@@ -16,7 +16,7 @@ jobs:
     uses: netcracker/qubership-workflow-hub/.github/workflows/docker-publish.yml@main
     needs: [ datetime ]
     with:
-      ref: "${{github.ref}}-${{ needs.datetime.outputs.value }}"
+      ref: "${{github.ref_name}}-${{ needs.datetime.outputs.value }}"
       component: '[
                      {"name": "qubership-core.base-alpine.amd64", "file": "./Dockerfile.base-alpine.amd64"},
                      {"name": "qubership-core.java-alpine.amd64", "file": "./Dockerfile.java-alpine.amd64"}
