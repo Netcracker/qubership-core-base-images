@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - id: datetime
-        run: echo "value=$(date +'%Y%m%dT%H%M%S')" >> $GITHUB_OUTPUT
+        run: echo "value=$(date +'%Y%m%d%H%M%S')" >> $GITHUB_OUTPUT
     outputs:
       value: ${{ steps.datetime.outputs.value }}
   call-docker-publish:
