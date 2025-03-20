@@ -49,6 +49,7 @@ A secure and feature-rich base Alpine Linux image for containerized applications
 ## Volume Mounts
 
 The following directories are exposed as volumes:
+
 - `/tmp`
 - `/app/nss`
 - `/etc/ssl/certs`
@@ -57,6 +58,7 @@ The following directories are exposed as volumes:
 ## Initialization Process
 
 The entrypoint script performs the following operations:
+
 1. Restores volume data
 2. Creates user if necessary
 3. Loads certificates to trust store
@@ -104,4 +106,4 @@ The image includes comprehensive signal handling for graceful shutdowns and prop
 
 [Add your license information here]
 
---- 
+---
