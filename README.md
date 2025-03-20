@@ -5,9 +5,11 @@ This repository contains secure and feature-rich base Alpine Linux images for co
 ## Available Images
 
 ### 1. Base Alpine Image
+
 A minimal Alpine-based image with essential security and system utilities.
 
 ### 2. Java Alpine Image
+
 An Alpine-based image with OpenJDK 21 and additional Java-specific configurations.
 
 ## Common Features
@@ -29,6 +31,7 @@ An Alpine-based image with OpenJDK 21 and additional Java-specific configuration
 - **Default Language**: `en_US.UTF-8`
 
 ### Dependencies
+
 - `ca-certificates`: 20241121-r1
 - `curl`: 8.12.1-r1
 - `bash`: 5.2.37-r0
@@ -36,6 +39,7 @@ An Alpine-based image with OpenJDK 21 and additional Java-specific configuration
 - `nss_wrapper`: 1.1.12-r1
 
 ### Volume Mounts
+
 - `/tmp`
 - `/app/nss`
 - `/etc/ssl/certs`
@@ -50,6 +54,7 @@ An Alpine-based image with OpenJDK 21 and additional Java-specific configuration
 - **Default Language**: `en_US.UTF-8`
 
 ### Additional Dependencies
+
 - `openjdk21-jdk`: 21.0.6_p7-r0
 - `fontconfig`: 2.15.0-r1
 - `font-dejavu`: 2.37-r5
@@ -60,6 +65,7 @@ An Alpine-based image with OpenJDK 21 and additional Java-specific configuration
 - And all base Alpine dependencies
 
 ### Java-Specific Environment Variables
+
 - `JAVA_HOME`: `/usr/lib/jvm/java-21-openjdk`
 - `MALLOC_ARENA_MAX`: 2
 - `MALLOC_MMAP_THRESHOLD_`: 131072
@@ -68,6 +74,7 @@ An Alpine-based image with OpenJDK 21 and additional Java-specific configuration
 - `MALLOC_MMAP_MAX_`: 65536
 
 ### Volume Mounts
+
 - `/tmp`
 - `/etc/env`
 - `/app/nss`
@@ -95,6 +102,7 @@ An Alpine-based image with OpenJDK 21 and additional Java-specific configuration
 ## Initialization Process
 
 The entrypoint script performs the following operations:
+
 1. Restores volume data
 2. Creates user if necessary
 3. Loads certificates to trust store
@@ -131,4 +139,4 @@ Place your initialization scripts (`.sh` files) in `/app/init.d/`. They will be 
 
 The images include comprehensive signal handling for graceful shutdowns and proper process management. They support all standard Linux signals and ensure proper cleanup on container termination. For SIGTERM signals, there is a 10-second delay to prevent 503/502 errors during deployment rollouts.
 
---- 
+---
