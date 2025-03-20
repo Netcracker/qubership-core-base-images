@@ -1,0 +1,13 @@
+name: Docker image publish
+
+on:
+  - push
+
+jobs:
+  call-docker-publish:
+    uses: netcracker/qubership-workflow-hub/.github/workflows/docker-publish.yml@main
+    with:
+      component: '[
+                     {"name": "qubership-core.base-alpine.amd64", "file": "./Dockerfile.base-alpine.amd64"},
+                     {"name": "qubership-core.java-alpine.amd64", "file": "./Dockerfile.java-alpine.amd64"}
+                  ]'
