@@ -14,6 +14,7 @@ jobs:
       name: ${{ steps.datetime.outputs.value }}
   call-docker-publish:
     uses: netcracker/qubership-workflow-hub/.github/workflows/docker-publish.yml@main
+    needs: [ datetime ]
     with:
       component: '[
                      {"name": "qubership-core.base-alpine.amd64-${{ needs.datetime.outputs.value }}", "file": "./Dockerfile.base-alpine.amd64"},
