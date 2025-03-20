@@ -11,7 +11,7 @@ jobs:
       - id: datetime
         run: echo "value=$(date +'%Y%m%dT%H%M%S')" >> $GITHUB_OUTPUT
     outputs:
-      name: ${{ steps.datetime.outputs.value }}
+      value: ${{ steps.datetime.outputs.value }}
   call-docker-publish:
     uses: netcracker/qubership-workflow-hub/.github/workflows/docker-publish.yml@main
     needs: [ datetime ]
