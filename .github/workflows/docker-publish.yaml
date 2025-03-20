@@ -8,8 +8,8 @@ jobs:
     name: Getting current date and time
     runs-on: ubuntu-latest
     steps:
-      - id: value
-        run: echo "datetime=$(date +'%Y%m%dT%H%M%S')" >> $GITHUB_OUTPUT
+      - id: datetime
+        run: echo "value=$(date +'%Y%m%dT%H%M%S')" >> $GITHUB_OUTPUT
     outputs:
       name: ${{ steps.datetime.outputs.value }}
   call-docker-publish:
