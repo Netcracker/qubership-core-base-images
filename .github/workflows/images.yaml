@@ -9,7 +9,7 @@ jobs:
     steps:
     - id: tag
       run: | 
-        echo "tag=$(echo ${{github.ref_name}} | tr -cs 'a-zA-Z0-9' '-')-$(date +'%Y%m%d%H%M%S')-${{ github.run_number }}" >> $GITHUB_OUTPUT
+        echo "tag=$(echo ${{github.ref_name}} | tr -cs 'a-zA-Z0-9' '-')$(date +'%Y%m%d%H%M%S')-${{ github.run_number }}" >> $GITHUB_OUTPUT
     outputs:
       tag: ${{ steps.tag.outputs.tag }}
   build-and-push:
@@ -36,6 +36,6 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           push: true
-          tags: ghcr.io/netcracker/qubership/core-base:${{ needs.prepare-variables.outputs.tag }}
+          tags: ghcr.io/netcracker/qubership/core-base:${{ needs.prepare-variables.outputs.tag }},ghcr.io/netcracker/qubership/core-base:latest
           file: Dockerfile.base-alpine.amd64
           platforms: linux/amd64
