@@ -35,6 +35,6 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           push: true
-          tags: ghcr.io/netcracker/qubership/core-base:${{ needs.prepare-variables.outputs.tag }}"
+          tags: ghcr.io/netcracker/qubership/core-base:${{ needs.prepare-variables.outputs.tag }}
           file: Dockerfile.base-alpine.amd64
           platforms: linux/amd64
