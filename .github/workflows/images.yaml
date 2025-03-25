@@ -4,18 +4,16 @@ on:
   push:
 
 jobs:
-  datetime:
-    name: Getting current date and time
+  prepare-variables:
     runs-on: ubuntu-latest
     steps:
-      - id: datetime
-        run: echo "value=$(date +'%Y%m%d%H%M%S')" >> $GITHUB_OUTPUT
+    - id: tag
+      run: echo "tag=${{github.ref_name}}-$(date +'%Y%m%d%H%M%S')-${{ github.run_number }}" >> $GITHUB_OUTPUT
     outputs:
-      value: ${{ steps.datetime.outputs.value }}
-
+      tag: ${{ steps.tag.outputs.tag }}
   build-and-push:
     runs-on: ubuntu-latest
-    needs: [ datetime ]
+    needs: prepare-variables
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -37,6 +35,6 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           push: true
-          tags: ghcr.io/netcracker/qubership/core-base:latest
+          tags: ghcr.io/netcracker/qubership/core-base:${{ needs.prepare-variables.outputs.tag }}"
           file: Dockerfile.base-alpine.amd64
           platforms: linux/amd64
