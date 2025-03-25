@@ -32,7 +32,7 @@ jobs:
       - name: Set up Docker Buildx (для кроссплатформенной сборки)
         uses: docker/setup-buildx-action@v3
 
-      - name: Build and push
+      - name: Build and push core-image
         uses: docker/build-push-action@v6
         with:
           push: true
@@ -40,4 +40,14 @@ jobs:
             ghcr.io/netcracker/qubership/core-base:${{ needs.prepare-variables.outputs.tag }}
             ghcr.io/netcracker/qubership/core-base:latest
           file: Dockerfile.base-alpine.amd64
+          platforms: linux/amd64
+
+      - name: Build and push java-image
+        uses: docker/build-push-action@v6
+        with:
+          push: true
+          tags: |
+            ghcr.io/netcracker/qubership/java-base:${{ needs.prepare-variables.outputs.tag }}
+            ghcr.io/netcracker/qubership/java-base:latest
+          file: Dockerfile.java-alpine.amd64
           platforms: linux/amd64
