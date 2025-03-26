@@ -18,19 +18,19 @@ updates:
     ignore:
       - dependency-name: io.quarkus.*
         versions:
-          - '[3.16.0,]'
-      - dependency-name: 'org.apache.maven.plugins:maven-surefire-plugin'
+          - "[3.16.0,]"
+      - dependency-name: "org.apache.maven.plugins:maven-surefire-plugin"
         versions:
-          - '[3.3.0,]'
-      - dependency-name: 'io.smallrye:jandex-maven-plugin'
+          - "[3.3.0,]"
+      - dependency-name: "io.smallrye:jandex-maven-plugin"
         versions:
-          - '[3.2.0,]'
-      - dependency-name: 'org.apache.maven.plugins:maven-source-plugin'
+          - "[3.2.0,]"
+      - dependency-name: "org.apache.maven.plugins:maven-source-plugin"
         versions:
-          - '[3.3.0,]'
-      - dependency-name: 'org.apache.maven.plugins:maven-compiler-plugin'
+          - "[3.3.0,]"
+      - dependency-name: "org.apache.maven.plugins:maven-compiler-plugin"
         versions:
-          - '[3.13.0,]'
-      - dependency-name: 'org.junit.jupiter:junit-jupiter.*'
+          - "[3.13.0,]"
+      - dependency-name: "org.junit.jupiter:junit-jupiter.*"
         versions:
-          - '[5.11.0,]'
+          - "[5.11.0,]"
