@@ -39,7 +39,7 @@ jobs:
           tags: |
             ghcr.io/netcracker/qubership/core-base:${{ needs.prepare-variables.outputs.tag }}
             ghcr.io/netcracker/qubership/core-base:latest
-          file: Dockerfile.base-alpine.amd64
+          file: Dockerfile.base-alpine
           platforms: linux/amd64,linux/arm64
 
       - name: Build and push java-image
@@ -49,5 +49,5 @@ jobs:
           tags: |
             ghcr.io/netcracker/qubership/java-base:${{ needs.prepare-variables.outputs.tag }}
             ghcr.io/netcracker/qubership/java-base:latest
-          file: Dockerfile.java-alpine.amd64
-          platforms: linux/amd64
+          file: Dockerfile.java-alpine
+          platforms: linux/amd64,linux/arm64

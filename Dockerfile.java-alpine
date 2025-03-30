@@ -1,4 +1,4 @@
-FROM alpine:3.21.0
+FROM --platform=$BUILDPLATFORM alpine:3.21.0
 LABEL maintainer="qubership"
 
 RUN apk add --no-cache \
@@ -27,13 +27,6 @@ RUN apk add --no-cache \
     font-dejavu=2.37-r5 \
     procps-ng=4.0.4-r2 \
     wget=1.25.0-r0
-
-# Set environment variables:
-#   Malloc parameters to reduce memory consumption in the container
-#   Diagnostic variables
-#   Certificate upload variables
-#   Profiler is disabled by default
-#   gcompat library should be preloaded at the start for alpine
 
 ENV HOME=/app \
     USER_NAME=appuser \
@@ -80,10 +73,8 @@ RUN mkdir /app && \
     chown -R 10001:0 /app/volumes && \
     find /app \( -type d -exec chmod ug+rwx {} \; -exec chown 10001:0 {} \; -o -type f -exec chmod ug+rw {} \; -exec chown 10001:0 {} \; \) 
 
-#Add nss_wrapper
-ARG NSS_WRAPPER_VERSION="1.1.12-r1"
-RUN wget https://dl-cdn.alpinelinux.org/alpine/edge/community/x86_64/nss_wrapper-${NSS_WRAPPER_VERSION}.apk && \
-    apk add nss_wrapper-${NSS_WRAPPER_VERSION}.apk
+RUN wget https://dl-cdn.alpinelinux.org/alpine/edge/community/$(uname -m)/nss_wrapper-1.1.12-r1.apk -O nss_wrapper.apk && \
+    apk add nss_wrapper.apk --allow-untrusted
 
 VOLUME /tmp
 VOLUME /etc/env
