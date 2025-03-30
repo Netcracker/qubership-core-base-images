@@ -17,11 +17,9 @@ LANGUAGE=en_US:en \
 LC_ALL=en_US.UTF-8
 
 
-RUN echo $(uname -m)
-
-ARG NSS_WRAPPER_VERSION="1.1.12-r1"
-RUN wget https://dl-cdn.alpinelinux.org/alpine/edge/community/$(uname -m)/nss_wrapper-${NSS_WRAPPER_VERSION}.apk && \
-    apk add nss_wrapper-${NSS_WRAPPER_VERSION}.apk --allow-untrusted
+RUN sh -c echo ">>> platform: $(uname -m)"
+RUN wget https://dl-cdn.alpinelinux.org/alpine/edge/community/$(uname -m)/nss_wrapper-1.1.12-r1.apk -O nss_wrapper.apk && \
+    apk add nss_wrapper.apk --allow-untrusted
 
 RUN mkdir -p /tmp/cert && \
     mkdir $HOME && \
