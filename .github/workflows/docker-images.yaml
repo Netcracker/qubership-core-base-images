@@ -50,4 +50,4 @@ jobs:
             ghcr.io/netcracker/qubership/java-base:${{ needs.prepare-variables.outputs.tag }}
             ghcr.io/netcracker/qubership/java-base:latest
           file: Dockerfile.java-alpine.amd64
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
