@@ -37,7 +37,7 @@ jobs:
         with:
           push: false
           tags: |
-            ghcr.io/netcracker/qubership/core-base:latest
+            ghcr.io/netcracker/qubership/core-base:test
           file: Dockerfile.base-alpine
           platforms: linux/amd64,linux/arm64
 
@@ -46,7 +46,7 @@ jobs:
         with:
           push: false
           tags: |
-            ghcr.io/netcracker/qubership/java-base:latest
+            ghcr.io/netcracker/qubership/java-base:test
           file: Dockerfile.java-alpine
           platforms: linux/amd64
 
@@ -59,7 +59,7 @@ jobs:
 
       - name: Validate Truststore
         run: |
-          docker run -v ./certs/:tmp/cert/ --rm ghcr.io/netcracker/qubership/java-base:latest trust list | grep testcert
+          docker run -v ./certs/:/tmp/cert/ --rm ghcr.io/netcracker/qubership/java-base:test trust list | grep testcert
 
       - name: Build and push java-image
         uses: docker/build-push-action@v6
@@ -73,7 +73,7 @@ jobs:
 
       - name: Validate Hash
         run: |
-          docker run -v ./certs/:tmp/cert/ --rm ghcr.io/netcracker/qubership/java-base:latest ls -l /etc/ssl/certs/*testcert*
+          docker run -v ./certs/:/tmp/cert/ --rm ghcr.io/netcracker/qubership/java-base:test ls -l /etc/ssl/certs/*testcert*
 
       - name: Build and push core-image
         uses: docker/build-push-action@v6
