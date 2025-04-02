@@ -36,7 +36,7 @@ ENV HOME=/app \
     MALLOC_TRIM_THRESHOLD_=131072 \
     MALLOC_TOP_PAD_=131072 \
     MALLOC_MMAP_MAX_=65536 \
-    CERTIFICATE_FILE_LOCATION=/etc/ssl/certs/java/cacerts 
+    CERTIFICATE_FILE_LOCATION=/usr/local/share/ca-certificates
 
 
 RUN mkdir /app && \
@@ -62,8 +62,10 @@ RUN mkdir /app && \
     chmod ug+rw /var/run && \
     chown 10001:0 /var/run && \
     mkdir -p /etc/alternatives && ln -s /usr/lib/jvm/java-21-openjdk/bin/java /etc/alternatives/java && \
-    chmod ug+rw -R /etc/ssl/certs/java && \
-    chown -R 10001:0 /etc/ssl/certs/java && \
+    chmod ug+rw -R /etc/ssl/certs && \
+    chown -R 10001:0 /etc/ssl/certs && \
+    chown -R 10001:0 /usr/share/ca-certificates/ && \
+    chown -R 10001:0 /etc/ca-certificates.conf && \
     mkdir -p /app/volumes/certs && \
     cp -R /etc/ssl/certs/java /app/volumes/certs && \
     mkdir -p /app/nss && \

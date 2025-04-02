@@ -35,12 +35,31 @@ jobs:
       - name: Build and push core-image
         uses: docker/build-push-action@v6
         with:
-          push: true
+          push: false
           tags: |
-            ghcr.io/netcracker/qubership/core-base:${{ needs.prepare-variables.outputs.tag }}
             ghcr.io/netcracker/qubership/core-base:latest
           file: Dockerfile.base-alpine
           platforms: linux/amd64,linux/arm64
+
+      - name: Build java-image
+        uses: docker/build-push-action@v6
+        with:
+          push: false
+          tags: |
+            ghcr.io/netcracker/qubership/java-base:latest
+          file: Dockerfile.java-alpine.amd64
+          platforms: linux/amd64
+
+      - name: Prepare test resources
+        run: |
+          openssl genpkey -algorithm RSA -out testcert_key.pem -pkeyopt rsa_keygen_bits:2048
+          openssl req -x509 -newkey rsa:2048 -keyout testcert_key.pem -out testcert.pem -days 365 -nodes -subj "/CN=testcerts.com"
+          mkdir certs
+          mv testcert_key.pem testcert.pem certs/
+
+      - name: Validate Truststore
+        run: |
+          docker run -v ./certs/:tmp/cert/ --rm ghcr.io/netcracker/qubership/java-base:latest trust list | grep testcert
 
       - name: Build and push java-image
         uses: docker/build-push-action@v6
@@ -51,3 +70,17 @@ jobs:
             ghcr.io/netcracker/qubership/java-base:latest
           file: Dockerfile.java-alpine
           platforms: linux/amd64,linux/arm64
+
+      - name: Validate Hash
+        run: |
+          docker run -v ./certs/:tmp/cert/ --rm ghcr.io/netcracker/qubership/java-base:latest ls -l /etc/ssl/certs/*testcert*
+
+      - name: Build and push core-image
+        uses: docker/build-push-action@v6
+        with:
+          push: true
+          tags: |
+            ghcr.io/netcracker/qubership/core-base:${{ needs.prepare-variables.outputs.tag }}
+            ghcr.io/netcracker/qubership/core-base:latest
+          file: Dockerfile.base-alpine.amd64
+          platforms: linux/amd64
