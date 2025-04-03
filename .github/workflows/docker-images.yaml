@@ -55,11 +55,18 @@ jobs:
           openssl genpkey -algorithm RSA -out testcert_key.pem -pkeyopt rsa_keygen_bits:2048
           openssl req -x509 -newkey rsa:2048 -keyout testcert_key.pem -out testcert.pem -days 365 -nodes -subj "/CN=testcerts.com"
           mkdir certs
-          mv testcert_key.pem testcert.pem certs/
+          mv testcert.pem certs/
 
       - name: Validate Truststore
         run: |
-          docker run -v ./certs/:/tmp/cert/ --rm ghcr.io/netcracker/qubership/java-base:test trust list | grep testcert
+          docker run -v ./certs/:/tmp/cert/ --rm ghcr.io/netcracker/qubership/java-base:test bash -c "
+            keytool -v -list -keystore $CERTIFICATE_FILE_LOCATION -storepass $CERTIFICATE_FILE_PASSWORD -alias testcert.pem
+          "
+
+      - name: Validate ca certificates were copied to store
+        run: |
+          docker run -v ./certs/:/tmp/cert/ --rm ghcr.io/netcracker/qubership/core-base:test ls -l /etc/ssl/certs/*testcert* 
+
 
       - name: Build and push java-image
         uses: docker/build-push-action@v6
@@ -70,10 +77,6 @@ jobs:
             ghcr.io/netcracker/qubership/java-base:latest
           file: Dockerfile.java-alpine
           platforms: linux/amd64,linux/arm64
-
-      - name: Validate Hash
-        run: |
-          docker run -v ./certs/:/tmp/cert/ --rm ghcr.io/netcracker/qubership/java-base:test ls -l /etc/ssl/certs/*testcert*
 
       - name: Build and push core-image
         uses: docker/build-push-action@v6

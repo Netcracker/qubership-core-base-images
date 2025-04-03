@@ -36,7 +36,7 @@ ENV HOME=/app \
     MALLOC_TRIM_THRESHOLD_=131072 \
     MALLOC_TOP_PAD_=131072 \
     MALLOC_MMAP_MAX_=65536 \
-    CERTIFICATE_FILE_LOCATION=/usr/local/share/ca-certificates
+    CERTIFICATE_FILE_LOCATION=/etc/ssl/certs/java/cacerts \
 
 
 RUN mkdir /app && \

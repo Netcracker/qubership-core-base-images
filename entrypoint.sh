@@ -1,11 +1,20 @@
 #!/usr/bin/env bash
 
 load_certificates() {
-    echo "Load certificates to trust store"
+
     export certs_location="${CERTIFICATE_FILE_LOCATION}"
     # shellcheck disable=SC2016
-    find /tmp/cert | grep -E '\.cer|\.pem' | grep -v '\.\.' | xargs -n 1 --no-run-if-empty sh -c \
-      'echo -file "$1" ; cp "$1" "$certs_location" ; update-ca-certificates; ' argv0
+    if which keytool; then
+      echo "Load certificates to java keystore"
+      export pass=${CERTIFICATE_FILE_PASSWORD:-changeit}
+      find /tmp/cert | grep -E '\.crt|\.cer|\.pem' | grep -v '\.\.'| awk '{nx=split($0,a,"/"); print $0" "a[nx];}' | xargs -n 2 --no-run-if-empty bash -c  \
+        'echo -file "$1" -alias "$2" ; keytool -keystore ${certs_location} -importcert -file "$1" -alias "$2"  -storepass ${pass} -noprompt' argv0
+
+    else
+      echo "Load certificates to trust store"
+      find /tmp/cert | grep -E '\.cer|\.pem' | grep -v '\.\.' | xargs -n 1 --no-run-if-empty sh -c \
+        'echo -file "$1" ; cp "$1" "$certs_location" ; update-ca-certificates; ' argv0
+    fi
 }
 
 create_user() {
@@ -117,9 +126,9 @@ if [[ "$1" != "bash" ]] && [[ "$1" != "sh" ]] ; then
     echo "Run subcommand:" "$@"
     $@ &
     pid="$!"
-    wait "$pid" ; javaRetCode=$?
-    echo "Java process ended with return code ${javaRetCode}"
-    exit $javaRetCode
+    wait "$pid" ; retCode=$?
+    echo "Process ended with return code ${retCode}"
+    exit $retCode
 else
     exec $@
 fi
