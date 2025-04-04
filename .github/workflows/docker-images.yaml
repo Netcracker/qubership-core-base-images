@@ -59,8 +59,8 @@ jobs:
 
       - name: Validate Truststore
         run: |
-          docker run -v ./certs/:/tmp/cert/ --rm ghcr.io/netcracker/qubership/java-base:test \
-            keytool -v -list -keystore /etc/ssl/certs/java/cacerts -storepass changeit -alias testcert.pem
+          docker run -v ./certs/:/tmp/cert/ -e CERTIFICATE_FILE_PASSWORD=test --rm ghcr.io/netcracker/qubership/java-base:test \
+            keytool -v -list -keystore /etc/ssl/certs/java/cacerts -storepass test -alias testcert.pem
 
       - name: Validate ca certificates were copied to store
         run: |
