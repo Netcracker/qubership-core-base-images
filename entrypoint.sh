@@ -7,6 +7,9 @@ load_certificates() {
     if which keytool; then
       echo "Load certificates to java keystore"
       export pass=${CERTIFICATE_FILE_PASSWORD:-changeit}
+      if [ "$pass" != "changeit" ] &&  keytool -list -keystore "${certs_location}" -storepass changeit > /dev/null; then
+         keytool -v -storepasswd -keystore "${certs_location}" -storepass changeit -new "$pass"
+      fi
       find /tmp/cert | grep -E '\.crt|\.cer|\.pem' | grep -v '\.\.'| awk '{nx=split($0,a,"/"); print $0" "a[nx];}' | xargs -n 2 --no-run-if-empty bash -c  \
         'echo -file "$1" -alias "$2" ; keytool -keystore ${certs_location} -importcert -file "$1" -alias "$2"  -storepass ${pass} -noprompt' argv0
 
