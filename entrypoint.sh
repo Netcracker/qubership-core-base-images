@@ -4,18 +4,22 @@ load_certificates() {
 
     export certs_location="${CERTIFICATE_FILE_LOCATION}"
     # shellcheck disable=SC2016
+    certs_found=$(find /tmp/cert -type f \( -name '*.crt' -o -name '*.cer' -o -name '*.pem' \))
     if which keytool; then
       echo "Load certificates to java keystore"
       export pass=${CERTIFICATE_FILE_PASSWORD:-changeit}
+
+      # Change password if passed and default one set as old
       if [ "$pass" != "changeit" ] &&  keytool -list -keystore "${certs_location}" -storepass changeit > /dev/null; then
          keytool -v -storepasswd -keystore "${certs_location}" -storepass changeit -new "$pass"
       fi
-      find /tmp/cert | grep -E '\.crt|\.cer|\.pem' | grep -v '\.\.'| awk '{nx=split($0,a,"/"); print $0" "a[nx];}' | xargs -n 2 --no-run-if-empty bash -c  \
-        'echo -file "$1" -alias "$2" ; keytool -keystore ${certs_location} -importcert -file "$1" -alias "$2"  -storepass ${pass} -noprompt' argv0
+
+      echo $certs_found | xargs -n 1 --no-run-if-empty bash -c  \
+        'alias=$(basename "$1"); echo -file "$1" -alias "$alias" ; keytool -keystore ${certs_location} -importcert -file "$1" -alias "$alias"  -storepass ${pass} -noprompt' argv0
 
     else
       echo "Load certificates to trust store"
-      find /tmp/cert | grep -E '\.cer|\.pem' | grep -v '\.\.' | xargs -n 1 --no-run-if-empty sh -c \
+      echo $certs_found | xargs -n 1 --no-run-if-empty sh -c \
         'echo -file "$1" ; cp "$1" "$certs_location" ; update-ca-certificates; ' argv0
     fi
 }
