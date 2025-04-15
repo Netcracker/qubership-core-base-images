@@ -3,15 +3,20 @@ name: Build and Push Multi-Platform Docker Image
 on:
   push:
 
+env:
+  PLATFORMS: linux/amd64,linux/arm64
+
 jobs:
   prepare-variables:
     runs-on: ubuntu-latest
     steps:
-    - id: tag
-      run: | 
-        echo "tag=$(echo ${{github.ref_name}} | tr -cs 'a-zA-Z0-9' '-')$(date +'%Y%m%d%H%M%S')-${{ github.run_number }}" >> $GITHUB_OUTPUT
+      - id: tag_build_number
+        run: echo "tag=$(echo ${{github.ref_name}} | tr -cs 'a-zA-Z0-9' '-')$(date +'%Y%m%d%H%M%S')-${{ github.run_number }}" >> $GITHUB_OUTPUT
+      - id: tag_snapshot
+        run: echo "tag=$(echo ${{github.ref_name}} | tr -cs 'a-zA-Z0-9' '-')snapshot" >> $GITHUB_OUTPUT
     outputs:
-      tag: ${{ steps.tag.outputs.tag }}
+      tag_build_number: ${{ steps.tag_build_number.outputs.tag }}
+      tag_snapshot: ${{ steps.tag_snapshot.outputs.tag }}
   build-and-push:
     runs-on: ubuntu-latest
     needs: prepare-variables
@@ -39,7 +44,7 @@ jobs:
           tags: |
             ghcr.io/netcracker/qubership/core-base:test
           file: Dockerfile.base-alpine
-          platforms: linux/amd64
+          platforms: ${{ env.PLATFORMS }}
 
       - name: Build and load test java-image
         uses: docker/build-push-action@v6
@@ -48,7 +53,7 @@ jobs:
           tags: |
             ghcr.io/netcracker/qubership/java-base:test
           file: Dockerfile.java-alpine
-          platforms: linux/amd64
+          platforms: ${{ env.PLATFORMS }}
 
       - name: Prepare test resources
         run: |
@@ -72,17 +77,17 @@ jobs:
         with:
           push: true
           tags: |
-            ghcr.io/netcracker/qubership/java-base:${{ needs.prepare-variables.outputs.tag }}
-            ghcr.io/netcracker/qubership/java-base:latest
+            ghcr.io/netcracker/qubership/java-base:${{ needs.prepare-variables.outputs.tag_snapshot }}
+            ghcr.io/netcracker/qubership/java-base:${{ needs.prepare-variables.outputs.tag_build_number }}
           file: Dockerfile.java-alpine
-          platforms: linux/amd64,linux/arm64
+          platforms: ${{ env.PLATFORMS }}
 
       - name: Build and push core-image
         uses: docker/build-push-action@v6
         with:
           push: true
           tags: |
-            ghcr.io/netcracker/qubership/core-base:${{ needs.prepare-variables.outputs.tag }}
-            ghcr.io/netcracker/qubership/core-base:latest
+            ghcr.io/netcracker/qubership/core-base:${{ needs.prepare-variables.outputs.tag_snapshot }}
+            ghcr.io/netcracker/qubership/core-base:${{ needs.prepare-variables.outputs.tag_build_number }}
           file: Dockerfile.base-alpine
-          platforms: linux/amd64
+          platforms: ${{ env.PLATFORMS }}
