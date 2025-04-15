@@ -44,7 +44,7 @@ jobs:
           tags: |
             ghcr.io/netcracker/qubership/core-base:test
           file: Dockerfile.base-alpine
-          platforms: ${{ env.PLATFORMS }}
+          platforms: linux/amd64
 
       - name: Build and load test java-image
         uses: docker/build-push-action@v6
@@ -53,7 +53,7 @@ jobs:
           tags: |
             ghcr.io/netcracker/qubership/java-base:test
           file: Dockerfile.java-alpine
-          platforms: ${{ env.PLATFORMS }}
+          platforms: linux/amd64
 
       - name: Prepare test resources
         run: |
