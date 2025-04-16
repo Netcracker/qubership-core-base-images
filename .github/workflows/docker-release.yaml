@@ -1,0 +1,84 @@
+---
+
+# This GitHub Actions workflow is designed to be triggered when a release is marked as a full release.
+# The workflow performs the following tasks:
+# 1. Checks if the tag already exists.
+# 2. Tags the commit with the release version.
+# 3. Builds and publishes a Docker image.
+# 4. Creates a GitHub release.
+
+# To make it work for your project, you need to adjust the pom.xml and add configuration file for GitHub release.
+# Please find detailed instructions:
+# https://github.com/Netcracker/qubership-workflow-hub?tab=readme-ov-file#docker-project-release-workflow
+
+name: Release And Publish Docker Artifact
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        required: true
+        default: '1.0.0'
+        type: string
+        description: 'Release version (e.g., 1.0.0)'
+      dry-run:
+        required: false
+        type: boolean
+        default: false
+        description: 'Dry run'
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  check-tag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Input parameters
+        run: |
+          echo "Version: ${{ github.event.inputs.version }}" >> $GITHUB_STEP_SUMMARY
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check if tag exists
+        id: check_tag
+        uses: netcracker/qubership-workflow-hub/actions/tag-checker@c07a5bf430a3c0120e189e6b54061b9bb8dde362
+        with:
+          tag: 'v${{ github.event.inputs.version }}'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Output result
+        run: |
+          echo "Tag exists: ${{ steps.check_tag.outputs.exists }}"
+          echo "Tag name: v${{ github.event.inputs.version }}"
+
+      - name: Fail if tag exists
+        if: steps.check_tag.outputs.exists == 'true'
+        run: |
+          echo "Tag already exists: v${{ github.event.inputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "Tag already exists: v${{ github.event.inputs.version }}"
+          exit 1
+
+  tag:
+    needs: [check-tag]
+    uses: netcracker/qubership-workflow-hub/.github/workflows/tag-creator.yml@c07a5bf430a3c0120e189e6b54061b9bb8dde362
+    with:
+      tag-name: v${{ github.event.inputs.version }}
+
+  docker-build-publish:
+    needs: [tag]
+    uses: netcracker/qubership-workflow-hub/.github/workflows/docker-publish.yml@c07a5bf430a3c0120e189e6b54061b9bb8dde362
+    with:
+      artifact-id: ${{ github.event.repository.name }}
+      ref: v${{ inputs.version }}
+      download-artifact: false
+      dry-run: ${{ github.event.inputs.dry-run }}
+
+  github-release:
+    needs: [tag]
+    uses: netcracker/qubership-workflow-hub/.github/workflows/release-drafter.yml@c07a5bf430a3c0120e189e6b54061b9bb8dde362
+    with:
+      version: ${{ github.event.inputs.version }}
+      publish: false
