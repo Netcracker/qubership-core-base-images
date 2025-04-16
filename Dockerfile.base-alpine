@@ -19,7 +19,8 @@ LC_ALL=en_US.UTF-8
 RUN wget https://dl-cdn.alpinelinux.org/alpine/edge/community/$(uname -m)/nss_wrapper-1.1.12-r1.apk -O nss_wrapper.apk && \
     apk add nss_wrapper.apk --allow-untrusted
 
-RUN mkdir -p /tmp/cert && \
+RUN mkdir /lib64 && ln -s /lib/libc.musl-x86_64.so.1 /lib64/ld-linux-x86-64.so.2 && \
+    mkdir -p /tmp/cert && \
     mkdir $HOME && \
     chmod g=u $HOME && \
     chown 10001:0 $HOME && \
