@@ -1,7 +1,7 @@
 FROM alpine:3.21.0
 LABEL maintainer="qubership"
 
-RUN apk add --no-cache \
+RUN apk add \
     alpine-baselayout \
     alpine-baselayout-data \
     alpine-keys \
