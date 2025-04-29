@@ -1,7 +1,7 @@
 FROM alpine:3.21.0
 LABEL maintainer="qubership"
 
-RUN apk add ca-certificates curl bash zlib
+RUN apk add --no-cache ca-certificates curl bash zlib nss_wrapper
 
 ENV HOME=/app \
 USER_NAME=appuser \
