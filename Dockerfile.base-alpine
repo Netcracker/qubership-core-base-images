@@ -1,6 +1,7 @@
 FROM alpine:3.21.0
 LABEL maintainer="qubership"
 
+# hadolint ignore=DL3018
 RUN apk add --no-cache ca-certificates curl bash zlib nss_wrapper
 
 ENV HOME=/app \
