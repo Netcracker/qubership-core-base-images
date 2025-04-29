@@ -74,7 +74,7 @@ jobs:
       - name: Build and push java-image
         uses: docker/build-push-action@v6
         with:
-          push: ${{ github.actor != 'dependabot[bot]' }}
+          push: ${{ !startsWith(github.ref, 'refs/heads/dependabot/') }}
           tags: |
             ghcr.io/netcracker/qubership/java-base:${{ needs.prepare-variables.outputs.tag_snapshot }}
             ghcr.io/netcracker/qubership/java-base:${{ needs.prepare-variables.outputs.tag_build_number }}
@@ -84,7 +84,7 @@ jobs:
       - name: Build and push core-image
         uses: docker/build-push-action@v6
         with:
-          push: ${{ github.actor != 'dependabot[bot]' }}
+          push: ${{ !startsWith(github.ref, 'refs/heads/dependabot/') }}
           tags: |
             ghcr.io/netcracker/qubership/core-base:${{ needs.prepare-variables.outputs.tag_snapshot }}
             ghcr.io/netcracker/qubership/core-base:${{ needs.prepare-variables.outputs.tag_build_number }}
