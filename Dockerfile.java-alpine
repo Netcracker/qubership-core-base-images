@@ -1,7 +1,7 @@
 FROM alpine:3.21.0
 LABEL maintainer="qubership"
 
-RUN apk add \
+RUN apk --no-cache add \
     alpine-baselayout \
     alpine-baselayout-data \
     alpine-keys \
@@ -26,7 +26,8 @@ RUN apk add \
     fontconfig \
     font-dejavu \
     procps-ng \
-    wget
+    wget \
+    nss_wrapper
 
 ENV HOME=/app \
     USER_NAME=appuser \
