@@ -12,9 +12,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - id: tag_build_number
-        run: echo "tag=$(echo '${{github.ref_name}}' | tr -cs 'a-zA-Z0-9' '-')$(date +'%Y%m%d%H%M%S')-${{ github.run_number }}" >> $GITHUB_OUTPUT
+        run: echo "tag=$(echo '${{github.ref_name}}' | tr -cs 'a-zA-Z0-9' '-')$(date +'%Y%m%d%H%M%S')-${{ github.run_number }}" >> "$GITHUB_OUTPUT"
       - id: tag_snapshot
-        run: echo "tag=$(echo '${{github.ref_name}}' | tr -cs 'a-zA-Z0-9' '-')snapshot" >> $GITHUB_OUTPUT
+        run: echo "tag=$(echo '${{github.ref_name}}' | tr -cs 'a-zA-Z0-9' '-')snapshot" >> "$GITHUB_OUTPUT"
     outputs:
       tag_build_number: ${{ steps.tag_build_number.outputs.tag }}
       tag_snapshot: ${{ steps.tag_snapshot.outputs.tag }}
