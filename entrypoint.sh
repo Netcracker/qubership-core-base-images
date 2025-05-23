@@ -130,8 +130,18 @@ if [[ "$1" != "bash" ]] && [[ "$1" != "sh" ]] ; then
     echo "run init scripts"
     run_init_scripts
     for sig in $SIGNALS_TO_RETHROW; do trap 'rethrow_handler "$sig"' "$sig" > /dev/null 2>&1; done
-    echo "Run subcommand:" "$@"
-    $@ &
+    if [[ "$1" == "java" || "$1" == "/usr/bin/java" ]]; then
+      shift # trim "java"
+      if [[ "${PROFILER_ENABLED,,}" == "true" ]]; then
+        JAVA_OPTIONS="$JAVA_OPTIONS -javaagent:/app/diag/lib/qubership-profiler-agent.jar"
+        JAVA_OPTIONS="$JAVA_OPTIONS -Dprofiler.dump.home=/app/diag"
+      fi
+      echo "Run command:" java "$JAVA_OPTIONS" "$@"
+      java $JAVA_OPTIONS $@ &
+    else
+      echo "Run subcommand:" "$@"
+      $@ &
+    fi
     pid="$!"
     wait "$pid" ; retCode=$?
     echo "Process ended with return code ${retCode}"
