@@ -123,6 +123,13 @@ SIGPWR
 SIGWINCH
 "
 
+if [[ "${PROFILER_ENABLED,,}" == "true" ]]; then
+  # Java automatically picks up JAVA_TOOL_OPTIONS, so we don't need to pass it explicitly
+  JAVA_TOOL_OPTIONS="$JAVA_TOOL_OPTIONS -javaagent:/app/diag/lib/qubership-profiler-agent.jar"
+  JAVA_TOOL_OPTIONS="$JAVA_TOOL_OPTIONS -Dprofiler.dump.home=/app/diag"
+  export JAVA_TOOL_OPTIONS
+fi
+
 if [[ "$1" != "bash" ]] && [[ "$1" != "sh" ]] ; then
 # We don't want to mess with shell signal handling in terminal mode.
 # Otherwise we need to rethrow signals to service to terminate it gracefully
@@ -130,22 +137,12 @@ if [[ "$1" != "bash" ]] && [[ "$1" != "sh" ]] ; then
     echo "run init scripts"
     run_init_scripts
     for sig in $SIGNALS_TO_RETHROW; do trap 'rethrow_handler "$sig"' "$sig" > /dev/null 2>&1; done
-    if [[ "$1" == "java" || "$1" == "/usr/bin/java" ]]; then
-      shift # trim "java"
-      if [[ "${PROFILER_ENABLED,,}" == "true" ]]; then
-        JAVA_OPTIONS="$JAVA_OPTIONS -javaagent:/app/diag/lib/qubership-profiler-agent.jar"
-        JAVA_OPTIONS="$JAVA_OPTIONS -Dprofiler.dump.home=/app/diag"
-      fi
-      echo "Run command:" java "$JAVA_OPTIONS" "$@"
-      java $JAVA_OPTIONS $@ &
-    else
-      echo "Run subcommand:" "$@"
-      $@ &
-    fi
+    echo "Run subcommand:" "$@"
+    "$@" &
     pid="$!"
     wait "$pid" ; retCode=$?
     echo "Process ended with return code ${retCode}"
     exit $retCode
 else
-    exec $@
+    exec "$@"
 fi
