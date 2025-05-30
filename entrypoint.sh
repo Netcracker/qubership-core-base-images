@@ -138,11 +138,13 @@ if [[ "$1" != "bash" ]] && [[ "$1" != "sh" ]] ; then
     run_init_scripts
     for sig in $SIGNALS_TO_RETHROW; do trap 'rethrow_handler "$sig"' "$sig" > /dev/null 2>&1; done
     echo "Run subcommand:" "$@"
+    # shellcheck disable=SC2068
     $@ &
     pid="$!"
     wait "$pid" ; retCode=$?
     echo "Process ended with return code ${retCode}"
     exit $retCode
 else
+    # shellcheck disable=SC2068
     exec $@
 fi
