@@ -3,8 +3,15 @@ name: CLA Assistant
 on:
   issue_comment:
     types: [created]
-  pull_request_target:
-    types: [opened,closed,synchronize]
+  pull_request:
+    types: [opened, closed, synchronize]
+
+permissions:
+  actions: write
+  contents: read
+  pull-requests: write
+  statuses: write
+
 jobs:
   cla_assistant:
     uses: Netcracker/qubership-workflow-hub/.github/workflows/cla.yaml@main
