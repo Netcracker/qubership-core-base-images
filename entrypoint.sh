@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 
 load_certificates() {
-    k8s_ca_cert="/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
-    if [ -f "$k8s_ca_cert" ]; then
-      mkdir -p "/tmp/cert"
-      cp "$k8s_ca_cert" "/tmp/cert"
-    fi
     export certs_location="${CERTIFICATE_FILE_LOCATION}"
     # shellcheck disable=SC2016
     certs_found=$(find /tmp/cert -type f \( -name '*.crt' -o -name '*.cer' -o -name '*.pem' \))
+    k8s_ca_cert="/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+    if [ -f "$k8s_ca_cert" ]; then
+      cp "$k8s_ca_cert" "/tmp/k8s-ca.crt"
+      certs_found="$certs_found"$'\n'"/tmp/k8s-ca.crt"
+    fi
     if which keytool; then
       echo "Load certificates to java keystore"
       export pass=${CERTIFICATE_FILE_PASSWORD:-changeit}
