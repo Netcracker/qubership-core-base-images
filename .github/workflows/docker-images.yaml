@@ -72,6 +72,10 @@ jobs:
         run: |
           docker run -v ./certs/:/tmp/cert/ --rm ghcr.io/netcracker/qubership/core-base:test ls -l /etc/ssl/certs/*testcert* 
 
+      - name: Validate kubernetes ca certificate was copied
+        run: |
+          docker run -v ./certs/:/tmp/cert/ --rm ghcr.io/netcracker/qubership/core-base:test ls -l ls -l "CERTIFICATE_FILE_LOCATION/ca.crt"
+
 
       - name: Build and push java-image
         uses: docker/build-push-action@v6
