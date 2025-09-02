@@ -60,7 +60,7 @@ jobs:
         run: |
           openssl genpkey -algorithm RSA -out testcert_key.pem -pkeyopt rsa_keygen_bits:2048
           openssl req -x509 -newkey rsa:2048 -keyout testcert_key.pem -out testcert.pem -days 365 -nodes -subj "/CN=testcerts.com"
-          openssl req -x509 -key testcert_key.pem -out test-k8s-ca.crt -days 365 -nodes -subj "/CN=kubernetes"
+          openssl req -x509 -key testcert_key.pem -out test-k8s-ca.crt -days 365 -nodes -subj "/CN=testcerts.com"
           mkdir certs
           mv testcert.pem certs/
 
@@ -71,12 +71,12 @@ jobs:
 
       - name: Validate ca certificates were copied to store
         run: |
-          docker run -v ./certs/:/tmp/cert/ --rm ghcr.io/netcracker/qubership/core-base:test ls -l /etc/ssl/certs/*testcert* 
+          docker run -v ./certs/:/tmp/cert/ --rm ghcr.io/netcracker/qubership/core-base:test cat /etc/ssl/certs/ca-certificates.crt | awk -v decoder='openssl x509 -noout -subject -enddate 2>/dev/null' '/BEGIN/{close(decoder)};{print | decoder}' | grep testcerts.com
 
       - name: Validate kubernetes ca certificate
         run: |
-          docker run -v ./certs/:/tmp/cert/ -v ./test-k8s-ca.crt:/var/run/secrets/kubernetes.io/serviceaccount/ca.crt --rm ghcr.io/netcracker/qubership/core-base:test cat /etc/ssl/certs/ca-certificates.crt | awk -v decoder='openssl x509 -noout -subject -enddate 2>/dev/null' '/BEGIN/{close(decoder)};{print | decoder}' | grep kubernetes
-          docker run -v ./certs/:/tmp/cert/ -v ./test-k8s-ca.crt:/var/run/secrets/kubernetes.io/serviceaccount/ca.crt --rm ghcr.io/netcracker/qubership/java-base:test keytool -cacerts -storepass changeit -list | grep ca.crt
+          docker run -v ./test-k8s-ca.crt:/var/run/secrets/kubernetes.io/serviceaccount/ca.crt --rm ghcr.io/netcracker/qubership/core-base:test cat /etc/ssl/certs/ca-certificates.crt | awk -v decoder='openssl x509 -noout -subject -enddate 2>/dev/null' '/BEGIN/{close(decoder)};{print | decoder}' | grep testcerts.com
+          docker run -v ./test-k8s-ca.crt:/var/run/secrets/kubernetes.io/serviceaccount/ca.crt --rm ghcr.io/netcracker/qubership/java-base:test keytool -cacerts -storepass changeit -v -list | grep testcerts.com
 
 
       - name: Build and push java-image
