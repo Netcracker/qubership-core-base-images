@@ -60,6 +60,7 @@ jobs:
         run: |
           openssl genpkey -algorithm RSA -out testcert_key.pem -pkeyopt rsa_keygen_bits:2048
           openssl req -x509 -newkey rsa:2048 -keyout testcert_key.pem -out testcert.pem -days 365 -nodes -subj "/CN=testcerts.com"
+          openssl req -x509 -key testcert_key.pem -out test-k8s-ca.crt -days 365 -nodes -subj "/CN=kubernetes"
           mkdir certs
           mv testcert.pem certs/
 
@@ -72,9 +73,9 @@ jobs:
         run: |
           docker run -v ./certs/:/tmp/cert/ --rm ghcr.io/netcracker/qubership/core-base:test ls -l /etc/ssl/certs/*testcert* 
 
-      - name: Validate kubernetes ca certificate was copied
+      - name: Validate kubernetes ca certificate
         run: |
-          docker run -v ./certs/:/tmp/cert/ --rm ghcr.io/netcracker/qubership/core-base:test ls -l ls -l "CERTIFICATE_FILE_LOCATION/ca.crt"
+          docker run -v ./certs/:/tmp/cert/ -v ./test-k8s-ca.crt:/var/run/secrets/kubernetes.io/serviceaccount/ca.crt --rm ghcr.io/netcracker/qubership/java-base:test keytool -ca-certs -storepass changeit -list | grep ca.crt
 
 
       - name: Build and push java-image
