@@ -75,7 +75,7 @@ jobs:
 
       - name: Validate kubernetes ca certificate
         run: |
-          docker run -v ./certs/:/tmp/cert/ -v ./test-k8s-ca.crt:/var/run/secrets/kubernetes.io/serviceaccount/ca.crt --rm ghcr.io/netcracker/qubership/java-base:test keytool -ca-certs -storepass changeit -list | grep ca.crt
+          docker run -v ./certs/:/tmp/cert/ -v ./test-k8s-ca.crt:/var/run/secrets/kubernetes.io/serviceaccount/ca.crt --rm ghcr.io/netcracker/qubership/java-base:test keytool -cacerts -storepass changeit -list | grep ca.crt
 
 
       - name: Build and push java-image
