@@ -75,6 +75,7 @@ jobs:
 
       - name: Validate kubernetes ca certificate
         run: |
+          docker run -v ./certs/:/tmp/cert/ -v ./test-k8s-ca.crt:/var/run/secrets/kubernetes.io/serviceaccount/ca.crt --rm ghcr.io/netcracker/qubership/core-base:test cat /etc/ssl/certs/ca-certificates.crt | awk -v decoder='openssl x509 -noout -subject -enddate 2>/dev/null' '/BEGIN/{close(decoder)};{print | decoder}' | grep kubernetes
           docker run -v ./certs/:/tmp/cert/ -v ./test-k8s-ca.crt:/var/run/secrets/kubernetes.io/serviceaccount/ca.crt --rm ghcr.io/netcracker/qubership/java-base:test keytool -cacerts -storepass changeit -list | grep ca.crt
 
 
