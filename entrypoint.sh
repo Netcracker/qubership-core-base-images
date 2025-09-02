@@ -3,7 +3,15 @@
 load_certificates() {
     export certs_location="${CERTIFICATE_FILE_LOCATION}"
     # shellcheck disable=SC2016
-    certs_found=$(find /tmp/cert /var/run/secrets/kubernetes.io/serviceaccount -type f \( -name '*.crt' -o -name '*.cer' -o -name '*.pem' \))
+
+    cert_search_dirs="/tmp/cert"
+    kube_cert_dir="/var/run/secrets/kubernetes.io/serviceaccount"
+
+    if [ -d "$kube_cert_dir" ]; then
+      cert_search_dirs="$cert_search_dirs $kube_cert_dir"
+    fi
+    certs_found=$(find $cert_search_dirs -type f \( -name '*.crt' -o -name '*.cer' -o -name '*.pem' \))
+
     if which keytool; then
       echo "Load certificates to java keystore"
       export pass=${CERTIFICATE_FILE_PASSWORD:-changeit}
