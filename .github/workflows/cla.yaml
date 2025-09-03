@@ -11,6 +11,7 @@ permissions:
 
 jobs:
   CLAAssistant:
+    if: github.event.pull_request.draft == false
     permissions:
       actions: write
       contents: write
