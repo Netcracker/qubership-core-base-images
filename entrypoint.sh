@@ -53,6 +53,13 @@ restore_volumes_data() {
     cp -Rn /app/volumes/certs/* /etc/ssl/certs
 }
 
+apply_diag_configuration() {
+    echo 'for sig in $SIGNALS_TO_RETHROW; do trap "rethrow_java_handler $sig" $sig 2>&1 > /dev/null ; done' > /app/diag/java
+    echo /etc/alternatives/java "\${X_JAVA_ARGS}" "\$@" '&' >> /app/diag/java
+    echo 'java_pid=$!' >> /app/diag/java
+    echo 'wait "$java_pid" ' >> /app/diag/java
+}
+
 run_init_scripts() {
   if [ -d "/app/init.d" ]; then
     local scripts
@@ -74,8 +81,6 @@ run_init_scripts() {
   fi
 }
 
-pid=0
-subcommandRetCode=0
 rethrow_handler() {
     echo "Caught $1 sig in entrypoint"
     #To prevent 503\502 error on rollout new deployment https://rtfm.co.ua/en/kubernetes-nginx-php-fpm-graceful-shutdown-and-502-errors/
@@ -92,10 +97,45 @@ rethrow_handler() {
     exit $subRetCode
 }
 
+rethrow_java_handler() {
+    echo "Caught $1 sig in /usr/bin/java"
+    if [ $java_pid -ne 0 ]; then
+        echo "Signaling to java"
+        kill -"$1" "$java_pid"
+        wait "$java_pid" ; javaRetCode=$?
+    fi
+    echo "Java signaled with $1, exit code $javaRetCode"
+    if $must_send_crash_dump && [ "$1" == "SIGTERM" ]; then
+        after_java
+    fi
+    exit $javaRetCode
+}
+
+# Load diag-bootstrap.sh (and diag-lib.sh) to make functions from profiler agent available
+. /app/diag/diag-bootstrap.sh
+
+pid=0
+subcommandRetCode=0
+must_send_crash_dump=false
+
 echo "Run entrypoint.sh:"
 restore_volumes_data
 create_user
 load_certificates
+
+# When java process ends due to signal or System.exit , we can collect crash
+# dumps (is such appeared) and send them to remote location for thorough diagnostic.
+# Include from diag-bootstrap.sh and diag-lib.sh
+if [ "$(type -t send_crash_dump)" = "function" ] ; then
+    after_java() {
+        send_crash_dump
+    }
+    export -f after_java
+    must_send_crash_dump=true
+fi
+
+# Apply profiler agent configuration
+apply_diag_configuration
 
 # See full current list in http://man7.org/linux/man-pages/man7/signal.7.html
 export SIGNALS_TO_RETHROW="
@@ -150,6 +190,9 @@ if [[ "$1" != "bash" ]] && [[ "$1" != "sh" ]] ; then
     pid="$!"
     wait "$pid" ; retCode=$?
     echo "Process ended with return code ${retCode}"
+    if $must_send_crash_dump; then
+        after_java
+    fi
     exit $retCode
 else
     # shellcheck disable=SC2068
