@@ -74,8 +74,6 @@ run_init_scripts() {
   fi
 }
 
-pid=0
-subcommandRetCode=0
 rethrow_handler() {
     echo "Caught $1 sig in entrypoint"
     #To prevent 503\502 error on rollout new deployment https://rtfm.co.ua/en/kubernetes-nginx-php-fpm-graceful-shutdown-and-502-errors/
@@ -92,10 +90,30 @@ rethrow_handler() {
     exit $subRetCode
 }
 
+###################### Start entrypoint.sh logic execution ######################
+
+# Load diag-bootstrap.sh (and diag-lib.sh) to make functions from profiler agent available
+. /app/diag/diag-bootstrap.sh
+
+pid=0
+subcommandRetCode=0
+must_send_crash_dump=false
+
 echo "Run entrypoint.sh:"
 restore_volumes_data
 create_user
 load_certificates
+
+# When java process ends due to signal or System.exit , we can collect crash
+# dumps (is such appeared) and send them to remote location for thorough diagnostic.
+# Include from diag-bootstrap.sh and diag-lib.sh
+if [ "$(type -t send_crash_dump)" = "function" ] ; then
+    after_java() {
+        send_crash_dump
+    }
+    export -f after_java
+    must_send_crash_dump=true
+fi
 
 # See full current list in http://man7.org/linux/man-pages/man7/signal.7.html
 export SIGNALS_TO_RETHROW="
@@ -130,13 +148,6 @@ SIGPWR
 SIGWINCH
 "
 
-if [[ "${PROFILER_ENABLED,,}" == "true" ]]; then
-  # Java automatically picks up JAVA_TOOL_OPTIONS, so we don't need to pass it explicitly
-  JAVA_TOOL_OPTIONS="$JAVA_TOOL_OPTIONS -javaagent:/app/diag/lib/qubership-profiler-agent.jar"
-  JAVA_TOOL_OPTIONS="$JAVA_TOOL_OPTIONS -Dprofiler.dump.home=/app/diag"
-  export JAVA_TOOL_OPTIONS
-fi
-
 if [[ "$1" != "bash" ]] && [[ "$1" != "sh" ]] ; then
 # We don't want to mess with shell signal handling in terminal mode.
 # Otherwise we need to rethrow signals to service to terminate it gracefully
@@ -150,6 +161,9 @@ if [[ "$1" != "bash" ]] && [[ "$1" != "sh" ]] ; then
     pid="$!"
     wait "$pid" ; retCode=$?
     echo "Process ended with return code ${retCode}"
+    if $must_send_crash_dump; then
+        after_java
+    fi
     exit $retCode
 else
     # shellcheck disable=SC2068
