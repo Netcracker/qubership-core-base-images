@@ -5,47 +5,48 @@ import (
 	"encoding/pem"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"strings"
 )
 
 var (
 	secretsPath = os.Getenv("CERTIFICATE_FILE_LOCATION")
-	trustStorePath = "/etc/ssl/certs"
+	trustStorePath = "/etc/ssl/certs/"
 	caCertPath = trustStorePath + "ca-certificates.crt"
 )
 
 func main() {
     info, err := os.Stat(secretsPath)
     if err != nil {
-        fmt.Printf("Cannot access secrets folder: %v\n", err)
+        log.Printf("Cannot access secrets folder: %v\n", err)
         return
     }
     if info.IsDir() {
-        fmt.Printf("Secrets folder exists: %s\n", secretsPath)
+        log.Printf("Secrets folder exists: %s\n", secretsPath)
         files, err := ioutil.ReadDir(secretsPath)
         if err != nil {
-            fmt.Printf("Error reading secrets folder: %v\n", err)
+            log.Printf("Error reading secrets folder: %v\n", err)
         } else {
-            fmt.Println("Secrets folder contents:")
+            log.Println("Secrets folder contents:")
             for _, file := range files {
-                fmt.Println(" -", file.Name())
+                log.Println(" -", file.Name())
             }
         }
     } else {
-        fmt.Printf("%s is not a directory\n", secretsPath)
+        log.Printf("%s is not a directory\n", secretsPath)
     }
 
-    fmt.Printf("Listing certificates in trust store: %s\n", trustStorePath)
+    log.Printf("Listing certificates in trust store: %s\n", trustStorePath)
 
     certFiles, err := ioutil.ReadDir(trustStorePath)
     if err != nil {
-        fmt.Printf("Error reading trust store: %v\n", err)
+        log.Printf("Error reading trust store: %v\n", err)
         return
     }
     for _, cert := range certFiles {
         if !cert.IsDir() {
-            fmt.Println(" -", cert.Name())
+            log.Printf(" - %s", cert.Name())
         }
     }
 
@@ -53,13 +54,12 @@ func main() {
 }
 
 func checkCertsInTruststore(){
-    fmt.Println("Validate ca certificates were copied to store")
-	data, err := ioutil.ReadFile(caCertPath)
+    log.Println("Validate ca certificates were copied to store")
+    data, err := ioutil.ReadFile(caCertPath)
     if err != nil {
-        fmt.Printf("Error reading CA bundle: %v\n", err)
-        return
+        log.Fatalf("Error reading CA bundle: %v", err)
     }
-	
+
     var block *pem.Block
     rest := data
 
@@ -75,15 +75,14 @@ func checkCertsInTruststore(){
 
         cert, err := x509.ParseCertificate(block.Bytes)
         if err != nil {
-            // skip invalid certificate
+            log.Printf("Error parsing certificate: %v", err)
             continue
         }
 
         if strings.Contains(cert.Subject.CommonName, "testcerts.com") || 
            strings.Contains(fmt.Sprintf("%s", cert.Subject), "testcerts.com") {
-            fmt.Printf("Subject: %s\n", cert.Subject.String())
-            fmt.Printf("Expires on: %s\n", cert.NotAfter.Format("2006-01-02"))
-            fmt.Println()
+            log.Printf("Subject: %s\n", cert.Subject.String())
+            log.Printf("Expires on: %s\n", cert.NotAfter.Format("2006-01-02"))
         }
     }
 }
