@@ -69,6 +69,9 @@ jobs:
       - name: Build and start test containers
         run: |
           docker compose -f ./base-image-test-service/core-base-docker-compose.yml up --build -d
+          sleep 10
+          docker ps
+          
           # Test communication
           curl -XGET --cacert base-image-test-service/certs/server.crt --key base-image-test-service/certs/server.key -v https://localhost:8084/health
           curl http://localhost:8083/call_from_service
