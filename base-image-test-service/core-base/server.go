@@ -16,7 +16,7 @@ var (
 	secretsPath = os.Getenv("CERTIFICATE_FILE_LOCATION") + "/"
 
 	serverCertPath = secretsPath + "server.crt"
-	certPKey = "/tmp/cert/server.key"
+	certPKey = "/app/server.key"
 
 	testContainerUrl = os.Getenv("TEST_URL")
 
