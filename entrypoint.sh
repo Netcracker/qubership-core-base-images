@@ -74,8 +74,6 @@ run_init_scripts() {
   fi
 }
 
-pid=0
-subcommandRetCode=0
 rethrow_handler() {
     echo "Caught $1 sig in entrypoint"
     #To prevent 503\502 error on rollout new deployment https://rtfm.co.ua/en/kubernetes-nginx-php-fpm-graceful-shutdown-and-502-errors/
@@ -91,6 +89,9 @@ rethrow_handler() {
     echo "Subcommand signaled with $1, exit code $subRetCode"
     exit $subRetCode
 }
+
+# Load diag-bootstrap.sh (and diag-lib.sh) to make functions from profiler agent available
+source /app/diag/diag-bootstrap.sh
 
 echo "Run entrypoint.sh:"
 restore_volumes_data
@@ -132,8 +133,7 @@ SIGWINCH
 
 if [[ "${PROFILER_ENABLED,,}" == "true" ]]; then
   # Java automatically picks up JAVA_TOOL_OPTIONS, so we don't need to pass it explicitly
-  JAVA_TOOL_OPTIONS="$JAVA_TOOL_OPTIONS -javaagent:/app/diag/lib/qubership-profiler-agent.jar"
-  JAVA_TOOL_OPTIONS="$JAVA_TOOL_OPTIONS -Dprofiler.dump.home=/app/diag"
+  JAVA_TOOL_OPTIONS="$X_JAVA_ARGS"
   export JAVA_TOOL_OPTIONS
 fi
 
@@ -150,6 +150,10 @@ if [[ "$1" != "bash" ]] && [[ "$1" != "sh" ]] ; then
     pid="$!"
     wait "$pid" ; retCode=$?
     echo "Process ended with return code ${retCode}"
+
+    # save crash dump for future analysis
+    [ "$(type -t send_crash_dump)" = "function" ]  && send_crash_dump
+
     exit $retCode
 else
     # shellcheck disable=SC2068
