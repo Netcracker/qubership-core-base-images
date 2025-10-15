@@ -67,20 +67,20 @@ jobs:
           cp server.key ../core-base
           cd ../..
 
-      - name: Build and start test containers
+      - name: Build and start core-base test containers
         run: |
           docker compose -f ./base-image-test-service/core-base-docker-compose.yml up --build -d
-          sleep 10
+          echo "Services were started:"
           docker logs base-image-test-service-service1-1
 
-          # Test communication
+          echo "Validate truststore"
           curl -XGET --cacert base-image-test-service/certs/server.crt --key base-image-test-service/certs/server.key -v https://localhost:8084/health
+          echo "Test communication"
           curl http://localhost:8083/call_from_service
           
-      - name: Tear down containers
-        run: docker-compose -f ./base-image-test-service/core-base-docker-compose.yml down 
+          echo "Tear down containers"
+          docker compose -f ./base-image-test-service/core-base-docker-compose.yml down 
           
-
       - name: Validate Truststore
         run: |
           docker run -v ./certs/:/tmp/cert/ -e CERTIFICATE_FILE_PASSWORD=testit --rm ghcr.io/netcracker/qubership/java-base:test \
