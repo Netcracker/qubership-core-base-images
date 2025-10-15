@@ -72,10 +72,10 @@ jobs:
 
       - name: Test communication
         run: |
-          # Validate Truststore
-          # curl -XGET --cacert base-image-test-service/certs/server.crt --key base-image-test-service/certs/server.key -v https://service2:8443/health
-
-          # Call to second service
+          sleep 10
+          docker ps
+          ls -l base-image-test-service/certs/
+          curl -XGET --cacert base-image-test-service/certs/server.crt --key base-image-test-service/certs/server.key -v https://localhost:8084/health
           curl http://localhost:8083/call_from_service
           
       - name: Tear down containers
