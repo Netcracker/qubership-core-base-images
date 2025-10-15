@@ -68,7 +68,7 @@ jobs:
 
       - name: Build and start test containers
         run: |
-          docker compose -f .\base-image-test-service\core-base-docker-compose.yml up --build -d
+          docker compose -f ./base-image-test-service/core-base-docker-compose.yml up --build -d
 
       - name: Test communication
         run: |
@@ -79,7 +79,7 @@ jobs:
           curl http://localhost:8083/call_from_service
           
       - name: Tear down containers
-        run: docker-compose -f .\base-image-test-service\core-base-docker-compose.yml down 
+        run: docker-compose -f ./base-image-test-service/core-base-docker-compose.yml down 
           
 
       - name: Validate Truststore
