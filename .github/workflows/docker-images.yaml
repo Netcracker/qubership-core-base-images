@@ -41,7 +41,7 @@ jobs:
       - name: Build and load test core-image
         uses: docker/build-push-action@v6
         with:
-          load: true
+          push: true
           tags: |
             ghcr.io/netcracker/qubership/core-base:test
           file: Dockerfile.base-alpine
@@ -50,7 +50,7 @@ jobs:
       - name: Build and load test java-image
         uses: docker/build-push-action@v6
         with:
-          load: true
+          push: true
           tags: |
             ghcr.io/netcracker/qubership/java-base:test
           file: Dockerfile.java-alpine
