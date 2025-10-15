@@ -1,12 +1,12 @@
 FROM golang:1.25 AS build
 
-COPY tests/test.go /app/test.go
+COPY ./* /app/
 
 WORKDIR /app
 
-RUN go build -o check_env test.go
+RUN go build -o check_env 
 
-FROM ghcr.io/netcracker/qubership/core-base:main-snapshot
+FROM ghcr.io/netcracker/qubership/core-base:test
 
 COPY --chown=10001:0 --chmod=555 --from=build app/check_env /app/check_env
 
