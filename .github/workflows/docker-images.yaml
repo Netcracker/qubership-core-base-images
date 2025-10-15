@@ -70,8 +70,8 @@ jobs:
         run: |
           docker compose -f ./base-image-test-service/core-base-docker-compose.yml up --build -d
           sleep 10
-          docker ps
-          
+          docker logs base-image-test-service-service1-1
+
           # Test communication
           curl -XGET --cacert base-image-test-service/certs/server.crt --key base-image-test-service/certs/server.key -v https://localhost:8084/health
           curl http://localhost:8083/call_from_service
