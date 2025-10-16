@@ -70,6 +70,7 @@ jobs:
       - name: Build and start core-base test containers
         run: |
           docker compose -f ./base-image-test-service/core-base-docker-compose.yml up --build -d
+          sleep 10
           echo "Services were started:"
           docker logs base-image-test-service-service1-1
 
