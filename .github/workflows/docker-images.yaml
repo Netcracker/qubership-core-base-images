@@ -81,7 +81,7 @@ jobs:
           curl http://localhost:8083/call_from_service
 
           echo "Validate kubernetes ca certificate"
-          docker exec -it base-image-test-service-service1-1 bash -c "cat /etc/ssl/certs/ca-certificates.crt" | awk -v decoder='openssl x509 -noout -subject -enddate 2>/dev/null' '/BEGIN/{close(decoder)};{print | decoder}' | grep testcerts.com
+          docker exec base-image-test-service-service1-1 bash -c "cat /etc/ssl/certs/ca-certificates.crt" | awk -v decoder='openssl x509 -noout -subject -enddate 2>/dev/null' '/BEGIN/{close(decoder)};{print | decoder}' | grep testcerts.com
           
           echo "Tear down containers"
           docker compose -f ./base-image-test-service/core-base-docker-compose.yml down 
