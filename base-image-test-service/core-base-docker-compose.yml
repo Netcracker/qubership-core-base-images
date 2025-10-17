@@ -10,7 +10,7 @@ services:
       - TEST_URL=http://service2:8080/health
     volumes:
       - ./certs/:/tmp/cert/ 
-      - ./test-k8s-ca.crt:/var/run/secrets/kubernetes.io/serviceaccount/ca.crt 
+      - ./certs/test-k8s-ca.crt:/var/run/secrets/kubernetes.io/serviceaccount/ca.crt 
     networks:
       - mynetwork
 

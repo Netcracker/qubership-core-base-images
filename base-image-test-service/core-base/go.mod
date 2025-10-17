@@ -1,4 +1,4 @@
-module trace-service/trace-service
+module base-image-test-service
 
 go 1.25.1
 
