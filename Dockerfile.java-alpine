@@ -1,7 +1,8 @@
-FROM alpine:3.22.1
+FROM alpine:3.22.2
 LABEL maintainer="qubership"
 
-# hadolint ignore=DL3018
+RUN apk update --no-cache
+
 RUN apk --no-cache add \
     alpine-baselayout \
     alpine-baselayout-data \
@@ -11,8 +12,6 @@ RUN apk --no-cache add \
     busybox \
     busybox-binsh \
     ca-certificates-bundle \
-    libcrypto3 \
-    libssl3 \
     musl \
     musl-utils \
     scanelf \
@@ -29,6 +28,7 @@ RUN apk --no-cache add \
     procps-ng \
     wget \
     nss_wrapper
+RUN apk add --no-cache --upgrade libcrypto3 libssl3
 
 ENV HOME=/app \
     USER_NAME=appuser \
