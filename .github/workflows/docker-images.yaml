@@ -50,7 +50,7 @@ jobs:
       - name: Build and load test java-image
         uses: docker/build-push-action@v6
         with:
-          push: true
+          load: true
           tags: |
             ghcr.io/netcracker/qubership/java-base:test
           file: Dockerfile.java-alpine
@@ -76,8 +76,12 @@ jobs:
 
           echo "Validate truststore"
           curl -XGET --cacert base-image-test-service/certs/server.crt --key base-image-test-service/certs/server.key -v https://localhost:8084/health
+          
           echo "Test communication"
           curl http://localhost:8083/call_from_service
+
+          # Validate kubernetes ca certificate
+          docker exec -it base-image-test-service-service1-1 bash -c "cat /etc/ssl/certs/ca-certificates.crt | awk -v decoder='openssl x509 -noout -subject -enddate 2>/dev/null' '/BEGIN/{close(decoder)};{print | decoder}' | grep testcerts.com"
           
           echo "Tear down containers"
           docker compose -f ./base-image-test-service/core-base-docker-compose.yml down 
@@ -89,8 +93,7 @@ jobs:
 
       - name: Validate kubernetes ca certificate
         run: |
-          docker run -v ./test-k8s-ca.crt:/var/run/secrets/kubernetes.io/serviceaccount/ca.crt --rm ghcr.io/netcracker/qubership/core-base:test cat /etc/ssl/certs/ca-certificates.crt | awk -v decoder='openssl x509 -noout -subject -enddate 2>/dev/null' '/BEGIN/{close(decoder)};{print | decoder}' | grep testcerts.com
-          docker run -v ./test-k8s-ca.crt:/var/run/secrets/kubernetes.io/serviceaccount/ca.crt --rm ghcr.io/netcracker/qubership/java-base:test keytool -cacerts -storepass changeit -v -list | grep testcerts.com
+          docker run -v ./base-image-test-service/certs/test-k8s-ca.crt:/var/run/secrets/kubernetes.io/serviceaccount/ca.crt --rm ghcr.io/netcracker/qubership/java-base:test keytool -cacerts -storepass changeit -v -list | grep testcerts.com
 
 
       - name: Build and push java-image
