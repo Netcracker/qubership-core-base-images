@@ -3,6 +3,8 @@
 name: Build and Push Multi-Platform Docker Image
 
 on:
+  push:
+    branches: [main]
   pull_request:
     branches: [main]
     types:
