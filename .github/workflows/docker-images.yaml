@@ -2,7 +2,11 @@
 # yamllint disable rule:line-length
 name: Build and Push Multi-Platform Docker Image
 
-on: push
+on:
+  pull_request:
+    branches: [main]
+    types:
+      [opened, reopened, synchronize]
 
 env:
   PLATFORMS: linux/amd64,linux/arm64

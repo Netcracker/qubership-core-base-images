@@ -8,6 +8,7 @@ services:
       - SERVICE_NAME=service1
       - CERTIFICATE_FILE_PASSWORD=testit
       - TEST_URL=http://service2:8080/health
+      - SERVER_KEY_NAME=server
     volumes:
       - ./certs/:/tmp/cert/ 
       - ./certs/test-k8s-ca.crt:/var/run/secrets/kubernetes.io/serviceaccount/ca.crt 
@@ -23,6 +24,7 @@ services:
       - SERVICE_NAME=service2
       - CERTIFICATE_FILE_PASSWORD=testit
       - TEST_URL=http://service1:8080/health
+      - SERVER_KEY_NAME=server
     volumes:
       - ./certs/:/tmp/cert/
       - ./certs/test-k8s-ca.crt:/var/run/secrets/kubernetes.io/serviceaccount/ca.crt 

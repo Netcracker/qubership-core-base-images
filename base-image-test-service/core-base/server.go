@@ -14,9 +14,10 @@ import (
 
 var (
 	secretsPath = os.Getenv("CERTIFICATE_FILE_LOCATION") + "/"
+	serverKey = os.Getenv("SERVER_KEY_NAME")
 
-	serverCertPath = secretsPath + "server.crt"
-	certPKey = "/app/server.key"
+	serverCertPath = secretsPath + serverKey + ".crt"
+	certPKey = "/app/" + serverKey + ".key"
 
 	testContainerUrl = os.Getenv("TEST_URL")
 
