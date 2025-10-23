@@ -14,7 +14,7 @@ An Alpine-based image with OpenJDK 21, Qubership profiler integration, and addit
 
 ## Common Features
 
-- Based on Alpine Linux 3.22.0
+- Based on Alpine Linux 3.22.2
 - Pre-configured with essential security settings
 - Built-in certificate management
 - User management with nss_wrapper support
