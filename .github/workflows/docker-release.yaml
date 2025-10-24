@@ -63,9 +63,14 @@ jobs:
 
   tag:
     needs: [check-tag]
-    uses: netcracker/qubership-workflow-hub/.github/workflows/tag-creator.yml@f7481bd2fd0f6d62001df77ec2c30b64ef1897d8
-    with:
-      tag-name: v${{ github.event.inputs.version }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create tag
+        uses: netcracker/qubership-workflow-hub/.github/actions/tag-action@b575bad3a0959c4e883bc34f9d055ff07fde2dbd
+        with:
+          ref: main
+          tag-name: v${{ github.event.inputs.version }}
+          tag-message: Tag v${{ github.event.inputs.version }}
 
   docker-build-publish:
     needs: [tag]
