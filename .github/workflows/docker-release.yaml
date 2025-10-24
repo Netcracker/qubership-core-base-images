@@ -43,7 +43,7 @@ jobs:
 
       - name: Check if tag exists
         id: check_tag
-        uses: netcracker/qubership-workflow-hub/actions/tag-checker@f7481bd2fd0f6d62001df77ec2c30b64ef1897d8
+        uses: netcracker/qubership-workflow-hub/actions/tag-checker@f2f2ac281f45a2f74d5cb055538b64dd55dfc05e
         with:
           tag: 'v${{ github.event.inputs.version }}'
         env:
@@ -63,13 +63,13 @@ jobs:
 
   tag:
     needs: [check-tag]
-    uses: netcracker/qubership-workflow-hub/.github/workflows/tag-creator.yml@f7481bd2fd0f6d62001df77ec2c30b64ef1897d8
+    uses: netcracker/qubership-workflow-hub/.github/workflows/tag-creator.yml@f2f2ac281f45a2f74d5cb055538b64dd55dfc05e
     with:
       tag-name: v${{ github.event.inputs.version }}
 
   docker-build-publish:
     needs: [tag]
-    uses: netcracker/qubership-workflow-hub/.github/workflows/docker-publish.yml@f7481bd2fd0f6d62001df77ec2c30b64ef1897d8
+    uses: netcracker/qubership-workflow-hub/.github/workflows/docker-publish.yml@f2f2ac281f45a2f74d5cb055538b64dd55dfc05e
     with:
       ref: v${{ inputs.version }}
       download-artifact: false
@@ -79,7 +79,7 @@ jobs:
 
   github-release:
     needs: [tag]
-    uses: netcracker/qubership-workflow-hub/.github/workflows/release-drafter.yml@f7481bd2fd0f6d62001df77ec2c30b64ef1897d8
+    uses: netcracker/qubership-workflow-hub/.github/workflows/release-drafter.yml@f2f2ac281f45a2f74d5cb055538b64dd55dfc05e
     with:
       version: ${{ github.event.inputs.version }}
       publish: false
