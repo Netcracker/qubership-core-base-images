@@ -4,7 +4,6 @@ name: Build and Push Multi-Platform Docker Image
 
 on:
   push:
-    branches: [main]
   pull_request:
     branches: [main]
     types:
@@ -53,6 +52,15 @@ jobs:
           file: Dockerfile.base-alpine
           platforms: linux/amd64
 
+      - name: Build and load image bases on core-image test
+        uses: docker/build-push-action@v6
+        with:
+          load: true
+          tags: |
+            ghcr.io/netcracker/qubership/core-base-image:test
+          file: ./core-base-image-test/Dockerfile
+          platforms: linux/amd64
+
       - name: Build and load test java-image
         uses: docker/build-push-action@v6
         with:
@@ -67,17 +75,23 @@ jobs:
           openssl genpkey -algorithm RSA -out testcert_key.pem -pkeyopt rsa_keygen_bits:2048
           openssl req -x509 -newkey rsa:2048 -keyout testcert_key.pem -out testcert.pem -days 365 -nodes -subj "/CN=testcerts.com"
           openssl req -x509 -key testcert_key.pem -out test-k8s-ca.crt -days 365 -nodes -subj "/CN=testcerts.com"
+          openssl req -x509 -newkey rsa:4096 -days 365 -nodes -keyout key.pem -out cert.pem -subj "/CN=host.docker.internal"
           mkdir certs
           mv testcert.pem certs/
+
+      - name: Start HTTPS server on host
+        run: |
+          nohup openssl s_server -cert cert.pem -key key.pem -accept 8084 > server.log 2>&1 &
+          echo "HOST_IP=$(hostname -I | awk '{print $1}')" >> $GITHUB_ENV
 
       - name: Validate Truststore
         run: |
           docker run -v ./certs/:/tmp/cert/ -e CERTIFICATE_FILE_PASSWORD=testit --rm ghcr.io/netcracker/qubership/java-base:test \
             keytool -v -list -keystore /etc/ssl/certs/java/cacerts -storepass testit -alias testcert.pem
 
-      - name: Validate ca certificates were copied to store
+      - name: Validate ca certificates were copied to store and work
         run: |
-          docker run -v ./certs/:/tmp/cert/ --rm ghcr.io/netcracker/qubership/core-base:test cat /etc/ssl/certs/ca-certificates.crt | awk -v decoder='openssl x509 -noout -subject -enddate 2>/dev/null' '/BEGIN/{close(decoder)};{print | decoder}' | grep testcerts.com
+          docker run -v ./certs/:/tmp/cert/ -e TEST_URL=https://host.docker.internal:8084/ --rm --add-host=host.docker.internal:${{ env.HOST_IP }} ghcr.io/netcracker/qubership/core-base-image:test
 
       - name: Validate kubernetes ca certificate
         run: |
