@@ -1,0 +1,36 @@
+services:
+  service1:
+    build: ./core-base/
+    ports:
+      - "8081:8080"
+      - "8082:8443"
+    environment:
+      - SERVICE_NAME=service1
+      - CERTIFICATE_FILE_PASSWORD=testit
+      - TEST_URL=http://service2:8080/health
+      - SERVER_KEY_NAME=server
+    volumes:
+      - ./certs/:/tmp/cert/ 
+      - ./certs/test-k8s-ca.crt:/var/run/secrets/kubernetes.io/serviceaccount/ca.crt 
+    networks:
+      - mynetwork
+
+  service2:
+    build: ./core-base/
+    ports:
+      - "8083:8080"
+      - "8084:8443"
+    environment:
+      - SERVICE_NAME=service2
+      - CERTIFICATE_FILE_PASSWORD=testit
+      - TEST_URL=http://service1:8080/health
+      - SERVER_KEY_NAME=server
+    volumes:
+      - ./certs/:/tmp/cert/
+      - ./certs/test-k8s-ca.crt:/var/run/secrets/kubernetes.io/serviceaccount/ca.crt 
+    networks:
+      - mynetwork
+
+networks:
+  mynetwork:
+    driver: bridge

@@ -47,7 +47,7 @@ jobs:
       - name: Build and load test core-image
         uses: docker/build-push-action@v6
         with:
-          load: true
+          push: true
           tags: |
             ghcr.io/netcracker/qubership/core-base:test
           file: Dockerfile.base-alpine
@@ -64,25 +64,42 @@ jobs:
 
       - name: Prepare test resources
         run: |
+          mkdir -p base-image-test-service/certs
+          cd base-image-test-service/certs
           openssl genpkey -algorithm RSA -out testcert_key.pem -pkeyopt rsa_keygen_bits:2048
           openssl req -x509 -newkey rsa:2048 -keyout testcert_key.pem -out testcert.pem -days 365 -nodes -subj "/CN=testcerts.com"
           openssl req -x509 -key testcert_key.pem -out test-k8s-ca.crt -days 365 -nodes -subj "/CN=testcerts.com"
-          mkdir certs
-          mv testcert.pem certs/
+          openssl req -x509 -newkey rsa:2048 -days 365 -nodes -keyout server.key -out server.crt -subj "/CN=localhost"
+          cp server.key ../core-base
+          cd ../..
 
+      - name: Build and start core-base test containers
+        run: |
+          docker compose -f ./base-image-test-service/core-base-docker-compose.yml up --build -d
+          sleep 10
+          echo "Services were started:"
+          docker logs base-image-test-service-service1-1
+
+          echo "Validate truststore"
+          curl -XGET --cacert base-image-test-service/certs/server.crt --key base-image-test-service/certs/server.key -v https://localhost:8084/health
+          
+          echo "Test communication"
+          curl http://localhost:8083/call_from_service
+
+          echo "Validate kubernetes ca certificate"
+          docker exec base-image-test-service-service1-1 bash -c "cat /etc/ssl/certs/ca-certificates.crt" | awk -v decoder='openssl x509 -noout -subject -enddate 2>/dev/null' '/BEGIN/{close(decoder)};{print | decoder}' | grep testcerts.com
+          
+          echo "Tear down containers"
+          docker compose -f ./base-image-test-service/core-base-docker-compose.yml down 
+          
       - name: Validate Truststore
         run: |
-          docker run -v ./certs/:/tmp/cert/ -e CERTIFICATE_FILE_PASSWORD=testit --rm ghcr.io/netcracker/qubership/java-base:test \
+          docker run -v ./base-image-test-service/certs/:/tmp/cert/ -e CERTIFICATE_FILE_PASSWORD=testit --rm ghcr.io/netcracker/qubership/java-base:test \
             keytool -v -list -keystore /etc/ssl/certs/java/cacerts -storepass testit -alias testcert.pem
-
-      - name: Validate ca certificates were copied to store
-        run: |
-          docker run -v ./certs/:/tmp/cert/ --rm ghcr.io/netcracker/qubership/core-base:test cat /etc/ssl/certs/ca-certificates.crt | awk -v decoder='openssl x509 -noout -subject -enddate 2>/dev/null' '/BEGIN/{close(decoder)};{print | decoder}' | grep testcerts.com
 
       - name: Validate kubernetes ca certificate
         run: |
-          docker run -v ./test-k8s-ca.crt:/var/run/secrets/kubernetes.io/serviceaccount/ca.crt --rm ghcr.io/netcracker/qubership/core-base:test cat /etc/ssl/certs/ca-certificates.crt | awk -v decoder='openssl x509 -noout -subject -enddate 2>/dev/null' '/BEGIN/{close(decoder)};{print | decoder}' | grep testcerts.com
-          docker run -v ./test-k8s-ca.crt:/var/run/secrets/kubernetes.io/serviceaccount/ca.crt --rm ghcr.io/netcracker/qubership/java-base:test keytool -cacerts -storepass changeit -v -list | grep testcerts.com
+          docker run -v ./base-image-test-service/certs/test-k8s-ca.crt:/var/run/secrets/kubernetes.io/serviceaccount/ca.crt --rm ghcr.io/netcracker/qubership/java-base:test keytool -cacerts -storepass changeit -v -list | grep testcerts.com
 
       - name: Set up JDK 21
         uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4
