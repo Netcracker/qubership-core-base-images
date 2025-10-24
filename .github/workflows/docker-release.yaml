@@ -66,7 +66,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Create tag
-        uses: netcracker/qubership-workflow-hub/.github/actions/tag-action@b575bad3a0959c4e883bc34f9d055ff07fde2dbd
+        uses: netcracker/qubership-workflow-hub/actions/tag-action@b575bad3a0959c4e883bc34f9d055ff07fde2dbd
         with:
           ref: main
           tag-name: v${{ github.event.inputs.version }}
