@@ -1,27 +1,29 @@
 package main
 
 import (
-	"fmt"
-	"net/http"
-	"os"
+    "fmt"
+    "net/http"
+    "os"
 )
 
 var (
-	testContainerUrl = os.Getenv("TEST_URL")
+    testContainerUrl = os.Getenv("TEST_URL")
 )
 
 func main() {
-	defer func() {
-		if r := recover(); r != nil {
-			fmt.Printf("Recovered from test-service launch panic: %v", r)
-		}
-	}()
-	
-	fmt.Println("Handle /call_from_service request")
+    defer func() {
+        if r := recover(); r != nil {
+            fmt.Printf("Recovered from test-service launch panic: %v\n", r)
+        }
+    }()
+
+    fmt.Println("Handle /call_from_service request")
     resp, err := http.Get(testContainerUrl)
     if err != nil {
-        fmt.Printf("Failed to call service: "+err.Error(), http.StatusInternalServerError)
+        fmt.Printf("Failed to call service: %v\n", err)
+        return
     }
+    defer resp.Body.Close()
 
-	fmt.Printf("Resonsed with: %d", resp.StatusCode)
+    fmt.Printf("Responded with: %d\n", resp.StatusCode)
 }
