@@ -44,10 +44,6 @@ func callFromServiceHandler(c *fiber.Ctx) error {
 	return RespondWithJson(c, resp.StatusCode, body)
 }
 
-func diagnosticToolHandler(c *fiber.Ctx)  error {
-	return RespondWithJson(c, http.StatusOK, nil)
-}
-
 func RespondWithJson(c *fiber.Ctx, code int, payload interface{}) error {
 	return c.Status(code).JSON(payload)
 }

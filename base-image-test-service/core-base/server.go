@@ -35,7 +35,6 @@ func runTestService() {
 	app.Get("/health", healthHandler)
 	app.Get("/certificate", certificateHandler)
 	app.Get("/call_from_service", callFromServiceHandler)
-	app.Get("/nc_diag", diagnosticToolHandler)
 
 	httpPort := ":8080"
 	go func() {
