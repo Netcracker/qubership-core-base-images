@@ -6,6 +6,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"time"
 )
 
 var (
@@ -22,17 +23,17 @@ func main() {
 
     fmt.Println("Handle /call_from_service request")
 
-    hostname := "host.docker.internal"
-    addrs, err := net.LookupHost(hostname)
+	hostname := "host.docker.internal:8084"
+    timeout := 5 * time.Second
+
+    conn, err := net.DialTimeout("tcp", hostname, timeout)
     if err != nil {
-        fmt.Printf("Failed to resolve %s: %v\n", hostname, err)
+        fmt.Printf("Port %s is not accessible: %v\n", hostname, err)
         return
     }
+    defer conn.Close()
 
-    fmt.Printf("Resolved addresses for %s:\n", hostname)
-    for _, addr := range addrs {
-        fmt.Println(addr)
-    }
+    fmt.Printf("Successfully connected to %s\n", hostname)
 
 	tr := &http.Transport{
     	TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
