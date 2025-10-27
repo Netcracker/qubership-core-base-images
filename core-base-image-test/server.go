@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/tls"
 	"fmt"
+	"net"
 	"net/http"
 	"os"
 )
@@ -21,8 +22,17 @@ func main() {
 
     fmt.Println("Handle /call_from_service request")
 
-	testContainerIp := os.Getenv("host.docker.internal")
-	fmt.Printf("testContainerIp: %s\n", testContainerIp)
+    hostname := "host.docker.internal"
+    addrs, err := net.LookupHost(hostname)
+    if err != nil {
+        fmt.Printf("Failed to resolve %s: %v\n", hostname, err)
+        return
+    }
+
+    fmt.Printf("Resolved addresses for %s:\n", hostname)
+    for _, addr := range addrs {
+        fmt.Println(addr)
+    }
 
 	tr := &http.Transport{
     	TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
