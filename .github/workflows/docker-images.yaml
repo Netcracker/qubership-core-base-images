@@ -72,18 +72,21 @@ jobs:
 
       - name: Prepare test resources
         run: |
+          echo "HOST_IP=$(hostname -I | awk '{print $2}')" >> $GITHUB_ENV
           openssl genpkey -algorithm RSA -out testcert_key.pem -pkeyopt rsa_keygen_bits:2048
           openssl req -x509 -newkey rsa:2048 -keyout testcert_key.pem -out testcert.pem -days 365 -nodes -subj "/CN=testcerts.com"
           openssl req -x509 -key testcert_key.pem -out test-k8s-ca.crt -days 365 -nodes -subj "/CN=testcerts.com"
-          openssl req -x509 -newkey rsa:4096 -days 365 -nodes -keyout key.pem -out cert.pem -subj "/CN=host.docker.internal"
+          openssl req -x509 -newkey rsa:4096 -days 365 -nodes -keyout key.pem -out cert.pem -subj "/CN=host.docker.internal" -addext "subjectAltName = DNS:host.docker.internal"
+          openssl req -x509 -newkey rsa:4096 -days 365 -nodes -keyout ip_key.pem -out ip_cert.pem -subj "/CN=${{ env.HOST_IP }}" -addext "subjectAltName = IP:${{ env.HOST_IP }}"
           mkdir certs
           mv testcert.pem certs/
 
       - name: Start HTTPS server on host
         run: |
           nohup openssl s_server -cert cert.pem -key key.pem -accept 0.0.0.0:8084 > server.log 2>&1 &
-          echo "HOST_IP=$(hostname -I | awk '{print $2}')" >> $GITHUB_ENV
-
+          sleep 5 &
+          cat server.log
+          
       - name: Validate Truststore
         run: |
           docker run -v ./certs/:/tmp/cert/ -e CERTIFICATE_FILE_PASSWORD=testit --rm ghcr.io/netcracker/qubership/java-base:test \
