@@ -20,7 +20,7 @@ func main() {
 
     fmt.Println("Handle /call_from_service request")
     resp, err := http.Get(testContainerUrl)
-    if err != nil && resp.StatusCode !=200 {
+    if err != nil {
         fmt.Printf("Failed to call service: %v\n", err)
         os.Exit(1)
     } 

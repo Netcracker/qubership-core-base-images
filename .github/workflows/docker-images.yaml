@@ -82,7 +82,7 @@ jobs:
       - name: Start HTTPS server on host
         run: |
           nohup openssl s_server -cert cert.pem -key key.pem -accept 8084 > server.log 2>&1 &
-          echo "HOST_IP=$(hostname -I | awk '{print $1}')" >> $GITHUB_ENV
+          echo "HOST_IP=$(hostname -I | awk '{print $2}')" >> $GITHUB_ENV
 
       - name: Validate Truststore
         run: |
