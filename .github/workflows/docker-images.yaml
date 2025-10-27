@@ -72,7 +72,7 @@ jobs:
 
       - name: Prepare test resources
         run: |
-          echo "HOST_IP=$(hostname -I | awk '{print $1}')" >> $GITHUB_ENV
+          echo "HOST_IP=$(hostname -I | awk '{print $2}')" >> $GITHUB_ENV
           openssl genpkey -algorithm RSA -out testcert_key.pem -pkeyopt rsa_keygen_bits:2048
           openssl req -x509 -newkey rsa:2048 -keyout testcert_key.pem -out testcert.pem -days 365 -nodes -subj "/CN=testcerts.com"
           openssl req -x509 -key testcert_key.pem -out test-k8s-ca.crt -days 365 -nodes -subj "/CN=testcerts.com"
