@@ -90,11 +90,11 @@ jobs:
 
       - name: Validate ca certificates were copied to store and work
         run: |
-          cat server.log
+          echo server.log && cat server.log
           netstat -tuln | grep 8084
-          cat server.log
-          openssl s_client -connect ${{ env.HOST_IP }}:8084 2>/dev/null </dev/null |  sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p'
-          cat server.log
+          echo server.log && cat server.log
+          openssl s_client -showcerts -servername ${{ env.HOST_IP }} -connect ${{ env.HOST_IP }}:8084 </dev/null
+          echo server.log && cat server.log
           docker run -v ./certs/:/tmp/cert/ -p 8084:8084 -e TEST_URL=https://${{ env.HOST_IP }}:8084/ --rm --add-host=host.docker.internal:${{ env.HOST_IP }} ghcr.io/netcracker/qubership/core-base-image:test
           
 
