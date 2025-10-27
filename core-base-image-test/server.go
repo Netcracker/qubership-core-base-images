@@ -1,9 +1,10 @@
 package main
 
 import (
-    "fmt"
-    "net/http"
-    "os"
+	"crypto/tls"
+	"fmt"
+	"net/http"
+	"os"
 )
 
 var (
@@ -19,7 +20,16 @@ func main() {
     }()
 
     fmt.Println("Handle /call_from_service request")
-    resp, err := http.Get(testContainerUrl)
+
+	testContainerIp := os.Getenv("host.docker.internal")
+	fmt.Printf("testContainerIp: %s\n", testContainerIp)
+
+	tr := &http.Transport{
+    	TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+    }
+    client := &http.Client{Transport: tr}
+
+    resp, err := client.Get(testContainerUrl)
     if err != nil {
         fmt.Printf("Failed to call service: %v\n", err)
         os.Exit(1)
