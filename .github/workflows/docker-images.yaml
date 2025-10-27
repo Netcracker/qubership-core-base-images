@@ -82,7 +82,7 @@ jobs:
 
       - name: Start HTTPS server on host
         run: |
-          nohup openssl s_server -cert ./certs/cert.pem -key ./certs/key.pem -accept 0.0.0.0:8084 > server.log 2>&1 &
+          nohup openssl s_server -cert ./certs/cert.pem -key key.pem -accept 0.0.0.0:8084 > server.log 2>&1 &
           sleep 5 
           cat server.log
           
