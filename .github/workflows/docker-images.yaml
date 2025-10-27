@@ -78,7 +78,7 @@ jobs:
           openssl req -x509 -key testcert_key.pem -out test-k8s-ca.crt -days 365 -nodes -subj "/CN=testcerts.com"
           openssl req -x509 -newkey rsa:4096 -days 365 -nodes -keyout key.pem -out cert.pem -subj "/CN=host.docker.internal" -addext "subjectAltName = DNS:host.docker.internal"
           mkdir certs
-          mv testcert.pem key.pem cert.pem certs/
+          mv testcert.pem cert.pem certs/
 
       - name: Start HTTPS server on host
         run: |
