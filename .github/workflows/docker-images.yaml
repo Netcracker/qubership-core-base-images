@@ -93,7 +93,7 @@ jobs:
           echo server.log && cat server.log
           netstat -tuln | grep 8084
           echo server.log && cat server.log
-          openssl s_client -showcerts -servername 127.0.0.1 -connect 127.0.0.1:8084 </dev/null
+          openssl s_client -showcerts -connect 127.0.0.1:8084 -cert ./certs/cert.pem -key key.pem  </dev/null
           echo server.log && cat server.log
           docker run -v ./certs/:/tmp/cert/ -p 8084:8084 -e TEST_URL=https://${{ env.HOST_IP }}:8084/ --rm --add-host=host.docker.internal:${{ env.HOST_IP }} ghcr.io/netcracker/qubership/core-base-image:test
           
