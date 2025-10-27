@@ -23,7 +23,7 @@ func main() {
 
     fmt.Println("Handle /call_from_service request")
 
-	hostname := "host.docker.internal:84443"
+	hostname := "host.docker.internal:8084"
     timeout := 5 * time.Second
 
     conn, err := net.DialTimeout("tcp", hostname, timeout)

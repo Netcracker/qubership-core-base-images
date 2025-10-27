@@ -79,7 +79,7 @@ jobs:
 
       - name: Start HTTPS server on host
         run: |
-          nohup openssl s_server -cert ./certs/cert.pem -key key.pem -accept 0.0.0.0:84443 > server.log 2>&1 &
+          nohup openssl s_server -cert ./certs/cert.pem -key key.pem -accept 0.0.0.0:8084 > server.log 2>&1 &
           sleep 5 
           cat server.log
           
@@ -90,10 +90,12 @@ jobs:
 
       - name: Validate ca certificates were copied to store and work
         run: |
-          netstat -tuln | grep 84443
-          curl -vk https://127.0.0.1:84443
           cat server.log
-          docker run -v ./certs/:/tmp/cert/ -p 84443:84443 -e TEST_URL=https://${{ env.HOST_IP }}:84443/ --rm --add-host=host.docker.internal:${{ env.HOST_IP }} ghcr.io/netcracker/qubership/core-base-image:test
+          netstat -tuln | grep 8084
+          cat server.log
+          curl -vk https://127.0.0.1:8084
+          cat server.log
+          docker run -v ./certs/:/tmp/cert/ -p 8084:8084 -e TEST_URL=https://${{ env.HOST_IP }}:8084/ --rm --add-host=host.docker.internal:${{ env.HOST_IP }} ghcr.io/netcracker/qubership/core-base-image:test
           
 
       - name: Validate kubernetes ca certificate
