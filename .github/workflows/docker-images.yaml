@@ -94,7 +94,7 @@ jobs:
       - name: Validate ca certificates were copied to store and work
         run: |
           netstat -tuln | grep 8084
-          curl -vk https://localhost:8084
+          curl -vk https://127.0.0.1:8084
           cat server.log
           docker run -v ./certs/:/tmp/cert/ -p 8084:8084 -e TEST_URL=https://${{ env.HOST_IP }}:8084/ --rm --add-host=host.docker.internal:${{ env.HOST_IP }} ghcr.io/netcracker/qubership/core-base-image:test
           
