@@ -4,7 +4,6 @@ name: Build and Push Multi-Platform Docker Image
 
 on:
   push:
-    branches: [main]
   pull_request:
     branches: [main]
     types:
@@ -42,9 +41,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -55,6 +51,15 @@ jobs:
           tags: |
             ghcr.io/netcracker/qubership/core-base:test
           file: Dockerfile.base-alpine
+          platforms: linux/amd64
+
+      - name: Build and load image bases on core-image test
+        uses: docker/build-push-action@v6
+        with:
+          load: true
+          tags: |
+            ghcr.io/netcracker/qubership/core-base-image:test
+          file: ./core-base-image-test/Dockerfile
           platforms: linux/amd64
 
       - name: Build and load test java-image
@@ -68,20 +73,34 @@ jobs:
 
       - name: Prepare test resources
         run: |
+          echo "HOST_IP=$(hostname -I | awk '{print $2}')" >> $GITHUB_ENV
           openssl genpkey -algorithm RSA -out testcert_key.pem -pkeyopt rsa_keygen_bits:2048
           openssl req -x509 -newkey rsa:2048 -keyout testcert_key.pem -out testcert.pem -days 365 -nodes -subj "/CN=testcerts.com"
           openssl req -x509 -key testcert_key.pem -out test-k8s-ca.crt -days 365 -nodes -subj "/CN=testcerts.com"
+          openssl req -x509 -newkey rsa:4096 -days 365 -nodes -keyout key.pem -out cert.pem -subj "/CN=127.0.0.1"
           mkdir certs
-          mv testcert.pem certs/
+          mv testcert.pem cert.pem certs/
 
+      - name: Start HTTPS server on host
+        run: |
+          nohup openssl s_server -cert ./certs/cert.pem -key key.pem -accept 0.0.0.0:8084 > server.log 2>&1 &
+          sleep 5 
+          cat server.log
+          
       - name: Validate Truststore
         run: |
           docker run -v ./certs/:/tmp/cert/ -e CERTIFICATE_FILE_PASSWORD=testit --rm ghcr.io/netcracker/qubership/java-base:test \
             keytool -v -list -keystore /etc/ssl/certs/java/cacerts -storepass testit -alias testcert.pem
 
-      - name: Validate ca certificates were copied to store
+      - name: Validate ca certificates were copied to store and work
         run: |
-          docker run -v ./certs/:/tmp/cert/ --rm ghcr.io/netcracker/qubership/core-base:test cat /etc/ssl/certs/ca-certificates.crt | awk -v decoder='openssl x509 -noout -subject -enddate 2>/dev/null' '/BEGIN/{close(decoder)};{print | decoder}' | grep testcerts.com
+          echo server.log && cat server.log
+          netstat -tuln | grep 8084
+          echo server.log && cat server.log
+          openssl s_client -showcerts -connect 127.0.0.1:8084 -cert ./certs/cert.pem -key key.pem  </dev/null
+          echo server.log && cat server.log
+          docker run -v ./certs/:/tmp/cert/ -p 8084:8084 -e TEST_URL=https://${{ env.HOST_IP }}:8084/ --rm --add-host=host.docker.internal:${{ env.HOST_IP }} ghcr.io/netcracker/qubership/core-base-image:test
+          
 
       - name: Validate kubernetes ca certificate
         run: |
