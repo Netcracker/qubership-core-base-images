@@ -82,8 +82,8 @@ jobs:
 
       - name: Start HTTPS server on host
         run: |
-          nohup openssl s_server -cert cert.pem -key key.pem -accept 0.0.0.0:8084 > server.log 2>&1 &
-          sleep 5 &
+          nohup openssl s_server -cert cert.pem -key key.pem -accept 0.0.0.0:8084 > server.log 2>&1
+          sleep 5 
           cat server.log
           
       - name: Validate Truststore
@@ -94,7 +94,7 @@ jobs:
       - name: Validate ca certificates were copied to store and work
         run: |
           netstat -tuln | grep 8084
-          curl -v -k https://${{ env.HOST_IP }}:8084
+          curl -v -k https://localhost:8084
           docker run -v ./certs/:/tmp/cert/ -e TEST_URL=https://host.docker.internal:8084/ --rm --network=host --add-host=host.docker.internal:${{ env.HOST_IP }} ghcr.io/netcracker/qubership/core-base-image:test
 
       - name: Validate kubernetes ca certificate
