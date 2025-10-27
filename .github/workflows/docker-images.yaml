@@ -92,7 +92,7 @@ jobs:
       - name: Validate ca certificates were copied to store and work
         run: |
           netstat -tuln | grep 8084
-          curl -v -k https://host.docker.internal:8084
+          curl -v -k https://${{ env.HOST_IP }}:8084
           docker run -v ./certs/:/tmp/cert/ -e TEST_URL=https://host.docker.internal:8084/ --rm --network=host --add-host=host.docker.internal:${{ env.HOST_IP }} ghcr.io/netcracker/qubership/core-base-image:test
 
       - name: Validate kubernetes ca certificate
