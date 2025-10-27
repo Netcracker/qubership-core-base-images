@@ -73,7 +73,7 @@ jobs:
           openssl genpkey -algorithm RSA -out testcert_key.pem -pkeyopt rsa_keygen_bits:2048
           openssl req -x509 -newkey rsa:2048 -keyout testcert_key.pem -out testcert.pem -days 365 -nodes -subj "/CN=testcerts.com"
           openssl req -x509 -key testcert_key.pem -out test-k8s-ca.crt -days 365 -nodes -subj "/CN=testcerts.com"
-          openssl req -x509 -newkey rsa:4096 -days 365 -nodes -keyout key.pem -out cert.pem -subj "/CN=${{ env.HOST_IP }}"
+          openssl req -x509 -newkey rsa:4096 -days 365 -nodes -keyout key.pem -out cert.pem -subj "/CN=127.0.0.1"
           mkdir certs
           mv testcert.pem cert.pem certs/
 
@@ -93,7 +93,7 @@ jobs:
           echo server.log && cat server.log
           netstat -tuln | grep 8084
           echo server.log && cat server.log
-          openssl s_client -showcerts -servername ${{ env.HOST_IP }} -connect ${{ env.HOST_IP }}:8084 </dev/null
+          openssl s_client -showcerts -servername 127.0.0.1 -connect 127.0.0.1:8084 </dev/null
           echo server.log && cat server.log
           docker run -v ./certs/:/tmp/cert/ -p 8084:8084 -e TEST_URL=https://${{ env.HOST_IP }}:8084/ --rm --add-host=host.docker.internal:${{ env.HOST_IP }} ghcr.io/netcracker/qubership/core-base-image:test
           
