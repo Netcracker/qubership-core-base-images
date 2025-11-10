@@ -80,6 +80,7 @@ RUN mkdir /app && \
     chown -R 10001:0 /app/volumes && \
     find /app \( -type d -exec chmod ug+rwx {} \; -exec chown 10001:0 {} \; -o -type f -exec chmod ug+rw {} \; -exec chown 10001:0 {} \; \)
 
+# renovate: datasource=maven depName=qubership-profiler-installer packageName=org.qubership.profiler versioning=maven
 ARG QUBERSHIP_PROFILER_VERSION=3.0.0
 ARG MAVEN_CENTRAL_URL=https://repo.maven.apache.org/maven2
 # Supported values are: local, remote. Local artifact enables testing the dockerfile without publishing the profiler to Central.
