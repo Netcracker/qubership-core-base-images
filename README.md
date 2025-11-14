@@ -16,16 +16,17 @@ An Alpine-based image with OpenJDK 21, Qubership profiler integration, and addit
 
 - Based on Alpine Linux 3.22.2
 - Pre-configured with essential security settings
-- Built-in certificate management
+- Built-in certificate management (including Kubernetes service account certificates)
 - User management with nss_wrapper support
 - Volume management for certificates and NSS data
 - Graceful shutdown handling
 - Initialization script support
 - UTF-8 locale configuration
+- Multi-platform support (linux/amd64, linux/arm64)
 
 ## Base Alpine Image Details
 
-- **Base Image**: `alpine:3.22.0`
+- **Base Image**: `alpine:3.22.2`
 - **Default User**: `appuser` (UID: 10001)
 - **Default Home**: `/app`
 - **Default Language**: `en_US.UTF-8`
@@ -37,6 +38,8 @@ An Alpine-based image with OpenJDK 21, Qubership profiler integration, and addit
 - `bash`: Latest version
 - `zlib`: Latest version
 - `nss_wrapper`: Latest version
+- `libcrypto3`: Latest version (upgraded)
+- `libssl3`: Latest version (upgraded)
 
 ### Volume Mounts
 
@@ -47,7 +50,7 @@ An Alpine-based image with OpenJDK 21, Qubership profiler integration, and addit
 
 ## Java Alpine Image Details
 
-- **Base Image**: `alpine:3.22.0`
+- **Base Image**: `alpine:3.22.2`
 - **Java Version**: OpenJDK 21
 - **Default User**: `appuser` (UID: 10001)
 - **Default Home**: `/app`
@@ -63,6 +66,9 @@ An Alpine-based image with OpenJDK 21, Qubership profiler integration, and addit
 - `zip`: Latest version
 - `unzip`: Latest version
 - `libstdc++`: Latest version
+- `nss_wrapper`: Latest version
+- `libcrypto3`: Latest version (upgraded)
+- `libssl3`: Latest version (upgraded)
 - And all base Alpine dependencies
 
 ### Java-Specific Environment Variables
@@ -78,11 +84,12 @@ An Alpine-based image with OpenJDK 21, Qubership profiler integration, and addit
 
 The Java Alpine image includes built-in support for the Qubership profiler:
 
-- **Profiler Version**: 1.0.4 (configurable via build arg)
-- **Artifact Source**: Configurable (local or remote from Maven Central)
+- **Profiler Version**: 3.0.0 (configurable via build arg `QUBERSHIP_PROFILER_VERSION`)
+- **Artifact Source**: Configurable via build arg `QUBERSHIP_PROFILER_ARTIFACT_SOURCE` (local or remote from Maven Central)
 - **Enable Profiler**: Set environment variable `PROFILER_ENABLED=true`
 - **Profiler Directory**: `/app/diag`
 - **Dump Directory**: `/app/diag/dump`
+- **Multi-platform Support**: Automatically downloads platform-specific artifacts based on `TARGETOS` and `TARGETARCH` build args
 
 ### Volume Mounts
 
@@ -92,6 +99,14 @@ The Java Alpine image includes built-in support for the Qubership profiler:
 - `/etc/ssl/certs/java`
 - `/etc/secret`
 - `/app/diag/dump`
+
+### Certificate Management
+
+- **Certificate Location**: `/etc/ssl/certs/java/cacerts` (Java keystore)
+- **Certificate Password**: Configurable via `CERTIFICATE_FILE_PASSWORD` environment variable (default: `changeit`)
+- **Certificate Sources**: 
+  - `/tmp/cert/` directory (`.crt`, `.cer`, or `.pem` files)
+  - Kubernetes service account certificates from `/var/run/secrets/kubernetes.io/serviceaccount/ca.crt`
 
 ## Directory Structure
 
@@ -118,18 +133,23 @@ The Java Alpine image includes built-in support for the Qubership profiler:
 
 The entrypoint script performs the following operations:
 
-1. Restores volume data
-2. Creates user if necessary
-3. Loads certificates to trust store
-4. Executes initialization scripts from `/app/init.d/`
-5. Runs the main application with proper signal handling
+1. **Restores volume data**: Copies certificate data from `/app/volumes/certs/` to the appropriate certificate locations
+2. **Creates user if necessary**: Uses nss_wrapper to create the appuser entry if the user doesn't exist in `/etc/passwd`
+3. **Loads certificates to trust store**: 
+   - Scans `/tmp/cert/` directory for certificate files
+   - Automatically detects and loads Kubernetes service account certificates from `/var/run/secrets/kubernetes.io/serviceaccount/ca.crt`
+   - For Java images: imports certificates into the Java keystore using `keytool`
+   - For base images: copies certificates and runs `update-ca-certificates`
+4. **Loads profiler bootstrap** (Java image only): Sources `/app/diag/diag-bootstrap.sh` to make profiler functions available
+5. **Executes initialization scripts**: Runs all `.sh` scripts from `/app/init.d/` in alphabetical order (only in non-interactive mode)
+6. **Runs the main application**: Executes the provided command with proper signal handling and crash dump collection
 
 ## Usage
 
 ### Base Alpine Image
 
 ```dockerfile
-FROM qubership/base-alpine:amd64
+FROM ghcr.io/netcracker/qubership/core-base:latest
 
 # Your application setup here
 ```
@@ -137,14 +157,22 @@ FROM qubership/base-alpine:amd64
 ### Java Alpine Image
 
 ```dockerfile
-FROM qubership/java-alpine:amd64
+FROM ghcr.io/netcracker/qubership/java-base:latest
 
 # Your Java application setup here
 ```
 
+**Note**: Images are available on GitHub Container Registry (`ghcr.io/netcracker/qubership/`) and support multi-platform builds (linux/amd64, linux/arm64). Use platform-specific tags if needed.
+
 ### Adding Custom Certificates
 
-Place your certificates (`.crt`, `.cer`, or `.pem` files) in `/tmp/cert/` directory. They will be automatically loaded into the trust store.
+Certificates can be added in two ways:
+
+1. **Manual placement**: Place your certificates (`.crt`, `.cer`, or `.pem` files) in `/tmp/cert/` directory. They will be automatically loaded into the trust store.
+
+2. **Kubernetes integration**: The image automatically detects and loads Kubernetes service account certificates from `/var/run/secrets/kubernetes.io/serviceaccount/ca.crt` if mounted.
+
+For Java images, certificates are imported into the Java keystore. The keystore password can be customized via the `CERTIFICATE_FILE_PASSWORD` environment variable (default: `changeit`).
 
 ### Adding Initialization Scripts
 
@@ -163,38 +191,63 @@ java -jar your-app.jar
 ```
 
 The profiler will automatically:
-- Load the profiler agent
+- Load the profiler agent from `/app/diag/lib/agent.jar`
 - Set up dump directory at `/app/diag/dump`
-- Configure Java tool options for profiling
+- Configure Java tool options for profiling via `JAVA_TOOL_OPTIONS`
+- Provide crash dump functionality via `send_crash_dump` function
+
+The profiler agent is automatically loaded via `diag-bootstrap.sh` script sourced in the entrypoint.
 
 ## Signal Handling
 
-The images include comprehensive signal handling for graceful shutdowns and proper process management. They support all standard Linux signals and ensure proper cleanup on container termination. For SIGTERM signals, there is a 10-second delay to prevent 503/502 errors during deployment rollouts.
+The images include comprehensive signal handling for graceful shutdowns and proper process management. They support all standard Linux signals (SIGHUP, SIGINT, SIGQUIT, SIGTERM, etc.) and ensure proper cleanup on container termination. 
+
+For SIGTERM signals, there is a 10-second delay to prevent 503/502 errors during deployment rollouts. The entrypoint script properly forwards all signals to the child process and handles exit codes appropriately.
+
+**Note**: Signal handling is disabled when running in interactive shell mode (`bash` or `sh` commands) to avoid interfering with terminal signal handling.
 
 ## Building the Images
 
 ### Base Alpine Image
 
 ```bash
-docker build -f Dockerfile.base-alpine -t qubership/base-alpine:amd64 .
+# Single platform build
+docker build -f Dockerfile.base-alpine -t ghcr.io/netcracker/qubership/core-base:latest .
+
+# Multi-platform build (requires Docker Buildx)
+docker buildx build --platform linux/amd64,linux/arm64 \
+  -f Dockerfile.base-alpine \
+  -t ghcr.io/netcracker/qubership/core-base:latest .
 ```
 
 ### Java Alpine Image
 
 ```bash
 # Build with remote profiler artifact (default)
-docker build -f Dockerfile.java-alpine -t qubership/java-alpine:amd64 .
+docker build -f Dockerfile.java-alpine \
+  -t ghcr.io/netcracker/qubership/java-base:latest .
 
-# Build with local profiler artifact
+# Build with local profiler artifact (for testing)
 docker build -f Dockerfile.java-alpine \
   --build-arg QUBERSHIP_PROFILER_ARTIFACT_SOURCE=local \
-  -t qubership/java-alpine:amd64 .
+  --build-arg TARGETOS=linux \
+  --build-arg TARGETARCH=amd64 \
+  -t ghcr.io/netcracker/qubership/java-base:latest .
 
 # Build with custom profiler version
 docker build -f Dockerfile.java-alpine \
-  --build-arg QUBERSHIP_PROFILER_VERSION=1.0.5 \
-  -t qubership/java-alpine:amd64 .
+  --build-arg QUBERSHIP_PROFILER_VERSION=3.0.1 \
+  --build-arg TARGETOS=linux \
+  --build-arg TARGETARCH=amd64 \
+  -t ghcr.io/netcracker/qubership/java-base:latest .
+
+# Multi-platform build (requires Docker Buildx)
+docker buildx build --platform linux/amd64,linux/arm64 \
+  -f Dockerfile.java-alpine \
+  -t ghcr.io/netcracker/qubership/java-base:latest .
 ```
+
+**Note**: When building with local artifacts, ensure the required profiler files are present in the `local-artifacts/` directory. See [local-artifacts/README.md](local-artifacts/README.md) for more details.
 
 ---
 
