@@ -66,9 +66,10 @@ jobs:
     needs: [check-tag]
     uses: Netcracker/qubership-core-infra/.github/workflows/docker-build.yaml@v1.1.1
     with:
-      tags: "21-alpine-${{ inputs.version }} 21-alpine-latest"
+      tags: "21-alpine-${{ inputs.version }}"
       config-filename: "java-base-docker-release-config.json"
       dry-run: ${{ inputs.dry-run }}
+      ref: ${{ inputs.version}}
 
   core-base-docker-build:
     name: Build Docker image
@@ -77,3 +78,4 @@ jobs:
     with:
       config-filename: "core-base-docker-release-config.json"
       dry-run: ${{ inputs.dry-run }}
+      ref: ${{ inputs.version}}
