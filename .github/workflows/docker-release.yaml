@@ -25,7 +25,18 @@ permissions:
   packages: write
 
 jobs:
+  create-tag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create tag
+        uses: netcracker/qubership-workflow-hub/actions/tag-action@main
+        with:
+          ref: main
+          tag-name: v${{ github.event.inputs.version }}
+          tag-message: Tag v${{ github.event.inputs.version }}
+
   java-base-docker-build:
+    needs: [create-tag]
     name: Build Docker image
     uses: Netcracker/qubership-core-infra/.github/workflows/docker-build.yaml@v1.1.1
     with:
@@ -34,6 +45,7 @@ jobs:
       dry-run: ${{ inputs.dry-run }}
 
   core-base-docker-build:
+    needs: [create-tag]
     name: Build Docker image
     uses: Netcracker/qubership-core-infra/.github/workflows/docker-build.yaml@v1.1.1
     with:
