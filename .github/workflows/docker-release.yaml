@@ -34,6 +34,7 @@ jobs:
           ref: main
           tag-name: v${{ github.event.inputs.version }}
           tag-message: Tag v${{ github.event.inputs.version }}
+          dry-run: ${{ inputs.dry-run }}
 
   java-base-docker-build:
     needs: [create-tag]
