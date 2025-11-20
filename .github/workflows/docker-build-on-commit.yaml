@@ -1,6 +1,6 @@
 ---
 # yamllint disable rule:line-length
-name: Build and Push Multi-Platform Docker Image
+name: Build and Push On Commit
 
 on:
   push:
@@ -114,8 +114,9 @@ jobs:
         with:
           push: ${{ !startsWith(github.ref, 'refs/heads/dependabot/') }}
           tags: |
-            ghcr.io/netcracker/qubership/java-base:${{ needs.prepare-variables.outputs.tag_snapshot }}
-            ghcr.io/netcracker/qubership/java-base:${{ needs.prepare-variables.outputs.tag_build_number }}
+            ghcr.io/netcracker/qubership/java-base:21-alpine-${{ needs.prepare-variables.outputs.tag_snapshot }}
+            ghcr.io/netcracker/qubership/java-base:21-alpine-${{ needs.prepare-variables.outputs.tag_build_number }}
+            ghcr.io/netcracker/qubership/java-base:21-alpine-latest
           file: Dockerfile.java-alpine
           platforms: ${{ env.PLATFORMS }}
 
