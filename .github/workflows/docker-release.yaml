@@ -61,30 +61,19 @@ jobs:
           echo "Tag already exists: v${{ github.event.inputs.version }}"
           exit 1
 
-  tag:
+  java-base-docker-build:
+    name: Build Docker image
     needs: [check-tag]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Create tag
-        uses: netcracker/qubership-workflow-hub/actions/tag-action@b575bad3a0959c4e883bc34f9d055ff07fde2dbd
-        with:
-          ref: main
-          tag-name: v${{ github.event.inputs.version }}
-          tag-message: Tag v${{ github.event.inputs.version }}
-
-  docker-build-publish:
-    needs: [tag]
-    uses: netcracker/qubership-workflow-hub/.github/workflows/docker-publish.yml@f7481bd2fd0f6d62001df77ec2c30b64ef1897d8
+    uses: Netcracker/qubership-core-infra/.github/workflows/docker-build.yaml@v1.1.1
     with:
-      ref: v${{ inputs.version }}
-      download-artifact: false
-      dry-run: ${{ github.event.inputs.dry-run == 'true' }}
-      platforms: linux/amd64,linux/arm64
-      component: '[{"name": "qubership/core-base", "file": "./Dockerfile.base-alpine", "context": "."},{"name": "qubership/java-base", "file": "./Dockerfile.java-alpine", "context": "."}]'
+      tags: "21-alpine-${{ inputs.version }} 21-alpine-latest"
+      config-filename: "java-base-docker-release-config.json"
+      dry-run: ${{ inputs.dry-run }}
 
-  github-release:
-    needs: [tag]
-    uses: netcracker/qubership-workflow-hub/.github/workflows/release-drafter.yml@f7481bd2fd0f6d62001df77ec2c30b64ef1897d8
+  core-base-docker-build:
+    name: Build Docker image
+    needs: [check-tag]
+    uses: Netcracker/qubership-core-infra/.github/workflows/docker-build.yaml@v1.1.1
     with:
-      version: ${{ github.event.inputs.version }}
-      publish: false
+      config-filename: "core-base-docker-release-config.json"
+      dry-run: ${{ inputs.dry-run }}

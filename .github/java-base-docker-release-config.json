@@ -1,0 +1,10 @@
+{
+    "components" : [
+    {
+      "name": "qubership/java-base",
+      "file": "./Dockerfile.java-alpine",
+      "context": "."
+    }
+    ],
+    "platforms" : "linux/amd64,linux/arm64"
+  }
