@@ -29,6 +29,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Create tag
+        if: ${{ !inputs.dry-run }}
         uses: netcracker/qubership-workflow-hub/actions/tag-action@v2.0.1
         with:
           ref: main
@@ -41,7 +42,7 @@ jobs:
     name: Build Docker image
     uses: Netcracker/qubership-core-infra/.github/workflows/docker-build.yaml@v1.1.1
     with:
-      tags: "21-alpine-${{ inputs.version }}"
+      tags: "21-alpine-${{ inputs.version }} 21-alpine-${{ inputs.version }}-latest"
       config-filename: "java-base-docker-release-config.json"
       dry-run: ${{ inputs.dry-run }}
 
@@ -56,6 +57,7 @@ jobs:
 
   github-release:
     needs: [create-tag]
+    if: ${{ !inputs.dry-run }}
     uses: netcracker/qubership-workflow-hub/.github/workflows/release-drafter.yml@v2.0.1
     with:
       version: ${{ github.event.inputs.version }}

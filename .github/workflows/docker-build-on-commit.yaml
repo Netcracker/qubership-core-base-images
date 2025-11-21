@@ -116,7 +116,6 @@ jobs:
           tags: |
             ghcr.io/netcracker/qubership/java-base:21-alpine-${{ needs.prepare-variables.outputs.tag_snapshot }}
             ghcr.io/netcracker/qubership/java-base:21-alpine-${{ needs.prepare-variables.outputs.tag_build_number }}
-            ghcr.io/netcracker/qubership/java-base:21-alpine-latest
           file: Dockerfile.java-alpine
           platforms: ${{ env.PLATFORMS }}
 
