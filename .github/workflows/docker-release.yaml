@@ -50,5 +50,6 @@ jobs:
     name: Build Docker image
     uses: Netcracker/qubership-core-infra/.github/workflows/docker-build.yaml@v1.1.1
     with:
+      tags: "${{ inputs.version }}"
       config-filename: "core-base-docker-release-config.json"
       dry-run: ${{ inputs.dry-run }}
