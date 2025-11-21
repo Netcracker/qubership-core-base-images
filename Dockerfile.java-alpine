@@ -10,8 +10,6 @@ RUN apk --no-cache add \
     busybox-binsh \
     ca-certificates-bundle \
     ssl_client \
-    zlib \
-    zip \
     openjdk21-jdk \
     curl \
     bash \
@@ -95,17 +93,9 @@ RUN --mount=type=bind,source=local-artifacts,target=/build/artifacts mkdir /app/
     rm "qubership-profiler-diagtools-$QUBERSHIP_PROFILER_VERSION-$TARGETOS-$TARGETARCH.tar.gz" && \
     chown -R 10001:0 /app/diag
 
-VOLUME /tmp
-VOLUME /etc/env
-VOLUME /app/nss
-VOLUME /etc/ssl/certs/java
-VOLUME /etc/secret
-
 RUN mkdir /app/diag/dump && \
     chmod ug+rw -R /app/diag && \
     chown -R 10001:0 /app/diag
-
-VOLUME /app/diag/dump
 
 ENV LANG=en_US.UTF-8
 ENV LANGUAGE=en_US:en
