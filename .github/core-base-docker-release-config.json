@@ -1,0 +1,10 @@
+{
+    "components" : [
+      {
+        "name": "qubership/core-base",
+        "file": "./Dockerfile.base-alpine",
+        "context": "."
+      }
+    ],
+    "platforms" : "linux/amd64,linux/arm64"
+  }

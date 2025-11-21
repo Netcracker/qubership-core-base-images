@@ -1,15 +1,9 @@
 ---
 
 # This GitHub Actions workflow is designed to be triggered when a release is marked as a full release.
-# The workflow performs the following tasks:
-# 1. Checks if the tag already exists.
-# 2. Tags the commit with the release version.
-# 3. Builds and publishes a Docker image.
-# 4. Creates a GitHub release.
-
-# To make it work for your project, you need to adjust the pom.xml and add configuration file for GitHub release.
-# Please find detailed instructions:
-# https://github.com/Netcracker/qubership-workflow-hub?tab=readme-ov-file#docker-project-release-workflow
+# The workflow performs the following tasks:.
+# 1. Builds and publishes a Docker image.
+# 2. Creates a GitHub release.
 
 name: Release And Publish Docker Artifact
 
@@ -31,60 +25,30 @@ permissions:
   packages: write
 
 jobs:
-  check-tag:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Input parameters
-        run: |
-          echo "Version: ${{ github.event.inputs.version }}" >> $GITHUB_STEP_SUMMARY
-
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Check if tag exists
-        id: check_tag
-        uses: netcracker/qubership-workflow-hub/actions/tag-checker@f7481bd2fd0f6d62001df77ec2c30b64ef1897d8
-        with:
-          tag: 'v${{ github.event.inputs.version }}'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Output result
-        run: |
-          echo "Tag exists: ${{ steps.check_tag.outputs.exists }}"
-          echo "Tag name: v${{ github.event.inputs.version }}"
-
-      - name: Fail if tag exists
-        if: steps.check_tag.outputs.exists == 'true'
-        run: |
-          echo "Tag already exists: v${{ github.event.inputs.version }}" >> $GITHUB_STEP_SUMMARY
-          echo "Tag already exists: v${{ github.event.inputs.version }}"
-          exit 1
-
-  tag:
-    needs: [check-tag]
+  create-tag:
     runs-on: ubuntu-latest
     steps:
       - name: Create tag
-        uses: netcracker/qubership-workflow-hub/actions/tag-action@b575bad3a0959c4e883bc34f9d055ff07fde2dbd
+        uses: netcracker/qubership-workflow-hub/actions/tag-action@v2.0.1
         with:
           ref: main
           tag-name: v${{ github.event.inputs.version }}
           tag-message: Tag v${{ github.event.inputs.version }}
+          dry-run: ${{ inputs.dry-run }}
 
-  docker-build-publish:
-    needs: [tag]
-    uses: netcracker/qubership-workflow-hub/.github/workflows/docker-publish.yml@f7481bd2fd0f6d62001df77ec2c30b64ef1897d8
+  java-base-docker-build:
+    needs: [create-tag]
+    name: Build Docker image
+    uses: Netcracker/qubership-core-infra/.github/workflows/docker-build.yaml@v1.1.1
     with:
-      ref: v${{ inputs.version }}
-      download-artifact: false
-      dry-run: ${{ github.event.inputs.dry-run == 'true' }}
-      platforms: linux/amd64,linux/arm64
-      component: '[{"name": "qubership/core-base", "file": "./Dockerfile.base-alpine", "context": "."},{"name": "qubership/java-base", "file": "./Dockerfile.java-alpine", "context": "."}]'
+      tags: "21-alpine-${{ inputs.version }}"
+      config-filename: "java-base-docker-release-config.json"
+      dry-run: ${{ inputs.dry-run }}
 
-  github-release:
-    needs: [tag]
-    uses: netcracker/qubership-workflow-hub/.github/workflows/release-drafter.yml@f7481bd2fd0f6d62001df77ec2c30b64ef1897d8
+  core-base-docker-build:
+    needs: [create-tag]
+    name: Build Docker image
+    uses: Netcracker/qubership-core-infra/.github/workflows/docker-build.yaml@v1.1.1
     with:
-      version: ${{ github.event.inputs.version }}
-      publish: false
+      config-filename: "core-base-docker-release-config.json"
+      dry-run: ${{ inputs.dry-run }}
