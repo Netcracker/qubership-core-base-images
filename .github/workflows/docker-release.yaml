@@ -53,3 +53,10 @@ jobs:
       tags: "${{ inputs.version }}"
       config-filename: "core-base-docker-release-config.json"
       dry-run: ${{ inputs.dry-run }}
+
+  github-release:
+    needs: [create-tag]
+    uses: netcracker/qubership-workflow-hub/.github/workflows/release-drafter.yml@v2.0.1
+    with:
+      version: ${{ github.event.inputs.version }}
+      publish: false
