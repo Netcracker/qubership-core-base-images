@@ -91,7 +91,11 @@ rethrow_handler() {
 }
 
 # Load diag-bootstrap.sh (and diag-lib.sh) to make functions from profiler agent available
-source /app/diag/diag-bootstrap.sh
+if [ -f /app/diag/diag-bootstrap.sh ]; then
+  source /app/diag/diag-bootstrap.sh
+else
+  echo "/app/diag/diag-bootstrap.sh file not found. Diagnostic functions are disabled."
+fi
 
 echo "Run entrypoint.sh:"
 restore_volumes_data
