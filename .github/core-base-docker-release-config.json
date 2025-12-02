@@ -1,7 +1,7 @@
 {
     "components" : [
       {
-        "name": "qubership/core-base",
+        "name": "qubership-core-base",
         "file": "./Dockerfile.base-alpine",
         "context": "."
       }
