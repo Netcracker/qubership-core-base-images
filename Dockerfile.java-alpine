@@ -91,9 +91,8 @@ RUN --mount=type=bind,source=local-artifacts,target=/build/artifacts mkdir /app/
     rm "qubership-profiler-installer-$QUBERSHIP_PROFILER_VERSION.zip" && \
     tar -xzf "qubership-profiler-diagtools-$QUBERSHIP_PROFILER_VERSION-$TARGETOS-$TARGETARCH.tar.gz" --strip-components=1 && \
     rm "qubership-profiler-diagtools-$QUBERSHIP_PROFILER_VERSION-$TARGETOS-$TARGETARCH.tar.gz" && \
-    chown -R 10001:0 /app/diag
-
-RUN mkdir /app/diag/dump && \
+    chown -R 10001:0 /app/diag && \
+    mkdir /app/diag/dump && \
     chmod ug+rw -R /app/diag && \
     chown -R 10001:0 /app/diag
 
