@@ -3,7 +3,8 @@
 load_certificates() {
     export certs_location="${CERTIFICATE_FILE_LOCATION}"
     # shellcheck disable=SC2016
-
+    
+    cert_proc_dir="/tmp/processed"
     cert_search_dirs="/tmp/cert"
     kube_cert_dir="/var/run/secrets/kubernetes.io/serviceaccount"
 
@@ -27,18 +28,18 @@ load_certificates() {
     else
       echo "Load certificates to trust store"
       validated_cert_files=()
-
+      
+      mkdir -p ${cert_proc_dir}
       for cert in $certs_found; do
         echo "Processing cert: ${cert}"
-        base_cert_name="${cert%.*}"
+        base_cert_name="$(basename ${cert%.*})"
         awk "
           /BEGIN CERTIFICATE/ { 
             c++; 
-            filename = \"${base_cert_name}_00\" c \".crt\";
+            filename = \"${cert_proc_dir}/${base_cert_name}_00\" c \".crt\";
             print filename;
           } 
           { print > filename }" ${cert} >> cert_files
-          rm -f ${cert}
       done
 
       for cert in $(cat cert_files); do
