@@ -26,8 +26,37 @@ load_certificates() {
 
     else
       echo "Load certificates to trust store"
-      echo $certs_found | xargs -n 1 --no-run-if-empty sh -c \
-        'echo -file "$1" ; cp "$1" "$certs_location" ; update-ca-certificates; ' argv0
+      validated_cert_files=()
+
+      for cert in $certs_found; do
+        echo "Processing cert: ${cert}"
+        base_cert_name="${cert%.*}"
+        awk "
+          /BEGIN CERTIFICATE/ { 
+            c++; 
+            filename = \"${base_cert_name}_00\" c \".crt\";
+            print filename;
+          } 
+          { print > filename }" ${cert} >> cert_files
+          rm -f ${cert}
+      done
+
+      for cert in $(cat cert_files); do
+        echo "Validate cert: ${cert}"
+        
+        if openssl x509 -in "${cert}" -noout ; then
+          validated_cert_files+=("${cert}")
+        else
+          echo "Invalid certificate: ${cert} will be skipped"
+        fi
+      done
+
+      for cert in "${validated_cert_files[@]}"; do
+        echo "Copying ${cert} to ${certs_location}"
+        cp "${cert}" "${certs_location}"
+      done
+
+      update-ca-certificates      
     fi
 }
 
