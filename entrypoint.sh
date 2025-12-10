@@ -12,7 +12,7 @@ load_certificates() {
     fi
     certs_found=$(find $cert_search_dirs -type f \( -name '*.crt' -o -name '*.cer' -o -name '*.pem' \))
 
-    if which keytool; then
+    if which keytool >/dev/null; then
       echo "Load certificates to java keystore"
       export pass=${CERTIFICATE_FILE_PASSWORD:-changeit}
 
@@ -135,11 +135,9 @@ SIGPWR
 SIGWINCH
 "
 
-if [[ "${PROFILER_ENABLED,,}" == "true" ]]; then
-  # Java automatically picks up JAVA_TOOL_OPTIONS, so we don't need to pass it explicitly
-  JAVA_TOOL_OPTIONS="$X_JAVA_ARGS"
-  export JAVA_TOOL_OPTIONS
-fi
+# Java automatically picks up JAVA_TOOL_OPTIONS, so we don't need to pass it explicitly
+export JAVA_TOOL_OPTIONS="$X_JAVA_ARGS"
+echo "JAVA_TOOL_OPTIONS: $JAVA_TOOL_OPTIONS"
 
 if [[ "$1" != "bash" ]] && [[ "$1" != "sh" ]] ; then
 # We don't want to mess with shell signal handling in terminal mode.

@@ -16,7 +16,8 @@ RUN apk --no-cache add \
     libstdc++ \
     fontconfig \
     font-dejavu \
-    nss_wrapper
+    nss_wrapper \
+    procps-ng # top command required by diag tool
 
 ENV HOME=/app \
     USER_NAME=appuser \
