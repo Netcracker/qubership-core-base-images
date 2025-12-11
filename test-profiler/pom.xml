@@ -23,7 +23,7 @@
         <dependency>
             <groupId>org.qubership.profiler</groupId>
             <artifactId>qubership-profiler-mock-collector</artifactId>
-            <version>3.0.2</version>
+            <version>3.0.6</version>
         </dependency>
         <dependency>
             <groupId>org.qubership.profiler</groupId>
