@@ -12,6 +12,27 @@ A minimal Alpine-based image with essential security and system utilities.
 
 An Alpine-based image with OpenJDK 21, Qubership profiler integration, and additional Java-specific configurations.
 
+## Usage
+
+### Base Alpine Image
+
+```dockerfile
+FROM ghcr.io/netcracker/qubership-core-base:latest
+
+# Your application setup here
+```
+**Note**: There is obsolete image labels named `qubership/core-base:latest`. Please, do not use it!
+
+### Java Alpine Image
+
+```dockerfile
+FROM ghcr.io/netcracker/qubership-java-base:21-alpine-latest
+
+# Your Java application setup here
+```
+**Note**: There is obsolete image labels named `qubership/java-base:latest`. Please, do not use it!
+**Note**: Images are available on GitHub Container Registry (`ghcr.io/netcracker/qubership/`) and support multi-platform builds (linux/amd64, linux/arm64). Use platform-specific tags if needed.
+
 ## Common Features
 
 - Based on Alpine Linux 3.23.0
@@ -143,27 +164,6 @@ The entrypoint script performs the following operations:
 4. **Loads profiler bootstrap** (Java image only): Sources `/app/diag/diag-bootstrap.sh` to make profiler functions available
 5. **Executes initialization scripts**: Runs all `.sh` scripts from `/app/init.d/` in alphabetical order (only in non-interactive mode)
 6. **Runs the main application**: Executes the provided command with proper signal handling and crash dump collection
-
-## Usage
-
-### Base Alpine Image
-
-```dockerfile
-FROM ghcr.io/netcracker/qubership-core-base:latest
-
-# Your application setup here
-```
-**Note**: There is obsolete image labels named `qubership/core-base:latest`. Please, do not use it!
-
-### Java Alpine Image
-
-```dockerfile
-FROM ghcr.io/netcracker/qubership-java-base:21-alpine-latest
-
-# Your Java application setup here
-```
-**Note**: There is obsolete image labels named `qubership/java-base:latest`. Please, do not use it! 
-**Note**: Images are available on GitHub Container Registry (`ghcr.io/netcracker/qubership/`) and support multi-platform builds (linux/amd64, linux/arm64). Use platform-specific tags if needed.
 
 ### Adding Custom Certificates
 
