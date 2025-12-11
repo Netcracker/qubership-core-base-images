@@ -14,7 +14,7 @@ An Alpine-based image with OpenJDK 21, Qubership profiler integration, and addit
 
 ## Common Features
 
-- Based on Alpine Linux 3.22.2
+- Based on Alpine Linux 3.23.0
 - Pre-configured with essential security settings
 - Built-in certificate management (including Kubernetes service account certificates)
 - User management with nss_wrapper support
@@ -26,7 +26,7 @@ An Alpine-based image with OpenJDK 21, Qubership profiler integration, and addit
 
 ## Base Alpine Image Details
 
-- **Base Image**: `alpine:3.22.2`
+- **Base Image**: `alpine:3.23.0`
 - **Default User**: `appuser` (UID: 10001)
 - **Default Home**: `/app`
 - **Default Language**: `en_US.UTF-8`
@@ -149,19 +149,20 @@ The entrypoint script performs the following operations:
 ### Base Alpine Image
 
 ```dockerfile
-FROM ghcr.io/netcracker/qubership/core-base:latest
+FROM ghcr.io/netcracker/qubership-core-base:latest
 
 # Your application setup here
 ```
+**Note**: There is obsolete image labels named `qubership/core-base:latest`. Please, do not use it!
 
 ### Java Alpine Image
 
 ```dockerfile
-FROM ghcr.io/netcracker/qubership/java-base:latest
+FROM ghcr.io/netcracker/qubership-java-base:21-alpine-latest
 
 # Your Java application setup here
 ```
-
+**Note**: There is obsolete image labels named `qubership/java-base:latest`. Please, do not use it! 
 **Note**: Images are available on GitHub Container Registry (`ghcr.io/netcracker/qubership/`) and support multi-platform builds (linux/amd64, linux/arm64). Use platform-specific tags if needed.
 
 ### Adding Custom Certificates
