@@ -21,6 +21,9 @@ docker run -v ${TEST_DIR}/test-k8s-ca.crt:/var/run/secrets/kubernetes.io/service
 
 echo Validate ca certificates were copied to store and splitted
 docker run -v ${TEST_DIR}:/tmp/cert/ --rm ${CORE_BASE_IMAGE} \
-      cat /etc/ssl/certs/ca-certificates.crt | awk -v decoder='openssl x509 -noout -subject -enddate 2>/dev/null' '/BEGIN/{close(decoder)};{print | decoder}' | grep -i -E "testcerts.com|valid1|valid2"
+      cat /etc/ssl/certs/ca-certificates.crt > processed.crt
+for cn in 'testcerts.com' 'valid1' 'valid2'; do
+  cat processed.crt | awk -v decoder='openssl x509 -noout -subject -enddate 2>/dev/null' '/BEGIN/{close(decoder)};{print | decoder}' | grep $cn; 
+done      
 
 echo "Test passed"
