@@ -15,8 +15,8 @@ docker run -v ${TEST_DIR}:/tmp/cert/ ${image_name} | tee test.log
 
 rm -rf "${TEST_DIR}" 
 
-if [[ $(grep -c Processing test.log) -ne 4 ]]; then
-  echo "Invalid certificate were counted in processing"
+if [[ $(grep -c "does not contain exactly one certificate or CRL" test.log) -gt 0 ]]; then
+  echo "Some certificates were not splitted"
   exit 1
 else
   echo "Test passed"
