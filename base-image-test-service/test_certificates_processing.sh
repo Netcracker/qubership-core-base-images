@@ -6,7 +6,8 @@ image_tag=$1
 JAVA_BASE_IMAGE=ghcr.io/netcracker/qubership-java-base:${image_tag}
 CORE_BASE_IMAGE=ghcr.io/netcracker/qubership-core-base:${image_tag}
 
-TEST_DIR="./certs"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+TEST_DIR="$SCRIPT_DIR/certs"
 
 echo Validate certificate load to java keystore
 docker run -v ${TEST_DIR}:/tmp/cert/ -e CERTIFICATE_FILE_PASSWORD=testit --rm ${JAVA_BASE_IMAGE} \
