@@ -3,8 +3,6 @@
 load_certificates() {
     export certs_location="${CERTIFICATE_FILE_LOCATION}"
     # shellcheck disable=SC2016
-    
-    cert_proc_dir="/tmp/processed"
     cert_search_dirs="/tmp/cert"
     kube_cert_dir="/var/run/secrets/kubernetes.io/serviceaccount"
 
