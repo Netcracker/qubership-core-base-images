@@ -81,7 +81,6 @@ jobs:
 
       - name: Test ca certificates were splitted correctly and validated
         run: |
-          chmod +x ./base-image-test-service/test_cert_split.sh
           ./base-image-test-service/test_cert_split.sh "ghcr.io/netcracker/qubership-core-base:test"
 
       - name: Validate ca certificates were copied to store
