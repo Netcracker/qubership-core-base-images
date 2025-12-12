@@ -30,9 +30,10 @@ load_certificates() {
     
       for cert in $certs_found; do
         echo "Processing cert: ${cert}"
+        base_cert_name="$(basename ${cert%.*})"
         awk "
           /-----BEGIN CERTIFICATE-----/ {
-              filename = sprintf(\"${certs_location}/cert_%03d.crt\", n++);
+              filename = sprintf(\"${certs_location}/${base_cert_name}_%03d.crt\", n++);
               print filename;
           } 
           { print > filename }" ${cert}

@@ -15,8 +15,8 @@ docker run -v ${TEST_DIR}:/tmp/cert/ ${image_name} | tee test.log
 
 rm -rf "${TEST_DIR}" 
 
-if [[ $(grep -c Validate test.log) -ne 4 ]]; then
-  echo "Invalid certificate were counted after processing"
+if [[ $(grep -c Processing test.log) -ne 4 ]]; then
+  echo "Invalid certificate were counted in processing"
   exit 1
 else
   echo "Test passed"
