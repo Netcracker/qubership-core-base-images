@@ -40,7 +40,7 @@ jobs:
   java-base-docker-build:
     needs: [create-tag]
     name: Build Docker image
-    uses: Netcracker/qubership-core-infra/.github/workflows/docker-build.yaml@v1.1.1
+    uses: Netcracker/qubership-core-infra/.github/workflows/docker-build.yaml@v1.2.1
     with:
       tags: "21-alpine-${{ inputs.version }},21-alpine-latest"
       config-filename: "java-base-docker-release-config.json"
@@ -49,7 +49,7 @@ jobs:
   core-base-docker-build:
     needs: [create-tag]
     name: Build Docker image
-    uses: Netcracker/qubership-core-infra/.github/workflows/docker-build.yaml@v1.1.1
+    uses: Netcracker/qubership-core-infra/.github/workflows/docker-build.yaml@v1.2.1
     with:
       tags: "${{ inputs.version }}"
       config-filename: "core-base-docker-release-config.json"
