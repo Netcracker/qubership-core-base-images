@@ -30,7 +30,8 @@ ENV HOME=/app \
     MALLOC_TRIM_THRESHOLD_=131072 \
     MALLOC_TOP_PAD_=131072 \
     MALLOC_MMAP_MAX_=65536 \
-    CERTIFICATE_FILE_LOCATION=/etc/ssl/certs/java/cacerts
+    CERTIFICATE_FILE_LOCATION=/usr/local/share/ca-certificates \
+    JAVA_CERTIFICATE_FILE_LOCATION=/etc/ssl/certs/java/cacerts
 
 
 RUN mkdir /app && \
@@ -43,6 +44,8 @@ RUN mkdir /app && \
     chmod g=u ${HOME} /etc/passwd && \
     chmod ug+rw ${CERTIFICATE_FILE_LOCATION} && \
     chown 10001:0 ${CERTIFICATE_FILE_LOCATION} && \
+    chmod ug+rw ${JAVA_CERTIFICATE_FILE_LOCATION} && \
+    chown 10001:0 ${JAVA_CERTIFICATE_FILE_LOCATION} && \
     mkdir -p /etc/secret && \
     chmod ug+rw /etc/secret && \
     chown 10001:0 /etc/secret && \
