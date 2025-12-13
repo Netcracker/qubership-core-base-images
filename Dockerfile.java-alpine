@@ -1,4 +1,4 @@
-FROM alpine:3.22.2
+FROM alpine:3.23.0
 ARG TARGETOS
 ARG TARGETARCH
 
@@ -16,11 +16,8 @@ RUN apk --no-cache add \
     libstdc++ \
     fontconfig \
     font-dejavu \
-    nss_wrapper
-RUN apk add --no-cache --upgrade libcrypto3 libssl3
-
-# temporary use of edge to fix CVE-2025-9086 remove on 3.23.-x release
-RUN apk add --no-cache --upgrade curl --repository=https://dl-cdn.alpinelinux.org/alpine/edge/main
+    nss_wrapper \
+    procps-ng # top command required by diag tool
 
 ENV HOME=/app \
     USER_NAME=appuser \
@@ -72,7 +69,7 @@ RUN mkdir /app && \
     chown -R 10001:0 /app/volumes && \
     find /app \( -type d -exec chmod ug+rwx {} \; -exec chown 10001:0 {} \; -o -type f -exec chmod ug+rw {} \; -exec chown 10001:0 {} \; \)
 
-ARG QUBERSHIP_PROFILER_VERSION=3.0.3
+ARG QUBERSHIP_PROFILER_VERSION=3.0.6
 ARG MAVEN_CENTRAL_URL=https://repo.maven.apache.org/maven2
 # Supported values are: local, remote. Local artifact enables testing the dockerfile without publishing the profiler to Central.
 ARG QUBERSHIP_PROFILER_ARTIFACT_SOURCE=remote
@@ -94,9 +91,8 @@ RUN --mount=type=bind,source=local-artifacts,target=/build/artifacts mkdir /app/
     rm "qubership-profiler-installer-$QUBERSHIP_PROFILER_VERSION.zip" && \
     tar -xzf "qubership-profiler-diagtools-$QUBERSHIP_PROFILER_VERSION-$TARGETOS-$TARGETARCH.tar.gz" --strip-components=1 && \
     rm "qubership-profiler-diagtools-$QUBERSHIP_PROFILER_VERSION-$TARGETOS-$TARGETARCH.tar.gz" && \
-    chown -R 10001:0 /app/diag
-
-RUN mkdir /app/diag/dump && \
+    chown -R 10001:0 /app/diag && \
+    mkdir /app/diag/dump && \
     chmod ug+rw -R /app/diag && \
     chown -R 10001:0 /app/diag
 
