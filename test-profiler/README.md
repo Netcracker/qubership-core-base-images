@@ -5,7 +5,7 @@ Integration test for the Qubership Java base image with profiler support.
 This test verifies that:
 - The profiler agent is correctly enabled in the base image
 - The profiler successfully connects to the collector
-- Profiling data (dictionary, traces, calls) is transmitted correctly
+- Profiling data (posDictionary, traces, calls) is transmitted correctly
 
 ## Running the Test
 

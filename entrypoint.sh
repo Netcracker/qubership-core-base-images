@@ -1,33 +1,49 @@
 #!/usr/bin/env bash
 
 load_certificates() {
-    export certs_location="${CERTIFICATE_FILE_LOCATION}"
     # shellcheck disable=SC2016
-
     cert_search_dirs="/tmp/cert"
     kube_cert_dir="/var/run/secrets/kubernetes.io/serviceaccount"
 
+    echo "Load certificates to image trust store..."
     if [ -d "$kube_cert_dir" ]; then
       cert_search_dirs="$cert_search_dirs $kube_cert_dir"
     fi
     certs_found=$(find $cert_search_dirs -type f \( -name '*.crt' -o -name '*.cer' -o -name '*.pem' \))
+    for cert in $certs_found; do
+      echo "  Preprocess certificates file: ${cert}"
+      cat "${cert}" | awk "
+        /-----BEGIN CERTIFICATE-----/ {
+            found = 1
+            filename = sprintf(\"${CERTIFICATE_FILE_LOCATION}/$(basename ${cert%.*})_%03d.${cert##*.}\", n++);
+            print \"    \" filename
+        }
+        filename { print > filename }
+        END { if (!found) exit 1 }" || echo "    Error process certificates file ${cert}: invalid certificates file data format. " >&2
+    done
+    update-ca-certificates
+    echo "Done"
 
-    if which keytool >/dev/null; then
-      echo "Load certificates to java keystore"
-      export pass=${CERTIFICATE_FILE_PASSWORD:-changeit}
-
+    if [[ -x /usr/bin/keytool ]]; then
+      echo "Load certificates to java keystore..."
+      pass=${CERTIFICATE_FILE_PASSWORD:-changeit}
       # Change password if passed and default one set as old
-      if [ "$pass" != "changeit" ] &&  keytool -list -keystore "${certs_location}" -storepass changeit > /dev/null; then
-         keytool -v -storepasswd -keystore "${certs_location}" -storepass changeit -new "$pass"
+      if [ "$pass" != "changeit" ]; then
+        echo -n "  Change default keystore password: "
+        keytool -v -storepasswd -cacerts -storepass changeit -new "$pass"
       fi
 
-      echo $certs_found | xargs -n 1 --no-run-if-empty bash -c  \
-        'alias=$(basename "$1"); echo -file "$1" -alias "$alias" ; keytool -keystore ${certs_location} -importcert -file "$1" -alias "$alias"  -storepass ${pass} -noprompt' argv0
-
-    else
-      echo "Load certificates to trust store"
-      echo $certs_found | xargs -n 1 --no-run-if-empty sh -c \
-        'echo -file "$1" ; cp "$1" "$certs_location" ; update-ca-certificates; ' argv0
+      for cert_file in "${CERTIFICATE_FILE_LOCATION}"/*; do
+         alias=$(basename "$cert_file")
+         echo -n "  Load certs to java kyestore: file \"$cert_file\" as alias \"$alias\". "
+         /usr/bin/keytool -importcert \
+            -cacerts \
+            -file "$cert_file" \
+            -alias "$alias" \
+            -storepass "${pass}" \
+            -noprompt
+      done
+      echo "Done"
     fi
 }
 

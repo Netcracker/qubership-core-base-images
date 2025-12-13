@@ -66,27 +66,9 @@ jobs:
           file: Dockerfile.java-alpine
           platforms: linux/amd64
 
-      - name: Prepare test resources
+      - name: Validated ca certificates were processed correctly
         run: |
-          openssl genpkey -algorithm RSA -out testcert_key.pem -pkeyopt rsa_keygen_bits:2048
-          openssl req -x509 -newkey rsa:2048 -keyout testcert_key.pem -out testcert.pem -days 365 -nodes -subj "/CN=testcerts.com"
-          openssl req -x509 -key testcert_key.pem -out test-k8s-ca.crt -days 365 -nodes -subj "/CN=testcerts.com"
-          mkdir certs
-          mv testcert.pem certs/
-
-      - name: Validate certificate load to java keystore
-        run: |
-          docker run -v ./certs/:/tmp/cert/ -e CERTIFICATE_FILE_PASSWORD=testit --rm ghcr.io/netcracker/qubership-java-base:test \
-            keytool -v -list -keystore /etc/ssl/certs/java/cacerts -storepass testit -alias testcert.pem
-
-      - name: Validate ca certificates were copied to store
-        run: |
-          docker run -v ./certs/:/tmp/cert/ --rm ghcr.io/netcracker/qubership-core-base:test cat /etc/ssl/certs/ca-certificates.crt | awk -v decoder='openssl x509 -noout -subject -enddate 2>/dev/null' '/BEGIN/{close(decoder)};{print | decoder}' | grep testcerts.com
-
-      - name: Validate kubernetes ca certificate load to image trust store
-        run: |
-          docker run -v ./test-k8s-ca.crt:/var/run/secrets/kubernetes.io/serviceaccount/ca.crt --rm ghcr.io/netcracker/qubership-core-base:test cat /etc/ssl/certs/ca-certificates.crt | awk -v decoder='openssl x509 -noout -subject -enddate 2>/dev/null' '/BEGIN/{close(decoder)};{print | decoder}' | grep testcerts.com
-          docker run -v ./test-k8s-ca.crt:/var/run/secrets/kubernetes.io/serviceaccount/ca.crt --rm ghcr.io/netcracker/qubership-java-base:test keytool -cacerts -storepass changeit -v -list | grep testcerts.com
+          ./base-image-test-service/test_certificates_processing.sh "test"
 
       - name: Set up JDK 21
         uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4
