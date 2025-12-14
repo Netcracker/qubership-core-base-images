@@ -19,7 +19,7 @@ export_image_trust_store() {
       -v "${TEST_DIR}":/tmp/cert/ \
       -v "$(pwd)":/out/ \
       "${image}" \
-      cp /etc/ssl/certs/ca-certificates.crt "/out/${output_file}.crt"
+      cat /etc/ssl/certs/ca-certificates.crt >"${output_file}.crt"
 
   # extract certificates list from certs file
   openssl crl2pkcs7 -nocrl -certfile "${output_file}.crt" | openssl pkcs7 -print_certs -noout >"${output_file}"
