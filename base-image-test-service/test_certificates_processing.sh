@@ -15,7 +15,7 @@ export_image_trust_store() {
   local image=$1
   local output_file=$2
   echo "Export certificate list from: $image"
-  docker run --rm -it \
+  docker run --rm \
       -v "${TEST_DIR}":/tmp/cert/ \
       -v "$(pwd)":/out/ \
       "${image}" \
@@ -29,7 +29,7 @@ export_java_keystore() {
   local image=$1
   local output_file=$2
   echo "Export certificate list from: $image"
-  docker run --rm -it \
+  docker run --rm \
       -v "${TEST_DIR}":/tmp/cert/ \
       -v "$(pwd)":/out/ \
       -eCERTIFICATE_FILE_PASSWORD=abc12345 \
