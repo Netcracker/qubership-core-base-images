@@ -30,7 +30,7 @@ jobs:
     steps:
       - name: Create tag
         if: ${{ !inputs.dry-run }}
-        uses: netcracker/qubership-workflow-hub/actions/tag-action@v2.0.3
+        uses: netcracker/qubership-workflow-hub/actions/tag-action@v2.0.5
         with:
           ref: main
           tag-name: v${{ github.event.inputs.version }}
@@ -40,7 +40,7 @@ jobs:
   java-base-docker-build:
     needs: [create-tag]
     name: Build Docker image
-    uses: Netcracker/qubership-core-infra/.github/workflows/docker-build.yaml@v1.1.1
+    uses: Netcracker/qubership-core-infra/.github/workflows/docker-build.yaml@v1.2.1
     with:
       tags: "21-alpine-${{ inputs.version }},21-alpine-latest"
       config-filename: "java-base-docker-release-config.json"
@@ -49,7 +49,7 @@ jobs:
   core-base-docker-build:
     needs: [create-tag]
     name: Build Docker image
-    uses: Netcracker/qubership-core-infra/.github/workflows/docker-build.yaml@v1.1.1
+    uses: Netcracker/qubership-core-infra/.github/workflows/docker-build.yaml@v1.2.1
     with:
       tags: "${{ inputs.version }}"
       config-filename: "core-base-docker-release-config.json"
@@ -58,7 +58,7 @@ jobs:
   github-release:
     needs: [create-tag]
     if: ${{ !inputs.dry-run }}
-    uses: netcracker/qubership-workflow-hub/.github/workflows/release-drafter.yml@v2.0.3
+    uses: netcracker/qubership-workflow-hub/.github/workflows/release-drafter.yml@v2.0.5
     with:
       version: ${{ github.event.inputs.version }}
       publish: false
