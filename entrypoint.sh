@@ -35,7 +35,7 @@ load_certificates() {
 
       for cert_file in "${CERTIFICATE_FILE_LOCATION}"/*; do
          alias=$(basename "$cert_file")
-         echo -n "  Load certs to java kyestore: file \"$cert_file\" as alias \"$alias\". "
+         echo -n "  Load certs to java kyestore: file \"$cert_file\" as alias \"$alias\": "
          /usr/bin/keytool -importcert \
             -cacerts \
             -file "$cert_file" \

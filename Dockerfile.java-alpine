@@ -32,6 +32,8 @@ ENV HOME=/app \
 
 
 RUN mkdir /app && \
+    # [https://github.com/Netcracker/qubership-core-base-images/issues/89] Remove custom java certs load script \
+    rm -f /etc/ca-certificates/update.d/java-cacerts && \
     mkdir -p /tmp/cert && \
     chmod -R ug+rw /tmp && \
     chown -R 10001:0 /tmp && \
