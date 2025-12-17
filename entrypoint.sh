@@ -30,20 +30,10 @@ load_certificates() {
       # Change password if passed and default one set as old
       if [ "$pass" != "changeit" ]; then
         echo -n "  Change default keystore password: "
+        chmod u+w /etc/ssl/certs/java/cacerts
         keytool -v -storepasswd -cacerts -storepass changeit -new "$pass"
+        chmod u-w /etc/ssl/certs/java/cacerts
       fi
-
-      for cert_file in "${CERTIFICATE_FILE_LOCATION}"/*; do
-         alias=$(basename "$cert_file")
-         echo -n "  Load certs to java kyestore: file \"$cert_file\" as alias \"$alias\": "
-         /usr/bin/keytool -importcert \
-            -cacerts \
-            -file "$cert_file" \
-            -alias "$alias" \
-            -storepass "${pass}" \
-            -noprompt
-      done
-      echo "Done"
     fi
 }
 
