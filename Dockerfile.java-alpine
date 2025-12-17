@@ -2,7 +2,7 @@ FROM alpine:3.23.0
 ARG TARGETOS
 ARG TARGETARCH
 ARG UID=10001
-ARG GID=10001
+ARG GID=root
 
 LABEL maintainer="qubership"
 
@@ -33,7 +33,7 @@ ENV HOME=/app \
     JAVA_CERTIFICATE_FILE_LOCATION=/etc/ssl/certs/java/cacerts
 
 
-RUN addgroup -g ${GID} -S app  && adduser -u ${UID} -S -G app app
+RUN adduser -u ${UID} -G root -S appuser
 
 RUN mkdir /app && \
     mkdir -p /tmp/cert && \

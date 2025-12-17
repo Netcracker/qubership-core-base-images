@@ -25,11 +25,10 @@ load_certificates() {
     echo "Done"
 
     if [[ -x /usr/bin/keytool ]]; then
-      echo "Load certificates to java keystore..."
       pass=${CERTIFICATE_FILE_PASSWORD:-changeit}
       # Change password if passed and default one set as old
       if [ "$pass" != "changeit" ]; then
-        echo -n "  Change default keystore password: "
+        echo -n "Change default keystore password: "
         chmod u+w /etc/ssl/certs/java/cacerts
         keytool -v -storepasswd -cacerts -storepass changeit -new "$pass"
         chmod u-w /etc/ssl/certs/java/cacerts

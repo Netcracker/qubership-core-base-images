@@ -68,7 +68,9 @@ jobs:
 
       - name: Validated ca certificates were processed correctly
         run: |
-          ./base-image-test-service/test_certificates_processing.sh "test"
+          ./base-image-test-service/test_certificates_processing.sh \
+             ghcr.io/netcracker/qubership-core-base:test \
+             ghcr.io/netcracker/qubership-java-base:test
 
       - name: Set up JDK 21
         uses: actions/setup-java@f2beeb24e141e01a676f977032f5a29d81c9e27e # v5

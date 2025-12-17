@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -ex
 
-CORE_BASE_IMAGE=ghcr.io/netcracker/qubership-core-base:$1
-JAVA_BASE_IMAGE=ghcr.io/netcracker/qubership-java-base:$1
+CORE_BASE_IMAGE=${1:?Missed core base image label}
+JAVA_BASE_IMAGE=${2:?Missed core java image label}
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TEST_DIR="$SCRIPT_DIR/certs"
 
