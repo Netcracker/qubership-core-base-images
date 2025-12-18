@@ -112,6 +112,6 @@ USER ${UID}:${GID}
 WORKDIR /app
 
 COPY font-local.conf /etc/fonts/local.conf
-COPY --chown=${UID}:${GID} --chmod=755 entrypoint.sh /usr/bin/entrypoint.sh
+COPY --chown=${UID}:${GID} --chmod=755 images/entrypoint.sh /usr/bin/entrypoint.sh
 ENTRYPOINT ["/usr/bin/entrypoint.sh"]
 CMD ["bash"]
