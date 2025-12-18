@@ -2,7 +2,7 @@
     "components" : [
       {
         "name": "qubership-core-base",
-        "file": "./Dockerfile.base-alpine",
+        "file": "./images/core/Dockerfile",
         "context": "."
       }
     ],

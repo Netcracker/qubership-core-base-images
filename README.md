@@ -213,11 +213,11 @@ For SIGTERM signals, there is a 10-second delay to prevent 503/502 errors during
 
 ```bash
 # Single platform build
-docker build -f Dockerfile.base-alpine -t ghcr.io/netcracker/qubership/core-base:latest .
+docker build -f images/core/Dockerfile -t ghcr.io/netcracker/qubership/core-base:latest .
 
 # Multi-platform build (requires Docker Buildx)
 docker buildx build --platform linux/amd64,linux/arm64 \
-  -f Dockerfile.base-alpine \
+  -f images/core/Dockerfile \
   -t ghcr.io/netcracker/qubership/core-base:latest .
 ```
 

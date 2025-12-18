@@ -54,7 +54,7 @@ jobs:
           load: true
           tags: |
             ghcr.io/netcracker/qubership-core-base:test
-          file: Dockerfile.base-alpine
+          file: images/core/Dockerfile
           platforms: linux/amd64
 
       - name: Build and load test java-image
@@ -110,5 +110,5 @@ jobs:
           tags: |
             ghcr.io/netcracker/qubership-core-base:${{ needs.prepare-variables.outputs.tag_snapshot }}
             ghcr.io/netcracker/qubership-core-base:${{ needs.prepare-variables.outputs.tag_build_number }}
-          file: Dockerfile.base-alpine
+          file: images/core/Dockerfile
           platforms: ${{ env.PLATFORMS }}
