@@ -1,4 +1,4 @@
-FROM alpine:3.23.0
+FROM alpine:3.23.2
 LABEL maintainer="qubership"
 
 ARG UID=10001
