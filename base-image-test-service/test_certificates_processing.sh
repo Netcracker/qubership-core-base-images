@@ -2,7 +2,8 @@
 set -ex
 
 CORE_BASE_IMAGE=${1:?Missed core base image label}
-JAVA_BASE_IMAGE=${2:?Missed core java image label}
+JAVA_BASE_21_IMAGE=${2:?Missed core java 21 image label}
+JAVA_BASE_25_IMAGE=${3:?Missed core java 25 image label}
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TEST_DIR="$SCRIPT_DIR/certs"
 
@@ -48,9 +49,14 @@ assert_tests() {
 export_image_trust_store "$CORE_BASE_IMAGE" exported-certs.list
 assert_tests exported-certs.list
 
-export_image_trust_store "$JAVA_BASE_IMAGE" exported-certs.list
+export_image_trust_store "$JAVA_BASE_JAVA_BASE_21_IMAGE" exported-certs.list
 assert_tests exported-certs.list
-export_java_keystore "$JAVA_BASE_IMAGE" exported-certs.list
+export_java_keystore "$JAVA_BASE_21_IMAGE" exported-certs.list
+assert_tests exported-certs.list
+
+export_image_trust_store "$JAVA_BASE_JAVA_BASE_25_IMAGE" exported-certs.list
+assert_tests exported-certs.list
+export_java_keystore "$JAVA_BASE_25_IMAGE" exported-certs.list
 assert_tests exported-certs.list
 
 echo "All tests passed"
