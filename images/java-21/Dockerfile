@@ -111,7 +111,8 @@ USER ${UID}:${GID}
 # Define working directory
 WORKDIR /app
 
-COPY font-local.conf /etc/fonts/local.conf
+COPY images/java-21/font-local.conf /etc/fonts/local.conf
 COPY --chown=${UID}:${GID} --chmod=755 images/entrypoint.sh /usr/bin/entrypoint.sh
 ENTRYPOINT ["/usr/bin/entrypoint.sh"]
 CMD ["bash"]
+
