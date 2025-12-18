@@ -28,7 +28,7 @@ ENV HOME=/app \
     MALLOC_MMAP_THRESHOLD_=131072 \
     MALLOC_TRIM_THRESHOLD_=131072 \
     MALLOC_TOP_PAD_=131072 \
-    MALLOC_MMAP_MAX_=65536 \
+    MALLOC_MMAP_MAX=65536 \
     CERTIFICATE_FILE_LOCATION=/usr/local/share/ca-certificates \
     JAVA_CERTIFICATE_FILE_LOCATION=/etc/ssl/certs/java/cacerts
 
@@ -111,7 +111,7 @@ USER ${UID}:${GID}
 # Define working directory
 WORKDIR /app
 
-COPY images/java-21/font-local.conf /etc/fonts/local.conf
+COPY images/java-21-prof/font-local.conf /etc/fonts/local.conf
 COPY --chown=${UID}:${GID} --chmod=755 images/entrypoint.sh /usr/bin/entrypoint.sh
 ENTRYPOINT ["/usr/bin/entrypoint.sh"]
 CMD ["bash"]

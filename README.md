@@ -225,18 +225,18 @@ docker buildx build --platform linux/amd64,linux/arm64 \
 
 ```bash
 # Build with remote profiler artifact (default)
-docker build -f images/java-21/Dockerfile \
+docker build -f images/java-21-prof/Dockerfile \
   -t ghcr.io/netcracker/qubership/java-base:latest .
 
 # Build with local profiler artifact (for testing)
-docker build -f images/java-21/Dockerfile \
+docker build -f images/java-21-prof/Dockerfile \
   --build-arg QUBERSHIP_PROFILER_ARTIFACT_SOURCE=local \
   --build-arg TARGETOS=linux \
   --build-arg TARGETARCH=amd64 \
   -t ghcr.io/netcracker/qubership/java-base:latest .
 
 # Build with custom profiler version
-docker build -f images/java-21/Dockerfile \
+docker build -f images/java-21-prof/Dockerfile \
   --build-arg QUBERSHIP_PROFILER_VERSION=3.0.1 \
   --build-arg TARGETOS=linux \
   --build-arg TARGETARCH=amd64 \
@@ -244,7 +244,7 @@ docker build -f images/java-21/Dockerfile \
 
 # Multi-platform build (requires Docker Buildx)
 docker buildx build --platform linux/amd64,linux/arm64 \
-  -f images/java-21/Dockerfile \
+  -f images/java-21-prof/Dockerfile \
   -t ghcr.io/netcracker/qubership/java-base:latest .
 ```
 
