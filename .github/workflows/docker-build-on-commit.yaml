@@ -61,7 +61,9 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           load: true
-          tags: ghcr.io/netcracker/qubership-java-base-prof:21-test
+          tags: |
+            ghcr.io/netcracker/qubership-java-base:21-test
+            ghcr.io/netcracker/qubership-java-base-prof:21-test
           file: images/java-21-prof/Dockerfile
           platforms: linux/amd64
 
