@@ -13,9 +13,7 @@ A minimal Alpine-based image with essential security and system utilities.
 There are tree java images based on Alpine:
 * Java 21 with JDK and profiler: `qubership-java-base:21-alpine-xxx`
 * Java 25 with JRE: `qubership-java-base:25-alpine-xxx`
-* Java 25 with JDK and profiler: `qubership-java-base-prof:25-alpine-xxx`
-
-**Node**: Starting from java 25 version images are separated on JRE and JDK+Profiler 
+* Java 25 with JRE and profiler: `qubership-java-base-prof:25-alpine-xxx`
 
 ## Usage
 
@@ -23,24 +21,32 @@ There are tree java images based on Alpine:
 
 ```dockerfile
 FROM ghcr.io/netcracker/qubership-core-base:latest
-
-# Your application setup here
 ```
 **Note**: There is obsolete image labels named `qubership/core-base:latest`. Please, do not use it!
 
-### Java Alpine Image
+### Java Alpine Images
 
+**Java 21 (JDK with profiler):**
 ```dockerfile
 FROM ghcr.io/netcracker/qubership-java-base:21-alpine-latest
-
-# Your Java application setup here
 ```
-**Note**: There is obsolete image labels named `qubership/java-base:latest`. Please, do not use it!
+
+**Java 25 (JRE only):**
+```dockerfile
+FROM ghcr.io/netcracker/qubership-java-base:25-alpine-latest
+```
+
+**Java 25 (JRE with profiler):**
+```dockerfile
+FROM ghcr.io/netcracker/qubership-java-base-prof:25-alpine-latest
+```
+
+**Note**: There are obsolete image labels named `qubership/java-base:latest`. Please, do not use them!
 **Note**: Images are available on GitHub Container Registry (`ghcr.io/netcracker/qubership/`) and support multi-platform builds (linux/amd64, linux/arm64). Use platform-specific tags if needed.
 
 ## Common Features
 
-- Based on Alpine Linux 3.23.0
+- Based on Alpine Linux 3.23.2
 - Pre-configured with essential security settings
 - Built-in certificate management (including Kubernetes service account certificates)
 - User management with nss_wrapper support
@@ -52,7 +58,7 @@ FROM ghcr.io/netcracker/qubership-java-base:21-alpine-latest
 
 ## Base Alpine Image Details
 
-- **Base Image**: `alpine:3.23.0`
+- **Base Image**: `alpine:3.23.2`
 - **Default User**: `appuser` (UID: 10001)
 - **Default Home**: `/app`
 - **Default Language**: `en_US.UTF-8`
@@ -62,10 +68,7 @@ FROM ghcr.io/netcracker/qubership-java-base:21-alpine-latest
 - `ca-certificates`: Latest version
 - `curl`: Latest version
 - `bash`: Latest version
-- `zlib`: Latest version
 - `nss_wrapper`: Latest version
-- `libcrypto3`: Latest version (upgraded)
-- `libssl3`: Latest version (upgraded)
 
 ### Volume Mounts
 
@@ -76,41 +79,65 @@ FROM ghcr.io/netcracker/qubership-java-base:21-alpine-latest
 
 ## Java Alpine Image Details
 
-- **Base Image**: `alpine:3.22.2`
-- **Java Version**: OpenJDK 21
+### Java 21 Image
+
+- **Base Image**: `alpine:3.23.2`
+- **Java Version**: OpenJDK 21 (JDK)
 - **Default User**: `appuser` (UID: 10001)
 - **Default Home**: `/app`
 - **Default Language**: `en_US.UTF-8`
 
-### Additional Dependencies
+#### Additional Dependencies
 
 - `openjdk21-jdk`: Latest version
 - `fontconfig`: Latest version
 - `font-dejavu`: Latest version
 - `procps-ng`: Latest version
-- `wget`: Latest version
-- `zip`: Latest version
-- `unzip`: Latest version
+- `curl`: Latest version
+- `bash`: Latest version
 - `libstdc++`: Latest version
 - `nss_wrapper`: Latest version
-- `libcrypto3`: Latest version (upgraded)
-- `libssl3`: Latest version (upgraded)
 - And all base Alpine dependencies
 
-### Java-Specific Environment Variables
+#### Java 21 Environment Variables
 
 - `JAVA_HOME`: `/usr/lib/jvm/java-21-openjdk`
 - `MALLOC_ARENA_MAX`: 2
 - `MALLOC_MMAP_THRESHOLD_`: 131072
 - `MALLOC_TRIM_THRESHOLD_`: 131072
 - `MALLOC_TOP_PAD_`: 131072
-- `MALLOC_MMAP_MAX_`: 65536
+- `MALLOC_MMAP_MAX`: 65536
+
+### Java 25 Images
+
+- **Base Image**: `alpine:3.23.2`
+- **Java Version**: OpenJDK 25 (JRE)
+- **Default User**: `appuser` (UID: 10001)
+- **Default Home**: `/app`
+- **Default Language**: `en_US.UTF-8`
+
+#### Additional Dependencies
+
+- `openjdk25-jre-headless`: Latest version
+- `curl`: Latest version
+- `bash`: Latest version
+- `nss_wrapper`: Latest version
+- And all base Alpine dependencies
+
+#### Java 25 Environment Variables
+
+- `JAVA_HOME`: `/usr/lib/jvm/default-jvm`
+- `MALLOC_ARENA_MAX`: 2
+- `MALLOC_MMAP_THRESHOLD_`: 131072
+- `MALLOC_TRIM_THRESHOLD_`: 131072
+- `MALLOC_TOP_PAD_`: 131072
+- `MALLOC_MMAP_MAX`: 65536
 
 ### Qubership Profiler Integration
 
-The Java Alpine image includes built-in support for the Qubership profiler:
+The Java Alpine images (Java 21 and Java 25 profiler variants) include built-in support for the Qubership profiler:
 
-- **Profiler Version**: 3.0.0 (configurable via build arg `QUBERSHIP_PROFILER_VERSION`)
+- **Profiler Version**: 3.0.6 (configurable via build arg `QUBERSHIP_PROFILER_VERSION`)
 - **Artifact Source**: Configurable via build arg `QUBERSHIP_PROFILER_ARTIFACT_SOURCE` (local or remote from Maven Central)
 - **Enable Profiler**: Set environment variable `PROFILER_ENABLED=true`
 - **Profiler Directory**: `/app/diag`
@@ -131,7 +158,7 @@ The Java Alpine image includes built-in support for the Qubership profiler:
 /app
 ├── init.d/          # Initialization scripts
 ├── nss/            # NSS wrapper data
-├── diag/           # Profiler diagnostics (Java image only)
+├── diag/           # Profiler diagnostics (Java profiler images only)
 │   ├── lib/        # Profiler libraries
 │   └── dump/       # Profiler dumps
 └── volumes/
@@ -157,7 +184,7 @@ The entrypoint script performs the following operations:
    - Automatically detects and loads Kubernetes service account certificates from `/var/run/secrets/kubernetes.io/serviceaccount/ca.crt`
    - For Java images: imports certificates into the Java keystore using `keytool`
    - For base images: copies certificates and runs `update-ca-certificates`
-4. **Loads profiler bootstrap** (Java image only): Sources `/app/diag/diag-bootstrap.sh` to make profiler functions available
+4. **Loads profiler bootstrap** (Java profiler images only): Sources `/app/diag/diag-bootstrap.sh` to make profiler functions available
 5. **Executes initialization scripts**: Runs all `.sh` scripts from `/app/init.d/` in alphabetical order (only in non-interactive mode)
 6. **Runs the main application**: Executes the provided command with proper signal handling and crash dump collection
 
@@ -177,7 +204,7 @@ Place your initialization scripts (`.sh` files) in `/app/init.d/`. They will be 
 
 ### Using the Qubership Profiler
 
-To enable the profiler in the Java Alpine image:
+To enable the profiler in Java Alpine images (Java 21 or Java 25 profiler variants):
 
 ```bash
 # Set environment variable to enable profiler
@@ -203,50 +230,6 @@ For SIGTERM signals, there is a 10-second delay to prevent 503/502 errors during
 
 **Note**: Signal handling is disabled when running in interactive shell mode (`bash` or `sh` commands) to avoid interfering with terminal signal handling.
 
-## Building the Images
-
-### Base Alpine Image
-
-```bash
-# Single platform build
-docker build -f images/core/Dockerfile -t ghcr.io/netcracker/qubership/core-base:latest .
-
-# Multi-platform build (requires Docker Buildx)
-docker buildx build --platform linux/amd64,linux/arm64 \
-  -f images/core/Dockerfile \
-  -t ghcr.io/netcracker/qubership/core-base:latest .
-```
-
-### Java Alpine Image
-
-```bash
-# Build with remote profiler artifact (default)
-docker build -f images/java-21-prof/Dockerfile \
-  -t ghcr.io/netcracker/qubership/java-base:latest .
-
-# Build with local profiler artifact (for testing)
-docker build -f images/java-21-prof/Dockerfile \
-  --build-arg QUBERSHIP_PROFILER_ARTIFACT_SOURCE=local \
-  --build-arg TARGETOS=linux \
-  --build-arg TARGETARCH=amd64 \
-  -t ghcr.io/netcracker/qubership/java-base:latest .
-
-# Build with custom profiler version
-docker build -f images/java-21-prof/Dockerfile \
-  --build-arg QUBERSHIP_PROFILER_VERSION=3.0.1 \
-  --build-arg TARGETOS=linux \
-  --build-arg TARGETARCH=amd64 \
-  -t ghcr.io/netcracker/qubership/java-base:latest .
-
-# Multi-platform build (requires Docker Buildx)
-docker buildx build --platform linux/amd64,linux/arm64 \
-  -f images/java-21-prof/Dockerfile \
-  -t ghcr.io/netcracker/qubership/java-base:latest .
-```
-
-**Note**: When building with local artifacts, ensure the required profiler files are present in the `local-artifacts/` directory. See [local-artifacts/README.md](local-artifacts/README.md) for more details.
-
----
 
 ## Contributing
 
