@@ -8,9 +8,14 @@ This repository contains secure and feature-rich base Alpine Linux images for co
 
 A minimal Alpine-based image with essential security and system utilities.
 
-### 2. Java Alpine Image
+### 2. Java Alpine Images
 
-An Alpine-based image with OpenJDK 21, Qubership profiler integration, and additional Java-specific configurations.
+There are tree java images based on Alpine:
+* Java 21 with JDK and profiler: `qubership-java-base:21-alpine-xxx`
+* Java 25 with JRE: `qubership-java-base:25-alpine-xxx`
+* Java 25 with JDK and profiler: `qubership-java-base-prof:25-alpine-xxx`
+
+**Node**: Starting from java 25 version images are separated on JRE and JDK+Profiler 
 
 ## Usage
 
@@ -112,19 +117,10 @@ The Java Alpine image includes built-in support for the Qubership profiler:
 - **Dump Directory**: `/app/diag/dump`
 - **Multi-platform Support**: Automatically downloads platform-specific artifacts based on `TARGETOS` and `TARGETARCH` build args
 
-### Volume Mounts
-
-- `/tmp`
-- `/etc/env`
-- `/app/nss`
-- `/etc/ssl/certs/java`
-- `/etc/secret`
-- `/app/diag/dump`
-
 ### Certificate Management
 
 - **Certificate Location**: `/etc/ssl/certs/java/cacerts` (Java keystore)
-- **Certificate Password**: Configurable via `CERTIFICATE_FILE_PASSWORD` environment variable (default: `changeit`)
+- **Certificate Password**: Configurable via `CERTIFICATE_FILE_PASSWORD` environment variable
 - **Certificate Sources**: 
   - `/tmp/cert/` directory (`.crt`, `.cer`, or `.pem` files)
   - Kubernetes service account certificates from `/var/run/secrets/kubernetes.io/serviceaccount/ca.crt`

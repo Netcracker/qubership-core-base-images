@@ -1,0 +1,11 @@
+{
+    "components" : [
+    {
+      "name": "qubership-java-base-25-prof",
+      "file": "./images/java-25-prof/Dockerfile",
+      "context": "."
+    }
+    ],
+    "platforms" : "linux/amd64,linux/arm64"
+  }
+

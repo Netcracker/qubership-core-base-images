@@ -57,30 +57,36 @@ jobs:
           file: images/core/Dockerfile
           platforms: linux/amd64
 
-      - name: Build and load test java-image
+      - name: Build and load test java 21 image with prof
         uses: docker/build-push-action@v6
         with:
           load: true
-          tags: |
-            ghcr.io/netcracker/qubership-java-base:21-test
+          tags: ghcr.io/netcracker/qubership-java-base-prof:21-test
           file: images/java-21-prof/Dockerfile
           platforms: linux/amd64
 
-      - name: Build and load test java-25-image
+      - name: Build and load test java 25 image
         uses: docker/build-push-action@v6
         with:
           load: true
-          tags: |
-            ghcr.io/netcracker/qubership-java-base:25-test
+          tags: ghcr.io/netcracker/qubership-java-base:25-test
           file: images/java-25/Dockerfile
+          platforms: linux/amd64
+
+      - name: Build and load test java 25 image with prof
+        uses: docker/build-push-action@v6
+        with:
+          load: true
+          tags: ghcr.io/netcracker/qubership-java-base-prof:25-test
+          file: images/java-25-prof/Dockerfile
           platforms: linux/amd64
 
       - name: Validated ca certificates were processed correctly
         run: |
-          ./base-image-test-service/test_certificates_processing.sh \
-             ghcr.io/netcracker/qubership-core-base:test \
-             ghcr.io/netcracker/qubership-java-base:21-test \
-             ghcr.io/netcracker/qubership-java-base:25-test
+          ./base-image-test-service/test_certificates_processing.sh ghcr.io/netcracker/qubership-core-base:test
+          ./base-image-test-service/test_certificates_processing.sh ghcr.io/netcracker/qubership-java-base-prof:21-test
+          ./base-image-test-service/test_certificates_processing.sh ghcr.io/netcracker/qubership-java-base:25-test
+          ./base-image-test-service/test_certificates_processing.sh ghcr.io/netcracker/qubership-java-base-prof:25-test
 
       - name: Set up JDK 21
         uses: actions/setup-java@f2beeb24e141e01a676f977032f5a29d81c9e27e # v5
@@ -101,7 +107,8 @@ jobs:
         working-directory: test-profiler
         # language=bash
         run: |
-          ./mvnw --batch-mode verify -Dqubership.profiler.java-base-image.tag=ghcr.io/netcracker/qubership-java-base:test
+          ./mvnw --batch-mode verify -Dqubership.profiler.java-base-image.tag=ghcr.io/netcracker/qubership-java-base:21-test
+          ./mvnw --batch-mode verify -Dqubership.profiler.java-base-image.tag=ghcr.io/netcracker/qubership-java-base-prof:25-test
 
       - name: Build and push core-image
         uses: docker/build-push-action@v6
@@ -120,6 +127,8 @@ jobs:
           tags: |
             ghcr.io/netcracker/qubership-java-base:21-alpine-${{ needs.prepare-variables.outputs.tag_snapshot }}
             ghcr.io/netcracker/qubership-java-base:21-alpine-${{ needs.prepare-variables.outputs.tag_build_number }}
+            ghcr.io/netcracker/qubership-java-base-prof:21-alpine-${{ needs.prepare-variables.outputs.tag_snapshot }}
+            ghcr.io/netcracker/qubership-java-base-prof:21-alpine-${{ needs.prepare-variables.outputs.tag_build_number }}
           file: images/java-21-prof/Dockerfile
           platforms: ${{ env.PLATFORMS }}
 
@@ -131,4 +140,14 @@ jobs:
             ghcr.io/netcracker/qubership-java-base:25-alpine-${{ needs.prepare-variables.outputs.tag_snapshot }}
             ghcr.io/netcracker/qubership-java-base:25-alpine-${{ needs.prepare-variables.outputs.tag_build_number }}
           file: images/java-25/Dockerfile
+          platforms: ${{ env.PLATFORMS }}
+
+      - name: Build and push java-image-25-prof
+        uses: docker/build-push-action@v6
+        with:
+          push: ${{ !startsWith(github.ref, 'refs/heads/dependabot/') }}
+          tags: |
+            ghcr.io/netcracker/qubership-java-base-prof:25-alpine-${{ needs.prepare-variables.outputs.tag_snapshot }}
+            ghcr.io/netcracker/qubership-java-base-prof:25-alpine-${{ needs.prepare-variables.outputs.tag_build_number }}
+          file: images/java-25-prof/Dockerfile
           platforms: ${{ env.PLATFORMS }}

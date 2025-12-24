@@ -27,7 +27,6 @@ ENV HOME=/app \
     CERTIFICATE_FILE_LOCATION=/usr/local/share/ca-certificates \
     JAVA_CERTIFICATE_FILE_LOCATION=/etc/ssl/certs/java/cacerts
 
-
 RUN adduser -u ${UID} -G root -S appuser
 
 RUN mkdir /app && \
@@ -67,6 +66,34 @@ RUN mkdir /app && \
     chown -R ${UID}:${GID} /app/volumes && \
     find /app \( -type d -exec chmod ug+rwx {} \; -exec chown ${UID}:${GID} {} \; -o -type f -exec chmod ug+rw {} \; -exec chown ${UID}:${GID} {} \; \)
 
+ARG QUBERSHIP_PROFILER_VERSION=3.0.6
+ARG MAVEN_CENTRAL_URL=https://repo.maven.apache.org/maven2
+# Supported values are: local, remote. Local artifact enables testing the dockerfile without publishing the profiler to Central.
+ARG QUBERSHIP_PROFILER_ARTIFACT_SOURCE=remote
+
+RUN --mount=type=bind,source=local-artifacts,target=/build/artifacts mkdir /app/diag && \
+    cd /app/diag && \
+    if [ "$QUBERSHIP_PROFILER_ARTIFACT_SOURCE" = "local" ]; then \
+      cp "/build/artifacts/qubership-profiler-installer-$QUBERSHIP_PROFILER_VERSION.zip" .; \
+      cp "/build/artifacts/qubership-profiler-diagtools-$QUBERSHIP_PROFILER_VERSION-$TARGETOS-$TARGETARCH.tar.gz" .; \
+    elif [ "$QUBERSHIP_PROFILER_ARTIFACT_SOURCE" = "remote" ]; then \
+      curl --fail-with-body -OL "$MAVEN_CENTRAL_URL/org/qubership/profiler/qubership-profiler-installer/$QUBERSHIP_PROFILER_VERSION/qubership-profiler-installer-$QUBERSHIP_PROFILER_VERSION.zip"; \
+      curl --fail-with-body -OL "$MAVEN_CENTRAL_URL/org/qubership/profiler/qubership-profiler-diagtools/$QUBERSHIP_PROFILER_VERSION/qubership-profiler-diagtools-$QUBERSHIP_PROFILER_VERSION-$TARGETOS-$TARGETARCH.tar.gz"; \
+    else \
+      echo "Unsupported QUBERSHIP_PROFILER_ARTIFACT_SOURCE=$QUBERSHIP_PROFILER_ARTIFACT_SOURCE. Supported values are local, remote"; \
+      exit 127; \
+    fi && \
+    unzip "qubership-profiler-installer-$QUBERSHIP_PROFILER_VERSION.zip" && \
+    mv lib/qubership-profiler-agent.jar lib/agent.jar && \
+    rm "qubership-profiler-installer-$QUBERSHIP_PROFILER_VERSION.zip" && \
+    tar -xzf "qubership-profiler-diagtools-$QUBERSHIP_PROFILER_VERSION-$TARGETOS-$TARGETARCH.tar.gz" --strip-components=1 && \
+    rm "qubership-profiler-diagtools-$QUBERSHIP_PROFILER_VERSION-$TARGETOS-$TARGETARCH.tar.gz" && \
+    chown -R ${UID}:${GID} /app/diag && \
+    mkdir /app/diag/dump && \
+    chmod ug+rw -R /app/diag && \
+    chown -R ${UID}:${GID} /app/diag
+
+
 ENV LANG=en_US.UTF-8
 ENV LANGUAGE=en_US:en
 ENV LC_ALL=en_US.UTF-8
@@ -77,6 +104,7 @@ USER ${UID}:${GID}
 # Define working directory
 WORKDIR /app
 
+COPY images/java-21-prof/font-local.conf /etc/fonts/local.conf
 COPY --chown=${UID}:${GID} --chmod=755 images/entrypoint.sh /usr/bin/entrypoint.sh
 ENTRYPOINT ["/usr/bin/entrypoint.sh"]
 CMD ["bash"]

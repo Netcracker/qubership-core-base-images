@@ -37,13 +37,22 @@ jobs:
           tag-message: Tag v${{ github.event.inputs.version }}
           dry-run: ${{ inputs.dry-run }}
 
-  java-base-docker-build:
+  core-base-docker-build:
+    needs: [ create-tag ]
+    name: Build Docker image
+    uses: Netcracker/qubership-core-infra/.github/workflows/docker-build.yaml@v1.2.1
+    with:
+      tags: "${{ inputs.version }}"
+      config-filename: "core-base-docker-release-config.json"
+      dry-run: ${{ inputs.dry-run }}
+
+  java-prof-21-docker-build:
     needs: [create-tag]
     name: Build Docker image
     uses: Netcracker/qubership-core-infra/.github/workflows/docker-build.yaml@v1.2.1
     with:
       tags: "21-alpine-${{ inputs.version }},21-alpine-latest"
-      config-filename: "java-base-docker-release-config.json"
+      config-filename: "java-prof-21-docker-release-config.json"
       dry-run: ${{ inputs.dry-run }}
 
   java-25-docker-build:
@@ -55,13 +64,13 @@ jobs:
       config-filename: "java-25-docker-release-config.json"
       dry-run: ${{ inputs.dry-run }}
 
-  core-base-docker-build:
+  java-prof-25-docker-build:
     needs: [create-tag]
     name: Build Docker image
     uses: Netcracker/qubership-core-infra/.github/workflows/docker-build.yaml@v1.2.1
     with:
-      tags: "${{ inputs.version }}"
-      config-filename: "core-base-docker-release-config.json"
+      tags: "25-alpine-${{ inputs.version }},25-alpine-latest"
+      config-filename: "java-prof-25-docker-release-config.json"
       dry-run: ${{ inputs.dry-run }}
 
   github-release:

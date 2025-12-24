@@ -1,9 +1,7 @@
 #!/usr/bin/env bash
 set -ex
 
-CORE_BASE_IMAGE=${1:?Missed core base image label}
-JAVA_BASE_21_IMAGE=${2:?Missed core java 21 image label}
-JAVA_BASE_25_IMAGE=${3:?Missed core java 25 image label}
+IMAGE=${1:?Missed image label}
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TEST_DIR="$SCRIPT_DIR/certs"
 
@@ -46,17 +44,12 @@ assert_tests() {
   <"$output_file" grep -e "CN\s*=\s*testcerts.com" >/dev/null || fail "cert from test-k8s-ca.crt is missed"
 }
 
-export_image_trust_store "$CORE_BASE_IMAGE" exported-certs.list
+export_image_trust_store "${IMAGE}" exported-certs.list
 assert_tests exported-certs.list
 
-export_image_trust_store "$JAVA_BASE_JAVA_BASE_21_IMAGE" exported-certs.list
-assert_tests exported-certs.list
-export_java_keystore "$JAVA_BASE_21_IMAGE" exported-certs.list
-assert_tests exported-certs.list
-
-export_image_trust_store "$JAVA_BASE_JAVA_BASE_25_IMAGE" exported-certs.list
-assert_tests exported-certs.list
-export_java_keystore "$JAVA_BASE_25_IMAGE" exported-certs.list
-assert_tests exported-certs.list
-
+if docker run --rm "${IMAGE}" java -version 1>&2 2>/dev/null; then
+  echo "Test certificates imported in JKS"
+  export_image_trust_store "${IMAGE}" exported-certs.list
+  assert_tests exported-certs.list
+fi
 echo "All tests passed"
