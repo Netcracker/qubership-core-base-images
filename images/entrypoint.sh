@@ -12,7 +12,7 @@ load_certificates() {
     certs_found=$(find $cert_search_dirs -type f \( -name '*.crt' -o -name '*.cer' -o -name '*.pem' \))
     for cert in $certs_found; do
       echo "  Preprocess certificates file: ${cert}"
-      cat "${cert}" | awk "
+      <"${cert}" awk "
         /-----BEGIN CERTIFICATE-----/ {
             found = 1
             filename = sprintf(\"${CERTIFICATE_FILE_LOCATION}/$(basename ${cert%.*})_%03d.${cert##*.}\", n++);
@@ -166,3 +166,5 @@ else
     # shellcheck disable=SC2068
     exec $@
 fi
+
+

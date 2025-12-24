@@ -8,9 +8,14 @@ This repository contains secure and feature-rich base Alpine Linux images for co
 
 A minimal Alpine-based image with essential security and system utilities.
 
-### 2. Java Alpine Image
+### 2. Java Alpine Images
 
-An Alpine-based image with OpenJDK 21, Qubership profiler integration, and additional Java-specific configurations.
+There are tree java images based on Alpine:
+* Java 21 with JDK and profiler: `qubership-java-base:21-alpine-xxx`
+* Java 25 with JRE: `qubership-java-base:25-alpine-xxx`
+* Java 25 with JDK and profiler: `qubership-java-base-prof:25-alpine-xxx`
+
+**Node**: Starting from java 25 version images are separated on JRE and JDK+Profiler 
 
 ## Usage
 
@@ -112,19 +117,10 @@ The Java Alpine image includes built-in support for the Qubership profiler:
 - **Dump Directory**: `/app/diag/dump`
 - **Multi-platform Support**: Automatically downloads platform-specific artifacts based on `TARGETOS` and `TARGETARCH` build args
 
-### Volume Mounts
-
-- `/tmp`
-- `/etc/env`
-- `/app/nss`
-- `/etc/ssl/certs/java`
-- `/etc/secret`
-- `/app/diag/dump`
-
 ### Certificate Management
 
 - **Certificate Location**: `/etc/ssl/certs/java/cacerts` (Java keystore)
-- **Certificate Password**: Configurable via `CERTIFICATE_FILE_PASSWORD` environment variable (default: `changeit`)
+- **Certificate Password**: Configurable via `CERTIFICATE_FILE_PASSWORD` environment variable
 - **Certificate Sources**: 
   - `/tmp/cert/` directory (`.crt`, `.cer`, or `.pem` files)
   - Kubernetes service account certificates from `/var/run/secrets/kubernetes.io/serviceaccount/ca.crt`
@@ -213,11 +209,11 @@ For SIGTERM signals, there is a 10-second delay to prevent 503/502 errors during
 
 ```bash
 # Single platform build
-docker build -f Dockerfile.base-alpine -t ghcr.io/netcracker/qubership/core-base:latest .
+docker build -f images/core/Dockerfile -t ghcr.io/netcracker/qubership/core-base:latest .
 
 # Multi-platform build (requires Docker Buildx)
 docker buildx build --platform linux/amd64,linux/arm64 \
-  -f Dockerfile.base-alpine \
+  -f images/core/Dockerfile \
   -t ghcr.io/netcracker/qubership/core-base:latest .
 ```
 
@@ -225,18 +221,18 @@ docker buildx build --platform linux/amd64,linux/arm64 \
 
 ```bash
 # Build with remote profiler artifact (default)
-docker build -f Dockerfile.java-alpine \
+docker build -f images/java-21-prof/Dockerfile \
   -t ghcr.io/netcracker/qubership/java-base:latest .
 
 # Build with local profiler artifact (for testing)
-docker build -f Dockerfile.java-alpine \
+docker build -f images/java-21-prof/Dockerfile \
   --build-arg QUBERSHIP_PROFILER_ARTIFACT_SOURCE=local \
   --build-arg TARGETOS=linux \
   --build-arg TARGETARCH=amd64 \
   -t ghcr.io/netcracker/qubership/java-base:latest .
 
 # Build with custom profiler version
-docker build -f Dockerfile.java-alpine \
+docker build -f images/java-21-prof/Dockerfile \
   --build-arg QUBERSHIP_PROFILER_VERSION=3.0.1 \
   --build-arg TARGETOS=linux \
   --build-arg TARGETARCH=amd64 \
@@ -244,7 +240,7 @@ docker build -f Dockerfile.java-alpine \
 
 # Multi-platform build (requires Docker Buildx)
 docker buildx build --platform linux/amd64,linux/arm64 \
-  -f Dockerfile.java-alpine \
+  -f images/java-21-prof/Dockerfile \
   -t ghcr.io/netcracker/qubership/java-base:latest .
 ```
 
