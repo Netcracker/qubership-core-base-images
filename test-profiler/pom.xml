@@ -28,7 +28,7 @@
         <dependency>
             <groupId>org.qubership.profiler</groupId>
             <artifactId>qubership-profiler-test-app</artifactId>
-            <version>3.0.6</version>
+            <version>3.1.1</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
