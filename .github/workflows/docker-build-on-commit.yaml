@@ -98,7 +98,7 @@ jobs:
           ./base-image-test-service/test_certificates_processing.sh ghcr.io/netcracker/qubership-java-base:25-test
           ./base-image-test-service/test_certificates_processing.sh ghcr.io/netcracker/qubership-java-base-prof:25-test
           
-      - name: Validate version "test" from go app
+      - name: Validate version "test" in log output
         run: |
            docker run --rm ghcr.io/netcracker/qubership-core-base:test | grep "Release version: test"
 
