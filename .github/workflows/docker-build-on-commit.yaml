@@ -52,15 +52,28 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           load: true
+          build-args: |
+            VERSION=test
           tags: |
             ghcr.io/netcracker/qubership-core-base:test
           file: images/core/Dockerfile
+          platforms: linux/amd64
+
+      - name: Build and load local the image with go app bases on core-base:test
+        uses: docker/build-push-action@v6
+        with:
+          load: true
+          tags: |
+            ghcr.io/netcracker/qubership-core-base-image:test
+          file: ./core-base-image-test/Dockerfile
           platforms: linux/amd64
 
       - name: Build and load test java 21 image with prof
         uses: docker/build-push-action@v6
         with:
           load: true
+          build-args: |
+            VERSION=test
           tags: |
             ghcr.io/netcracker/qubership-java-base:21-test
             ghcr.io/netcracker/qubership-java-base-prof:21-test
@@ -71,6 +84,8 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           load: true
+          build-args: |
+            VERSION=test
           tags: ghcr.io/netcracker/qubership-java-base:25-test
           file: images/java-25/Dockerfile
           platforms: linux/amd64
@@ -79,16 +94,22 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           load: true
+          build-args: |
+            VERSION=test
           tags: ghcr.io/netcracker/qubership-java-base-prof:25-test
           file: images/java-25-prof/Dockerfile
           platforms: linux/amd64
 
       - name: Validated ca certificates were processed correctly
         run: |
-          ./base-image-test-service/test_certificates_processing.sh ghcr.io/netcracker/qubership-core-base:test
+          ./base-image-test-service/test_certificates_processing.sh ghcr.io/netcracker/qubership-core-base-image:test
           ./base-image-test-service/test_certificates_processing.sh ghcr.io/netcracker/qubership-java-base-prof:21-test
           ./base-image-test-service/test_certificates_processing.sh ghcr.io/netcracker/qubership-java-base:25-test
           ./base-image-test-service/test_certificates_processing.sh ghcr.io/netcracker/qubership-java-base-prof:25-test
+          
+      - name: Validate version "test" from go app
+        run: |
+           docker run --rm ghcr.io/netcracker/qubership-core-base-image:test | grep "Version validation passed" || false
 
       - name: Set up JDK 21
         uses: actions/setup-java@f2beeb24e141e01a676f977032f5a29d81c9e27e # v5
@@ -116,6 +137,8 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           push: ${{ !startsWith(github.ref, 'refs/heads/dependabot/') }}
+          build-args: |
+            VERSION=qubership-core-base:${{ needs.prepare-variables.outputs.tag_build_number }}
           tags: |
             ghcr.io/netcracker/qubership-core-base:${{ needs.prepare-variables.outputs.tag_snapshot }}
             ghcr.io/netcracker/qubership-core-base:${{ needs.prepare-variables.outputs.tag_build_number }}
@@ -126,6 +149,8 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           push: ${{ !startsWith(github.ref, 'refs/heads/dependabot/') }}
+          build-args: |
+            VERSION=qubership-java-base:21-alpine-${{ needs.prepare-variables.outputs.tag_build_number }}
           tags: |
             ghcr.io/netcracker/qubership-java-base:21-alpine-${{ needs.prepare-variables.outputs.tag_snapshot }}
             ghcr.io/netcracker/qubership-java-base:21-alpine-${{ needs.prepare-variables.outputs.tag_build_number }}
@@ -138,6 +163,8 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           push: ${{ !startsWith(github.ref, 'refs/heads/dependabot/') }}
+          build-args: |
+            VERSION=qubership-java-base:25-alpine-${{ needs.prepare-variables.outputs.tag_build_number }}
           tags: |
             ghcr.io/netcracker/qubership-java-base:25-alpine-${{ needs.prepare-variables.outputs.tag_snapshot }}
             ghcr.io/netcracker/qubership-java-base:25-alpine-${{ needs.prepare-variables.outputs.tag_build_number }}
@@ -148,6 +175,8 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           push: ${{ !startsWith(github.ref, 'refs/heads/dependabot/') }}
+          build-args: |
+            VERSION=qubership-java-base-prof:25-alpine-${{ needs.prepare-variables.outputs.tag_build_number }}
           tags: |
             ghcr.io/netcracker/qubership-java-base-prof:25-alpine-${{ needs.prepare-variables.outputs.tag_snapshot }}
             ghcr.io/netcracker/qubership-java-base-prof:25-alpine-${{ needs.prepare-variables.outputs.tag_build_number }}

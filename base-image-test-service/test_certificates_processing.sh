@@ -31,7 +31,7 @@ export_java_keystore() {
   docker run --rm \
       -v "${TEST_DIR}":/tmp/cert/ \
       -v "$(pwd)":/out/ \
-      -eCERTIFICATE_FILE_PASSWORD=abc12345 \
+      -e CERTIFICATE_FILE_PASSWORD=abc12345 \
       "${image}" \
       keytool -list -cacerts -storepass abc12345 -v >${output_file}
 }

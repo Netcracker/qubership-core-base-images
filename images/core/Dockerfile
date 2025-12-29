@@ -1,6 +1,7 @@
 FROM alpine:3.23.2
 LABEL maintainer="qubership"
 
+ARG VERSION
 ARG UID=10001
 ARG GID=root
 
@@ -36,6 +37,8 @@ RUN mkdir /lib64 && ln -s /lib/libc.musl-x86_64.so.1 /lib64/ld-linux-x86-64.so.2
     cp -R /etc/ssl/certs /app/volumes && \
     chmod ug+r -R /app/volumes && \
     chown -R ${UID}:${GID} /app/volumes
+
+RUN echo $VERSION > /version
 
 USER ${UID}:${GID}
 

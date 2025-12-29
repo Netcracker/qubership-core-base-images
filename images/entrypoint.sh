@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+echo "Release version: $(cat /version)"
+
 load_certificates() {
     # shellcheck disable=SC2016
     cert_search_dirs="/tmp/cert"

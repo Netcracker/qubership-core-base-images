@@ -3,6 +3,7 @@ ARG TARGETOS
 ARG TARGETARCH
 ARG UID=10001
 ARG GID=root
+ARG VERSION
 
 LABEL maintainer="qubership"
 
@@ -66,6 +67,8 @@ RUN mkdir /app && \
     chmod ug+r -R /app/volumes && \
     chown -R ${UID}:${GID} /app/volumes && \
     find /app \( -type d -exec chmod ug+rwx {} \; -exec chown ${UID}:${GID} {} \; -o -type f -exec chmod ug+rw {} \; -exec chown ${UID}:${GID} {} \; \)
+
+RUN echo $VERSION > /version
 
 ENV LANG=en_US.UTF-8
 ENV LANGUAGE=en_US:en

@@ -3,6 +3,7 @@ ARG TARGETOS
 ARG TARGETARCH
 ARG UID=10001
 ARG GID=root
+ARG VERSION
 
 LABEL maintainer="qubership"
 
@@ -101,6 +102,7 @@ RUN --mount=type=bind,source=local-artifacts,target=/build/artifacts mkdir /app/
     chmod ug+rw -R /app/diag && \
     chown -R ${UID}:${GID} /app/diag
 
+RUN echo $VERSION > /version
 
 ENV LANG=en_US.UTF-8
 ENV LANGUAGE=en_US:en
