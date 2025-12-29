@@ -168,8 +168,7 @@ jobs:
     name: Build and push qubership-core-base image
     uses: Netcracker/qubership-core-infra/.github/workflows/docker-build.yaml@a401421fdccbf23f5257b8fce77a7a46d974fa7a
     with:
-      build-args: |
-        BASE_IMAGE_TAG=qubership-core-base:${{ needs.prepare-variables.outputs.tag_build_number }}
+      build-args: "['BASE_IMAGE_TAG=qubership-core-base:${{ needs.prepare-variables.outputs.tag_build_number }}']"
       tags: |
        "${{ needs.prepare-variables.outputs.tag_snapshot }},${{ needs.prepare-variables.outputs.tag_build_number }}"
       config-filename: "core-base-docker-release-config.json"
