@@ -65,7 +65,7 @@ jobs:
           load: true
           tags: |
             ghcr.io/netcracker/qubership-core-base-image:test
-          file: ./base-image-test-service/Dockerfile
+          file: base-image-test-service/Dockerfile
           platforms: linux/amd64
 
       - name: Build and load test java 21 image with prof
