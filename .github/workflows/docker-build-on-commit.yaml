@@ -59,15 +59,6 @@ jobs:
           file: images/core/Dockerfile
           platforms: linux/amd64
 
-      - name: Build and load local the image with go app bases on core-base:test
-        uses: docker/build-push-action@v6
-        with:
-          load: true
-          tags: |
-            ghcr.io/netcracker/qubership-core-base-image:test
-          file: base-image-test-service/Dockerfile
-          platforms: linux/amd64
-
       - name: Build and load test java 21 image with prof
         uses: docker/build-push-action@v6
         with:
@@ -102,13 +93,14 @@ jobs:
 
       - name: Validated ca certificates were processed correctly
         run: |
-          ./base-image-test-service/test_certificates_processing.sh ghcr.io/netcracker/qubership-core-base-image:test
+          ./base-image-test-service/test_certificates_processing.sh ghcr.io/netcracker/qubership-core-base:test
           ./base-image-test-service/test_certificates_processing.sh ghcr.io/netcracker/qubership-java-base-prof:21-test
           ./base-image-test-service/test_certificates_processing.sh ghcr.io/netcracker/qubership-java-base:25-test
           ./base-image-test-service/test_certificates_processing.sh ghcr.io/netcracker/qubership-java-base-prof:25-test
           
       - name: Validate version "test" from go app
         run: |
+           docker build -t ghcr.io/netcracker/qubership-core-base-image:test -f base-image-test-service/Dockerfile .
            docker run --rm ghcr.io/netcracker/qubership-core-base-image:test | grep "Version validation passed" || false
 
       - name: Set up JDK 21
