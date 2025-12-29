@@ -28,7 +28,7 @@ jobs:
     outputs:
       tag_build_number: ${{ steps.tag_build_number.outputs.tag }}
       tag_snapshot: ${{ steps.tag_snapshot.outputs.tag }}
-  build-and-test:
+  build-and-push:
     runs-on: ubuntu-latest
     needs: prepare-variables
     steps:
@@ -124,12 +124,25 @@ jobs:
           ./mvnw --batch-mode verify -Dqubership.profiler.java-base-image.tag=ghcr.io/netcracker/qubership-java-base:21-test
           ./mvnw --batch-mode verify -Dqubership.profiler.java-base-image.tag=ghcr.io/netcracker/qubership-java-base-prof:25-test
 
+      - name: Build and push core-base image
+        uses: docker/build-push-action@v6
+        with:
+          push: ${{ !startsWith(github.ref, 'refs/heads/dependabot/') }}
+          build-args: |
+            BASE_IMAGE_TAG=${{ needs.prepare-variables.outputs.tag_build_number }}
+          tags: |
+            ghcr.io/netcracker/qubership-core-base:${{ needs.prepare-variables.outputs.tag_snapshot }}
+            ghcr.io/netcracker/qubership-core-base:${{ needs.prepare-variables.outputs.tag_build_number }}
+          file: images/core/Dockerfile
+          platforms: ${{ env.PLATFORMS }}
+
+
       - name: Build and push java-image-21
         uses: docker/build-push-action@v6
         with:
           push: ${{ !startsWith(github.ref, 'refs/heads/dependabot/') }}
           build-args: |
-            BASE_IMAGE_TAG=qubership-java-base:21-alpine-${{ needs.prepare-variables.outputs.tag_build_number }}
+            BASE_IMAGE_TAG=21-alpine-${{ needs.prepare-variables.outputs.tag_build_number }}
           tags: |
             ghcr.io/netcracker/qubership-java-base:21-alpine-${{ needs.prepare-variables.outputs.tag_snapshot }}
             ghcr.io/netcracker/qubership-java-base:21-alpine-${{ needs.prepare-variables.outputs.tag_build_number }}
@@ -143,7 +156,7 @@ jobs:
         with:
           push: ${{ !startsWith(github.ref, 'refs/heads/dependabot/') }}
           build-args: |
-            BASE_IMAGE_TAG=qubership-java-base:25-alpine-${{ needs.prepare-variables.outputs.tag_build_number }}
+            BASE_IMAGE_TAG=25-alpine-${{ needs.prepare-variables.outputs.tag_build_number }}
           tags: |
             ghcr.io/netcracker/qubership-java-base:25-alpine-${{ needs.prepare-variables.outputs.tag_snapshot }}
             ghcr.io/netcracker/qubership-java-base:25-alpine-${{ needs.prepare-variables.outputs.tag_build_number }}
@@ -155,21 +168,9 @@ jobs:
         with:
           push: ${{ !startsWith(github.ref, 'refs/heads/dependabot/') }}
           build-args: |
-            BASE_IMAGE_TAG=qubership-java-base-prof:25-alpine-${{ needs.prepare-variables.outputs.tag_build_number }}
+            BASE_IMAGE_TAG=25-alpine-${{ needs.prepare-variables.outputs.tag_build_number }}
           tags: |
             ghcr.io/netcracker/qubership-java-base-prof:25-alpine-${{ needs.prepare-variables.outputs.tag_snapshot }}
             ghcr.io/netcracker/qubership-java-base-prof:25-alpine-${{ needs.prepare-variables.outputs.tag_build_number }}
           file: images/java-25-prof/Dockerfile
           platforms: ${{ env.PLATFORMS }}
-
-  publish-docker-build:
-    if: ${{ !startsWith(github.ref, 'refs/heads/dependabot/') }}
-    needs: [prepare-variables, build-and-test]
-    name: Build and push qubership-core-base image
-    uses: Netcracker/qubership-core-infra/.github/workflows/docker-build.yaml@fe1e3fb71ae904f5bca5b3075415e3312b689f0f
-    with:
-      build-args: |
-        BASE_IMAGE_TAG=qubership-core-base:${{ needs.prepare-variables.outputs.tag_build_number }}
-      tags: "${{ needs.prepare-variables.outputs.tag_snapshot }},${{ needs.prepare-variables.outputs.tag_build_number }}"
-      config-filename: "core-base-docker-release-config.json"
-      dry-run: false
