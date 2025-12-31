@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+echo "Base image version: $(cat /etc/base-image-release)"
+
 load_certificates() {
     # shellcheck disable=SC2016
     cert_search_dirs="/tmp/cert"
