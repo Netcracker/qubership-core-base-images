@@ -1,12 +1,12 @@
 FROM alpine:3.23.2
 LABEL maintainer="qubership"
 
-ARG BASE_IMAGE_TAG
+ARG BASE_IMAGE_TAG=unknown
 ARG UID=10001
 ARG GID=root
 
 RUN apk update --no-cache
-RUN apk add --no-cache ca-certificates curl bash nss_wrapper
+RUN apk add --no-cache ca-certificates curl bash nss_wrapper tini
 
 ENV HOME=/app \
     USER_NAME=appuser \
@@ -45,5 +45,5 @@ USER ${UID}:${GID}
 WORKDIR /app
 
 COPY --chown=${UID}:${GID} --chmod=755 images/entrypoint.sh /usr/bin/entrypoint.sh
-ENTRYPOINT ["/usr/bin/entrypoint.sh"]
+ENTRYPOINT ["/sbin/tini", "--", "/usr/bin/entrypoint.sh"]
 
