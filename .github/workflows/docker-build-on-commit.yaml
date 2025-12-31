@@ -53,7 +53,7 @@ jobs:
         with:
           load: true
           build-args: |
-            BASE_IMAGE_TAG=test
+            BASE_IMAGE_TAG=ghcr.io/netcracker/qubership-core-base:test
           tags: |
             ghcr.io/netcracker/qubership-core-base:test
           file: images/core/Dockerfile
@@ -64,7 +64,7 @@ jobs:
         with:
           load: true
           build-args: |
-            BASE_IMAGE_TAG=test
+            BASE_IMAGE_TAG=ghcr.io/netcracker/qubership-java-base-prof:21-test
           tags: |
             ghcr.io/netcracker/qubership-java-base:21-test
             ghcr.io/netcracker/qubership-java-base-prof:21-test
@@ -76,7 +76,7 @@ jobs:
         with:
           load: true
           build-args: |
-            BASE_IMAGE_TAG=test
+            BASE_IMAGE_TAG=ghcr.io/netcracker/qubership-java-base:25-test
           tags: ghcr.io/netcracker/qubership-java-base:25-test
           file: images/java-25/Dockerfile
           platforms: linux/amd64
@@ -86,7 +86,7 @@ jobs:
         with:
           load: true
           build-args: |
-            BASE_IMAGE_TAG=test
+            BASE_IMAGE_TAG=ghcr.io/netcracker/qubership-java-base-prof:25-test
           tags: ghcr.io/netcracker/qubership-java-base-prof:25-test
           file: images/java-25-prof/Dockerfile
           platforms: linux/amd64
@@ -100,7 +100,7 @@ jobs:
           
       - name: Validate version "test" in log output
         run: |
-           docker run --rm ghcr.io/netcracker/qubership-core-base:test | grep "Release version: test"
+           docker run --rm ghcr.io/netcracker/qubership-core-base:test | grep "Base image version: ghcr.io/netcracker/qubership-core-base:test"
 
       - name: Set up JDK 21
         uses: actions/setup-java@f2beeb24e141e01a676f977032f5a29d81c9e27e # v5
@@ -129,7 +129,7 @@ jobs:
         with:
           push: ${{ !startsWith(github.ref, 'refs/heads/dependabot/') }}
           build-args: |
-            BASE_IMAGE_TAG=${{ needs.prepare-variables.outputs.tag_build_number }}
+            BASE_IMAGE_TAG=ghcr.io/netcracker/qubership-core-base:${{ needs.prepare-variables.outputs.tag_build_number }}
           tags: |
             ghcr.io/netcracker/qubership-core-base:${{ needs.prepare-variables.outputs.tag_snapshot }}
             ghcr.io/netcracker/qubership-core-base:${{ needs.prepare-variables.outputs.tag_build_number }}
@@ -142,7 +142,7 @@ jobs:
         with:
           push: ${{ !startsWith(github.ref, 'refs/heads/dependabot/') }}
           build-args: |
-            BASE_IMAGE_TAG=21-alpine-${{ needs.prepare-variables.outputs.tag_build_number }}
+            BASE_IMAGE_TAG=ghcr.io/netcracker/qubership-java-base-prof:21-alpine-${{ needs.prepare-variables.outputs.tag_build_number }}
           tags: |
             ghcr.io/netcracker/qubership-java-base:21-alpine-${{ needs.prepare-variables.outputs.tag_snapshot }}
             ghcr.io/netcracker/qubership-java-base:21-alpine-${{ needs.prepare-variables.outputs.tag_build_number }}
@@ -156,7 +156,7 @@ jobs:
         with:
           push: ${{ !startsWith(github.ref, 'refs/heads/dependabot/') }}
           build-args: |
-            BASE_IMAGE_TAG=25-alpine-${{ needs.prepare-variables.outputs.tag_build_number }}
+            BASE_IMAGE_TAG=ghcr.io/netcracker/qubership-java-base:25-alpine-${{ needs.prepare-variables.outputs.tag_build_number }}
           tags: |
             ghcr.io/netcracker/qubership-java-base:25-alpine-${{ needs.prepare-variables.outputs.tag_snapshot }}
             ghcr.io/netcracker/qubership-java-base:25-alpine-${{ needs.prepare-variables.outputs.tag_build_number }}
@@ -168,7 +168,7 @@ jobs:
         with:
           push: ${{ !startsWith(github.ref, 'refs/heads/dependabot/') }}
           build-args: |
-            BASE_IMAGE_TAG=25-alpine-${{ needs.prepare-variables.outputs.tag_build_number }}
+            BASE_IMAGE_TAG=ghcr.io/netcracker/qubership-java-base-prof:25-alpine-${{ needs.prepare-variables.outputs.tag_build_number }}
           tags: |
             ghcr.io/netcracker/qubership-java-base-prof:25-alpine-${{ needs.prepare-variables.outputs.tag_snapshot }}
             ghcr.io/netcracker/qubership-java-base-prof:25-alpine-${{ needs.prepare-variables.outputs.tag_build_number }}

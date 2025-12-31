@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-echo "Release version: $(cat /etc/base-image-release)"
+echo "Base image version: $(cat /etc/base-image-release)"
 
 load_certificates() {
     # shellcheck disable=SC2016
