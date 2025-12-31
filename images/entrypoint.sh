@@ -81,22 +81,6 @@ run_init_scripts() {
   fi
 }
 
-rethrow_handler() {
-    echo "Caught $1 sig in entrypoint"
-    #To prevent 503\502 error on rollout new deployment https://rtfm.co.ua/en/kubernetes-nginx-php-fpm-graceful-shutdown-and-502-errors/
-    if [ "$1" == "SIGTERM" ]; then
-      /bin/sleep 10
-    fi
-    local subRetCode=0
-    if [ $pid -ne 0 ]; then
-        echo "Signaling to subcommand"
-        kill -"$1" "$pid"
-        wait "$pid" ; subRetCode=$?
-    fi
-    echo "Subcommand signaled with $1, exit code $subRetCode"
-    exit $subRetCode
-}
-
 # Load diag-bootstrap.sh (and diag-lib.sh) to make functions from profiler agent available
 if [ -f /app/diag/diag-bootstrap.sh ]; then
   source /app/diag/diag-bootstrap.sh
@@ -109,53 +93,16 @@ restore_volumes_data
 create_user
 load_certificates
 
-# See full current list in http://man7.org/linux/man-pages/man7/signal.7.html
-export SIGNALS_TO_RETHROW="
-SIGHUP
-SIGINT
-SIGQUIT
-SIGILL
-SIGABRT
-SIGFPE
-SIGSEGV
-SIGPIPE
-SIGALRM
-SIGTERM
-SIGUSR1
-SIGUSR2
-SIGCONT
-SIGSTOP
-SIGTSTP
-SIGTTIN
-SIGTTOU
-SIGBUS
-SIGPROF
-SIGSYS
-SIGTRAP
-SIGURG
-SIGVTALRM
-SIGXCPU
-SIGXFSZ
-SIGSTKFLT
-SIGIO
-SIGPWR
-SIGWINCH
-"
-
 # Java automatically picks up JAVA_TOOL_OPTIONS, so we don't need to pass it explicitly
 export JAVA_TOOL_OPTIONS="$X_JAVA_ARGS"
-echo "JAVA_TOOL_OPTIONS: $JAVA_TOOL_OPTIONS"
+[[ -n "$JAVA_TOOL_OPTIONS" ]] && echo "JAVA_TOOL_OPTIONS: $JAVA_TOOL_OPTIONS"
 
 if [[ "$1" != "bash" ]] && [[ "$1" != "sh" ]] ; then
-# We don't want to mess with shell signal handling in terminal mode.
-# Otherwise we need to rethrow signals to service to terminate it gracefully
-# in case of need, while also executing post-mortem if available.
-    echo "run init scripts"
     run_init_scripts
-    for sig in $SIGNALS_TO_RETHROW; do trap 'rethrow_handler "$sig"' "$sig" > /dev/null 2>&1; done
+
     echo "Run subcommand:" "$@"
     # shellcheck disable=SC2068
-    $@ &
+    exec $@
     pid="$!"
     wait "$pid" ; retCode=$?
     echo "Process ended with return code ${retCode}"
@@ -165,8 +112,10 @@ if [[ "$1" != "bash" ]] && [[ "$1" != "sh" ]] ; then
 
     exit $retCode
 else
+    # For interactive shell commands, execute directly
+    echo "Run subcommand:" "$@"
     # shellcheck disable=SC2068
-    exec $@
+exec $@
 fi
 
 
