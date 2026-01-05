@@ -89,7 +89,7 @@ rethrow_handler() {
     fi
     local subRetCode=0
     if [ $pid -ne 0 ]; then
-        echo "Signaling to subcommand"
+        echo "Rethrow $1 to subprocess: $pid"
         kill -"$1" "$pid"
         wait "$pid" ; subRetCode=$?
     fi
@@ -144,7 +144,7 @@ SIGWINCH
 
 # Java automatically picks up JAVA_TOOL_OPTIONS, so we don't need to pass it explicitly
 export JAVA_TOOL_OPTIONS="$X_JAVA_ARGS"
-echo "JAVA_TOOL_OPTIONS: $JAVA_TOOL_OPTIONS"
+[[ -n "$JAVA_TOOL_OPTIONS" ]] && echo "JAVA_TOOL_OPTIONS: $JAVA_TOOL_OPTIONS"
 
 if [[ "$1" != "bash" ]] && [[ "$1" != "sh" ]] ; then
 # We don't want to mess with shell signal handling in terminal mode.
@@ -152,7 +152,8 @@ if [[ "$1" != "bash" ]] && [[ "$1" != "sh" ]] ; then
 # in case of need, while also executing post-mortem if available.
     echo "run init scripts"
     run_init_scripts
-    for sig in $SIGNALS_TO_RETHROW; do trap 'rethrow_handler "$sig"' "$sig" > /dev/null 2>&1; done
+    # shellcheck disable=SC2064
+    for sig in $SIGNALS_TO_RETHROW; do trap "rethrow_handler $sig" "$sig"; done
     echo "Run subcommand:" "$@"
     # shellcheck disable=SC2068
     $@ &
@@ -166,6 +167,7 @@ if [[ "$1" != "bash" ]] && [[ "$1" != "sh" ]] ; then
     exit $retCode
 else
     # shellcheck disable=SC2068
+    echo "Run subcommand:" "$@"
     exec $@
 fi
 
