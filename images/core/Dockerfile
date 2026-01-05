@@ -1,7 +1,7 @@
 FROM alpine:3.23.2
 LABEL maintainer="qubership"
 
-ARG BASE_IMAGE_TAG
+ARG BASE_IMAGE_TAG=core:unknown
 ARG UID=10001
 ARG GID=root
 
@@ -10,13 +10,12 @@ RUN apk add --no-cache ca-certificates curl bash nss_wrapper
 
 ENV HOME=/app \
     USER_NAME=appuser \
-    CERTIFICATE_FILE_LOCATION=/usr/local/share/ca-certificates
-
-ENV LANG=en_US.UTF-8 \
+    CERTIFICATE_FILE_LOCATION=/usr/local/share/ca-certificates \
+    LANG=en_US.UTF-8 \
     LANGUAGE=en_US:en \
     LC_ALL=en_US.UTF-8
 
-RUN adduser -u ${UID} -G root -S appuser
+RUN adduser -u ${UID} -G ${GID} -S appuser
 
 RUN mkdir /lib64 && ln -s /lib/libc.musl-x86_64.so.1 /lib64/ld-linux-x86-64.so.2 && \
     mkdir -p /tmp/cert && \

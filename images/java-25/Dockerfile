@@ -1,46 +1,35 @@
-FROM alpine:3.23.2
+ARG BASE_IMAGE=ghcr.io/netcracker/qubership-core-base:latest
+FROM ${BASE_IMAGE}
 ARG TARGETOS
 ARG TARGETARCH
 ARG UID=10001
 ARG GID=root
-ARG BASE_IMAGE_TAG
+ARG BASE_IMAGE_TAG=java:25-alpine-unknown
 
 LABEL maintainer="qubership"
+
+USER root
 
 RUN apk update --no-cache
 
 RUN apk --no-cache add \
-    busybox-binsh \
-    ca-certificates-bundle \
-    openjdk25-jre-headless \
-    curl \
-    bash \
-    nss_wrapper
+    openjdk25-jre-headless
 
-ENV HOME=/app \
-    USER_NAME=appuser \
-    JAVA_HOME=/usr/lib/jvm/default-jvm \
+ENV JAVA_HOME=/usr/lib/jvm/default-jvm \
     MALLOC_ARENA_MAX=2 \
     MALLOC_MMAP_THRESHOLD_=131072 \
     MALLOC_TRIM_THRESHOLD_=131072 \
     MALLOC_TOP_PAD_=131072 \
     MALLOC_MMAP_MAX=65536 \
-    CERTIFICATE_FILE_LOCATION=/usr/local/share/ca-certificates \
     JAVA_CERTIFICATE_FILE_LOCATION=/etc/ssl/certs/java/cacerts
 
-
-RUN adduser -u ${UID} -G root -S appuser
-
-RUN mkdir /app && \
-    mkdir -p /tmp/cert && \
+RUN mkdir -p /tmp/cert && \
     chmod -R ug+rw /tmp && \
     chown -R ${UID}:${GID} /tmp && \
     mkdir -p /etc/env && \
     chmod -R ug+rw /etc/env && \
     chown -R ${UID}:${GID} /etc/env && \
-    chmod g=u ${HOME} /etc/passwd && \
-    chmod ug+rw ${CERTIFICATE_FILE_LOCATION} && \
-    chown ${UID}:${GID} ${CERTIFICATE_FILE_LOCATION} && \
+    chmod g=u /etc/passwd && \
     chmod ug+rw ${JAVA_CERTIFICATE_FILE_LOCATION} && \
     chown ${UID}:${GID} ${JAVA_CERTIFICATE_FILE_LOCATION} && \
     mkdir -p /etc/secret && \
@@ -61,26 +50,13 @@ RUN mkdir /app && \
     chown -R ${UID}:${GID} /etc/ca-certificates.conf && \
     mkdir -p /app/volumes/certs && \
     cp -R /etc/ssl/certs/java /app/volumes/certs && \
-    mkdir -p /app/nss && \
-    chmod ug+rw -R /app/nss && \
-    chown ${UID}:${GID} /app/nss && \
     chmod ug+r -R /app/volumes && \
     chown -R ${UID}:${GID} /app/volumes && \
     find /app \( -type d -exec chmod ug+rwx {} \; -exec chown ${UID}:${GID} {} \; -o -type f -exec chmod ug+rw {} \; -exec chown ${UID}:${GID} {} \; \)
 
 RUN echo $BASE_IMAGE_TAG > /etc/base-image-release
 
-ENV LANG=en_US.UTF-8
-ENV LANGUAGE=en_US:en
-ENV LC_ALL=en_US.UTF-8
 
 # Set user appuser for image run and all the following RUN, CMD and ENTRYPOINT commands
 USER ${UID}:${GID}
-
-# Define working directory
-WORKDIR /app
-
-COPY --chown=${UID}:${GID} --chmod=755 images/entrypoint.sh /usr/bin/entrypoint.sh
-ENTRYPOINT ["/usr/bin/entrypoint.sh"]
-CMD ["bash"]
 

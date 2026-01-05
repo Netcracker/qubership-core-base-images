@@ -64,6 +64,7 @@ jobs:
         with:
           load: true
           build-args: |
+            BASE_IMAGE=ghcr.io/netcracker/qubership-core-base:test
             BASE_IMAGE_TAG=ghcr.io/netcracker/qubership-java-base-prof:21-test
           tags: |
             ghcr.io/netcracker/qubership-java-base:21-test
@@ -76,6 +77,7 @@ jobs:
         with:
           load: true
           build-args: |
+            BASE_IMAGE=ghcr.io/netcracker/qubership-core-base:test
             BASE_IMAGE_TAG=ghcr.io/netcracker/qubership-java-base:25-test
           tags: ghcr.io/netcracker/qubership-java-base:25-test
           file: images/java-25/Dockerfile
@@ -86,6 +88,7 @@ jobs:
         with:
           load: true
           build-args: |
+            BASE_IMAGE=ghcr.io/netcracker/qubership-java-base:25-test
             BASE_IMAGE_TAG=ghcr.io/netcracker/qubership-java-base-prof:25-test
           tags: ghcr.io/netcracker/qubership-java-base-prof:25-test
           file: images/java-25-prof/Dockerfile
@@ -146,6 +149,7 @@ jobs:
         with:
           push: ${{ !startsWith(github.ref, 'refs/heads/dependabot/') }}
           build-args: |
+            BASE_IMAGE=ghcr.io/netcracker/qubership-core-base:${{ needs.prepare-variables.outputs.tag_build_number }}
             BASE_IMAGE_TAG=ghcr.io/netcracker/qubership-java-base-prof:21-alpine-${{ needs.prepare-variables.outputs.tag_build_number }}
           tags: |
             ghcr.io/netcracker/qubership-java-base:21-alpine-${{ needs.prepare-variables.outputs.tag_snapshot }}
@@ -160,6 +164,7 @@ jobs:
         with:
           push: ${{ !startsWith(github.ref, 'refs/heads/dependabot/') }}
           build-args: |
+            BASE_IMAGE=ghcr.io/netcracker/qubership-cseore-ba:${{ needs.prepare-variables.outputs.tag_build_number }}
             BASE_IMAGE_TAG=ghcr.io/netcracker/qubership-java-base:25-alpine-${{ needs.prepare-variables.outputs.tag_build_number }}
           tags: |
             ghcr.io/netcracker/qubership-java-base:25-alpine-${{ needs.prepare-variables.outputs.tag_snapshot }}
@@ -172,6 +177,7 @@ jobs:
         with:
           push: ${{ !startsWith(github.ref, 'refs/heads/dependabot/') }}
           build-args: |
+            BASE_IMAGE=ghcr.io/netcracker/qubership-java-base:25-alpine-${{ needs.prepare-variables.outputs.tag_build_number }}
             BASE_IMAGE_TAG=ghcr.io/netcracker/qubership-java-base-prof:25-alpine-${{ needs.prepare-variables.outputs.tag_build_number }}
           tags: |
             ghcr.io/netcracker/qubership-java-base-prof:25-alpine-${{ needs.prepare-variables.outputs.tag_snapshot }}
