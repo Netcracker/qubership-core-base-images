@@ -145,7 +145,7 @@ jobs:
 
       - name: Build and push java-image-21
         uses: docker/build-push-action@v6
-        if: !startsWith(github.ref, 'refs/heads/dependabot/')
+        if: ${{ !startsWith(github.ref, 'refs/heads/dependabot/') }}
         with:
           push: true
           build-args: |
@@ -161,7 +161,7 @@ jobs:
 
       - name: Build and push java-image-25
         uses: docker/build-push-action@v6
-        if: !startsWith(github.ref, 'refs/heads/dependabot/')
+        if: ${{ !startsWith(github.ref, 'refs/heads/dependabot/') }}
         with:
           push: true
           build-args: |
@@ -175,7 +175,7 @@ jobs:
 
       - name: Build and push java-image-25-prof
         uses: docker/build-push-action@v6
-        if: !startsWith(github.ref, 'refs/heads/dependabot/')
+        if: ${{ !startsWith(github.ref, 'refs/heads/dependabot/') }}
         with:
           push: true
           build-args: |
