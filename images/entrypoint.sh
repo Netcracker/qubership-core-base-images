@@ -95,7 +95,7 @@ load_certificates
 
 # Java automatically picks up JAVA_TOOL_OPTIONS, so we don't need to pass it explicitly
 export JAVA_TOOL_OPTIONS="$X_JAVA_ARGS"
-[[ -n "$JAVA_TOOL_OPTIONS" ]] && echo "JAVA_TOOL_OPTIONS: $JAVA_TOOL_OPTIONS"
+echo "JAVA_TOOL_OPTIONS: $JAVA_TOOL_OPTIONS"
 
 if [[ "$1" != "bash" ]] && [[ "$1" != "sh" ]] ; then
     run_init_scripts
@@ -103,6 +103,7 @@ if [[ "$1" != "bash" ]] && [[ "$1" != "sh" ]] ; then
     echo "Run subcommand:" "$@"
     # shellcheck disable=SC2068
     exec $@
+    # TODO unreachable code: how to end crash dumps?
     pid="$!"
     wait "$pid" ; retCode=$?
     echo "Process ended with return code ${retCode}"
@@ -115,7 +116,7 @@ else
     # For interactive shell commands, execute directly
     echo "Run subcommand:" "$@"
     # shellcheck disable=SC2068
-exec $@
+    exec $@
 fi
 
 

@@ -102,6 +102,10 @@ jobs:
         run: |
           ./tests/signal-propagation/test-signal-propagation.sh ghcr.io/netcracker/qubership-core-base:test
 
+      - name: Test NSS wrapper
+        run: |
+          ./tests/nss/test-nss-wrapper.sh ghcr.io/netcracker/qubership-core-base:test
+
       - name: Validate version "test" in log output
         run: |
            docker run --rm ghcr.io/netcracker/qubership-core-base:test | grep "Base image version: ghcr.io/netcracker/qubership-core-base:test"
