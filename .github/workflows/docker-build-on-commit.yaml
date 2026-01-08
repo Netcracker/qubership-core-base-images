@@ -145,8 +145,9 @@ jobs:
 
       - name: Build and push java-image-21
         uses: docker/build-push-action@v6
+        if: !startsWith(github.ref, 'refs/heads/dependabot/')
         with:
-          push: ${{ !startsWith(github.ref, 'refs/heads/dependabot/') }}
+          push: true
           build-args: |
             BASE_IMAGE=ghcr.io/netcracker/qubership-core-base:${{ needs.prepare-variables.outputs.tag_build_number }}
             BASE_IMAGE_TAG=ghcr.io/netcracker/qubership-java-base-prof:21-alpine-${{ needs.prepare-variables.outputs.tag_build_number }}
@@ -160,10 +161,11 @@ jobs:
 
       - name: Build and push java-image-25
         uses: docker/build-push-action@v6
+        if: !startsWith(github.ref, 'refs/heads/dependabot/')
         with:
-          push: ${{ !startsWith(github.ref, 'refs/heads/dependabot/') }}
+          push: true
           build-args: |
-            BASE_IMAGE=ghcr.io/netcracker/qubership-cseore-ba:${{ needs.prepare-variables.outputs.tag_build_number }}
+            BASE_IMAGE=ghcr.io/netcracker/qubership-core-base:${{ needs.prepare-variables.outputs.tag_build_number }}
             BASE_IMAGE_TAG=ghcr.io/netcracker/qubership-java-base:25-alpine-${{ needs.prepare-variables.outputs.tag_build_number }}
           tags: |
             ghcr.io/netcracker/qubership-java-base:25-alpine-${{ needs.prepare-variables.outputs.tag_snapshot }}
@@ -173,8 +175,9 @@ jobs:
 
       - name: Build and push java-image-25-prof
         uses: docker/build-push-action@v6
+        if: !startsWith(github.ref, 'refs/heads/dependabot/')
         with:
-          push: ${{ !startsWith(github.ref, 'refs/heads/dependabot/') }}
+          push: true
           build-args: |
             BASE_IMAGE=ghcr.io/netcracker/qubership-java-base:25-alpine-${{ needs.prepare-variables.outputs.tag_build_number }}
             BASE_IMAGE_TAG=ghcr.io/netcracker/qubership-java-base-prof:25-alpine-${{ needs.prepare-variables.outputs.tag_build_number }}
