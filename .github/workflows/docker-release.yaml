@@ -49,33 +49,36 @@ jobs:
       dry-run: ${{ inputs.dry-run }}
 
   java-prof-21-docker-build:
-    needs: [create-tag]
+    needs: [create-tag, core-base-docker-build]
     name: Build Docker image
     uses: Netcracker/qubership-core-infra/.github/workflows/docker-build.yaml@5f6ee8fac69a11a84575cd9db148952eea8e32e7
     with:
       build-args: |
+        BASE_IMAGE=ghcr.io/netcracker/qubership-core-base:${{ inputs.version }}
         BASE_IMAGE_TAG=ghcr.io/netcracker/qubership-java-base-prof:21-alpine-${{ inputs.version }}
       tags: "21-alpine-${{ inputs.version }},21-alpine-latest"
       config-filename: "java-prof-21-docker-release-config.json"
       dry-run: ${{ inputs.dry-run }}
 
   java-25-docker-build:
-    needs: [create-tag]
+    needs: [create-tag, core-base-docker-build]
     name: Build Docker image
     uses: Netcracker/qubership-core-infra/.github/workflows/docker-build.yaml@5f6ee8fac69a11a84575cd9db148952eea8e32e7
     with:
       build-args: |
+        BASE_IMAGE=ghcr.io/netcracker/qubership-core-base:${{ inputs.version }}
         BASE_IMAGE_TAG=ghcr.io/netcracker/qubership-java-base:25-alpine-${{ inputs.version }}
       tags: "25-alpine-${{ inputs.version }},25-alpine-latest"
       config-filename: "java-25-docker-release-config.json"
       dry-run: ${{ inputs.dry-run }}
 
   java-prof-25-docker-build:
-    needs: [create-tag]
+    needs: [create-tag, java-25-docker-build]
     name: Build Docker image
     uses: Netcracker/qubership-core-infra/.github/workflows/docker-build.yaml@5f6ee8fac69a11a84575cd9db148952eea8e32e7
     with:
       build-args: |
+        BASE_IMAGE=ghcr.io/netcracker/qubership-java-base:25-alpine-${{ inputs.version }}
         BASE_IMAGE_TAG=ghcr.io/netcracker/qubership-java-base-prof:25-alpine-${{ inputs.version }}
       tags: "25-alpine-${{ inputs.version }},25-alpine-latest"
       config-filename: "java-prof-25-docker-release-config.json"

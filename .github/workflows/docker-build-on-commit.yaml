@@ -47,49 +47,46 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+        with:
+          driver: docker
       
       - name: Build and load test core-image
         uses: docker/build-push-action@v6
         with:
-          load: true
           build-args: |
             BASE_IMAGE_TAG=ghcr.io/netcracker/qubership-core-base:test
           tags: |
             ghcr.io/netcracker/qubership-core-base:test
           file: images/core/Dockerfile
-          platforms: linux/amd64
 
       - name: Build and load test java 21 image with prof
         uses: docker/build-push-action@v6
         with:
-          load: true
           build-args: |
+            BASE_IMAGE=ghcr.io/netcracker/qubership-core-base:test
             BASE_IMAGE_TAG=ghcr.io/netcracker/qubership-java-base-prof:21-test
           tags: |
             ghcr.io/netcracker/qubership-java-base:21-test
             ghcr.io/netcracker/qubership-java-base-prof:21-test
           file: images/java-21-prof/Dockerfile
-          platforms: linux/amd64
 
       - name: Build and load test java 25 image
         uses: docker/build-push-action@v6
         with:
-          load: true
           build-args: |
+            BASE_IMAGE=ghcr.io/netcracker/qubership-core-base:test
             BASE_IMAGE_TAG=ghcr.io/netcracker/qubership-java-base:25-test
           tags: ghcr.io/netcracker/qubership-java-base:25-test
           file: images/java-25/Dockerfile
-          platforms: linux/amd64
 
       - name: Build and load test java 25 image with prof
         uses: docker/build-push-action@v6
         with:
-          load: true
           build-args: |
+            BASE_IMAGE=ghcr.io/netcracker/qubership-java-base:25-test
             BASE_IMAGE_TAG=ghcr.io/netcracker/qubership-java-base-prof:25-test
           tags: ghcr.io/netcracker/qubership-java-base-prof:25-test
           file: images/java-25-prof/Dockerfile
-          platforms: linux/amd64
 
       - name: Test ca certificates were processed correctly
         run: |
@@ -132,10 +129,16 @@ jobs:
           ./mvnw --batch-mode verify -Dqubership.profiler.java-base-image.tag=ghcr.io/netcracker/qubership-java-base:21-test
           ./mvnw --batch-mode verify -Dqubership.profiler.java-base-image.tag=ghcr.io/netcracker/qubership-java-base-prof:25-test
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver: docker-container
+
       - name: Build and push core-base image
         uses: docker/build-push-action@v6
+        if: ${{ !startsWith(github.ref, 'refs/heads/dependabot/') }}
         with:
-          push: ${{ !startsWith(github.ref, 'refs/heads/dependabot/') }}
+          push: true
           build-args: |
             BASE_IMAGE_TAG=ghcr.io/netcracker/qubership-core-base:${{ needs.prepare-variables.outputs.tag_build_number }}
           tags: |
@@ -147,9 +150,11 @@ jobs:
 
       - name: Build and push java-image-21
         uses: docker/build-push-action@v6
+        if: ${{ !startsWith(github.ref, 'refs/heads/dependabot/') }}
         with:
-          push: ${{ !startsWith(github.ref, 'refs/heads/dependabot/') }}
+          push: true
           build-args: |
+            BASE_IMAGE=ghcr.io/netcracker/qubership-core-base:${{ needs.prepare-variables.outputs.tag_build_number }}
             BASE_IMAGE_TAG=ghcr.io/netcracker/qubership-java-base-prof:21-alpine-${{ needs.prepare-variables.outputs.tag_build_number }}
           tags: |
             ghcr.io/netcracker/qubership-java-base:21-alpine-${{ needs.prepare-variables.outputs.tag_snapshot }}
@@ -161,9 +166,11 @@ jobs:
 
       - name: Build and push java-image-25
         uses: docker/build-push-action@v6
+        if: ${{ !startsWith(github.ref, 'refs/heads/dependabot/') }}
         with:
-          push: ${{ !startsWith(github.ref, 'refs/heads/dependabot/') }}
+          push: true
           build-args: |
+            BASE_IMAGE=ghcr.io/netcracker/qubership-core-base:${{ needs.prepare-variables.outputs.tag_build_number }}
             BASE_IMAGE_TAG=ghcr.io/netcracker/qubership-java-base:25-alpine-${{ needs.prepare-variables.outputs.tag_build_number }}
           tags: |
             ghcr.io/netcracker/qubership-java-base:25-alpine-${{ needs.prepare-variables.outputs.tag_snapshot }}
@@ -173,9 +180,11 @@ jobs:
 
       - name: Build and push java-image-25-prof
         uses: docker/build-push-action@v6
+        if: ${{ !startsWith(github.ref, 'refs/heads/dependabot/') }}
         with:
-          push: ${{ !startsWith(github.ref, 'refs/heads/dependabot/') }}
+          push: true
           build-args: |
+            BASE_IMAGE=ghcr.io/netcracker/qubership-java-base:25-alpine-${{ needs.prepare-variables.outputs.tag_build_number }}
             BASE_IMAGE_TAG=ghcr.io/netcracker/qubership-java-base-prof:25-alpine-${{ needs.prepare-variables.outputs.tag_build_number }}
           tags: |
             ghcr.io/netcracker/qubership-java-base-prof:25-alpine-${{ needs.prepare-variables.outputs.tag_snapshot }}
