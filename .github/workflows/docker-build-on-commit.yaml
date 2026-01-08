@@ -132,8 +132,9 @@ jobs:
 
       - name: Build and push core-base image
         uses: docker/build-push-action@v6
+        if: ${{ !startsWith(github.ref, 'refs/heads/dependabot/') }}
         with:
-          push: ${{ !startsWith(github.ref, 'refs/heads/dependabot/') }}
+          push: true
           build-args: |
             BASE_IMAGE_TAG=ghcr.io/netcracker/qubership-core-base:${{ needs.prepare-variables.outputs.tag_build_number }}
           tags: |
