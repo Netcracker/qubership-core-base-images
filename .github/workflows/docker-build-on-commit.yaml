@@ -64,7 +64,7 @@ jobs:
         with:
           build-args: |
             BASE_IMAGE=ghcr.io/netcracker/qubership-core-base:test
-            BASE_IMAGE_TAG=ghcr.io/netcracker/qubership-java-base-prof:test
+            BASE_IMAGE_TAG=ghcr.io/netcracker/qubership-java-base-prof:21-test
           tags: |
             ghcr.io/netcracker/qubership-java-base:21-test
             ghcr.io/netcracker/qubership-java-base-prof:21-test
@@ -75,7 +75,7 @@ jobs:
         with:
           build-args: |
             BASE_IMAGE=ghcr.io/netcracker/qubership-core-base:test
-            BASE_IMAGE_TAG=ghcr.io/netcracker/qubership-java-base:test
+            BASE_IMAGE_TAG=ghcr.io/netcracker/qubership-java-base:25-test
           tags: ghcr.io/netcracker/qubership-java-base:25-test
           file: images/java-25/Dockerfile
 
