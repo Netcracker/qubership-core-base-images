@@ -53,6 +53,8 @@ jobs:
       - name: Build and load test core-image
         uses: docker/build-push-action@v6
         with:
+          build-args: |
+            BASE_IMAGE_TAG=ghcr.io/netcracker/qubership-core-base:test
           tags: |
             ghcr.io/netcracker/qubership-core-base:test
           file: images/core/Dockerfile
