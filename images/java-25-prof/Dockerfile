@@ -3,7 +3,7 @@ ARG TARGETOS
 ARG TARGETARCH
 ARG UID=10001
 ARG GID=root
-ARG BASE_IMAGE_TAG
+ARG BASE_IMAGE_TAG=unknown
 
 LABEL maintainer="qubership"
 
@@ -15,7 +15,8 @@ RUN apk --no-cache add \
     openjdk25-jre-headless \
     curl \
     bash \
-    nss_wrapper
+    nss_wrapper \
+    tini
 
 ENV HOME=/app \
     USER_NAME=appuser \
@@ -110,6 +111,6 @@ WORKDIR /app
 
 COPY images/java-21-prof/font-local.conf /etc/fonts/local.conf
 COPY --chown=${UID}:${GID} --chmod=755 images/entrypoint.sh /usr/bin/entrypoint.sh
-ENTRYPOINT ["/usr/bin/entrypoint.sh"]
+ENTRYPOINT ["/sbin/tini", "--", "/usr/bin/entrypoint.sh"]
 CMD ["bash"]
 
