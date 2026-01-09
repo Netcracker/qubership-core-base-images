@@ -107,6 +107,10 @@ jobs:
         run: |
            docker run --rm ghcr.io/netcracker/qubership-core-base:test | grep "Base image version: ghcr.io/netcracker/qubership-core-base:test"
 
+      - name: Test send-crash-dump function
+        run: |
+          ./tests/send-crash-dump/test-send-crash-dump.sh ghcr.io/netcracker/qubership-java-base:25-test
+
       - name: Set up JDK 21
         uses: actions/setup-java@f2beeb24e141e01a676f977032f5a29d81c9e27e # v5
         with:
