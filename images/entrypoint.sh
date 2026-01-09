@@ -157,7 +157,7 @@ if [[ "$1" != "bash" ]] && [[ "$1" != "sh" ]] ; then
     echo "run init scripts"
     run_init_scripts
     # shellcheck disable=SC2064
-    #for sig in $SIGNALS_TO_RETHROW; do trap "rethrow_handler $sig" "$sig"; done
+    for sig in $SIGNALS_TO_RETHROW; do trap "rethrow_handler $sig" "$sig"; done
     echo "Run subcommand:" "$@"
     # shellcheck disable=SC2068
     $@ &
