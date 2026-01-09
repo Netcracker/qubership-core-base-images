@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+[[ ${LOG_ENTRYPOINT_COMMANDS,,} == "true" ]] && set -x
+
 echo "Base image version: $(cat /etc/base-image-release)"
 
 load_certificates() {
@@ -85,7 +87,7 @@ rethrow_handler() {
     echo "Caught $1 sig in entrypoint"
     #To prevent 503\502 error on rollout new deployment https://rtfm.co.ua/en/kubernetes-nginx-php-fpm-graceful-shutdown-and-502-errors/
     if [ "$1" == "SIGTERM" ]; then
-      /bin/sleep 10
+      /bin/sleep "${SIGTERM_EXIT_DELAY:-10}"
     fi
     local subRetCode=0
     if [ $pid -ne 0 ]; then
@@ -143,8 +145,10 @@ SIGWINCH
 "
 
 # Java automatically picks up JAVA_TOOL_OPTIONS, so we don't need to pass it explicitly
-export JAVA_TOOL_OPTIONS="$X_JAVA_ARGS"
-[[ -n "$JAVA_TOOL_OPTIONS" ]] && echo "JAVA_TOOL_OPTIONS: $JAVA_TOOL_OPTIONS"
+if [[ -n $X_JAVA_ARGS ]]; then
+  export JAVA_TOOL_OPTIONS="$X_JAVA_ARGS"
+  echo "JAVA_TOOL_OPTIONS: $JAVA_TOOL_OPTIONS"
+fi
 
 if [[ "$1" != "bash" ]] && [[ "$1" != "sh" ]] ; then
 # We don't want to mess with shell signal handling in terminal mode.
@@ -153,11 +157,11 @@ if [[ "$1" != "bash" ]] && [[ "$1" != "sh" ]] ; then
     echo "run init scripts"
     run_init_scripts
     # shellcheck disable=SC2064
-    for sig in $SIGNALS_TO_RETHROW; do trap "rethrow_handler $sig" "$sig"; done
+    #for sig in $SIGNALS_TO_RETHROW; do trap "rethrow_handler $sig" "$sig"; done
     echo "Run subcommand:" "$@"
     # shellcheck disable=SC2068
     $@ &
-    pid="$!"
+    pid=$!
     wait "$pid" ; retCode=$?
     echo "Process ended with return code ${retCode}"
 
