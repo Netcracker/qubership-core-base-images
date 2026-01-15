@@ -15,7 +15,10 @@ get_add_params_for_docker_cmd() {
   local params=""
   if [[ "${fs_mode}" == "ro" ]]; then
     mkdir -p $(pwd)/cert_ro_test
+    chmod -R 777 $(pwd)/cert_ro_test
     mkdir -p $(pwd)/ca_cert_ro_test
+    chmod -R 777 $(pwd)/ca_cert_ro_test
+    
     params+="--read-only \
           -v $(pwd)/cert_ro_test:/etc/ssl/certs:rw \
           -v $(pwd)/ca_cert_ro_test:/usr/local/share/ca-certificates:rw "
