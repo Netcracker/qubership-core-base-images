@@ -43,6 +43,7 @@ VOLUME /tmp
 VOLUME /etc/env
 VOLUME /app/nss
 VOLUME /etc/ssl/certs/java
+VOLUME /etc/ssl/certs
 VOLUME /etc/secret
 
 USER ${UID}:${GID}

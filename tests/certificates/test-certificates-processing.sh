@@ -17,8 +17,8 @@ get_add_params_for_docker_cmd() {
     mkdir -p $(pwd)/cert_ro_test
     mkdir -p $(pwd)/ca_cert_ro_test
     params+="--read-only \
-          -v $(pwd)/cert_ro_test:/etc/ssl/certs \
-          -v $(pwd)/ca_cert_ro_test:/usr/local/share/ca-certificates "
+          -v $(pwd)/cert_ro_test:/etc/ssl/certs:rw \
+          -v $(pwd)/ca_cert_ro_test:/usr/local/share/ca-certificates:rw "
   fi
   echo ${params}
 }
