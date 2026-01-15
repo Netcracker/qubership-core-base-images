@@ -44,18 +44,15 @@ RUN mkdir -p /tmp/cert && \
     chown ${UID}:${GID} /var/lock && \
     chmod ug+rw /var/run && \
     chown ${UID}:${GID} /var/run && \
-    chmod ug+rw -R /etc/ssl/certs && \
-    chown -R ${UID}:${GID} /etc/ssl/certs && \
-    chown -R ${UID}:${GID} /usr/share/ca-certificates/ && \
     chown -R ${UID}:${GID} /etc/ca-certificates.conf && \
     mkdir -p /app/volumes/certs && \
     cp -R /etc/ssl/certs/java /app/volumes/certs && \
-    chmod ug+r -R /app/volumes && \
-    chown -R ${UID}:${GID} /app/volumes && \
+    find /etc/ssl/certs \( -type d -exec chmod ug+rw {} \; -exec chown ${UID}:${GID} {} \; -o -type f -exec chmod 644 {} \; -exec chown ${UID}:${GID} {} \; \) && \
+    find /usr/local/share/ca-certificates/ \( -type d -exec chmod ug+rw {} \; -exec chown ${UID}:${GID} {} \; -o -type f -exec chmod 644 {} \; -exec chown ${UID}:${GID} {} \; \) && \
+    find /usr/share/ca-certificates/ \( -type d -exec chmod ug+rw {} \; -exec chown ${UID}:${GID} {} \; -o -type f -exec chmod 644 {} \; -exec chown ${UID}:${GID} {} \; \) && \
     find /app \( -type d -exec chmod ug+rwx {} \; -exec chown ${UID}:${GID} {} \; -o -type f -exec chmod ug+rw {} \; -exec chown ${UID}:${GID} {} \; \)
 
 RUN echo $BASE_IMAGE_TAG > /etc/base-image-release
-
 
 # Set user appuser for image run and all the following RUN, CMD and ENTRYPOINT commands
 USER ${UID}:${GID}

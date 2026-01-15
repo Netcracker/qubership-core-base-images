@@ -10,13 +10,28 @@ fail() {
   false
 }
 
+get_add_params_for_docker_cmd() {
+  local fs_mode=${1:-rw}
+  local params=""
+  if [[ "${fs_mode}" == "ro" ]]; then
+    mkdir -p $(pwd)/cert_ro_test
+    mkdir -p $(pwd)/ca_cert_ro_test
+    params+="--read-only \
+          -v $(pwd)/cert_ro_test:/etc/ssl/certs \
+          -v $(pwd)/ca_cert_ro_test:/usr/local/share/ca-certificates "
+  fi
+  echo ${params}
+}
+
 export_image_trust_store() {
   local image=$1
   local output_file=$2
-  echo "Export certificate list from: $image"
+  local fs_mode=${3:-rw}
+  echo "Export certificate list from: $image, FS mode: ${fs_mode}"
   docker run --rm \
       -v "${TEST_DIR}":/tmp/cert/ \
       -v "$(pwd)":/out/ \
+      $(get_add_params_for_docker_cmd $fs_mode) \
       "${image}" \
       cat /etc/ssl/certs/ca-certificates.crt >"${output_file}.crt"
 
@@ -27,11 +42,13 @@ export_image_trust_store() {
 export_java_keystore() {
   local image=$1
   local output_file=$2
-  echo "Export certificate list from: $image"
+  local fs_mode=${3:-rw}
+  echo "Export certificate list from: $image, FS mode: ${fs_mode}"
   docker run --rm \
       -v "${TEST_DIR}":/tmp/cert/ \
       -v "$(pwd)":/out/ \
       -e CERTIFICATE_FILE_PASSWORD=abc12345 \
+      $(get_add_params_for_docker_cmd $fs_mode) \
       "${image}" \
       keytool -list -cacerts -storepass abc12345 -v >${output_file}
 }
@@ -47,9 +64,16 @@ assert_tests() {
 export_image_trust_store "${IMAGE}" exported-certs.list
 assert_tests exported-certs.list
 
+# Test the same with volume mounted to cert path directory in read-only mode
+export_image_trust_store "${IMAGE}" exported-certs.list ro
+assert_tests exported-certs.list
+
 if docker run --rm "${IMAGE}" java -version 1>&2 2>/dev/null; then
   echo "Test certificates imported in JKS"
-  export_image_trust_store "${IMAGE}" exported-certs.list
+  export_java_keystore "${IMAGE}" exported-certs.list
+  assert_tests exported-certs.list
+
+  export_java_keystore "${IMAGE}" exported-certs.list ro
   assert_tests exported-certs.list
 fi
 echo "All tests passed"
