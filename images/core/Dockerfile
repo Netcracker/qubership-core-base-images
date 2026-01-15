@@ -31,6 +31,8 @@ RUN mkdir /lib64 && ln -s /lib/libc.musl-x86_64.so.1 /lib64/ld-linux-x86-64.so.2
     chmod ug+rw -R /app/nss && \
     chown -R ${UID}:${GID} /app/nss && \
     mkdir -p /app/volumes/certs && \
+    chmod ug+r -R /app/volumes/certs && \
+    chown -R ${UID}:${GID} /app/volumes/certs && \
     cp -R /etc/ssl/certs /app/volumes && \
     chmod ug+r -R /app/volumes && \
     chown -R ${UID}:${GID} /app/volumes
