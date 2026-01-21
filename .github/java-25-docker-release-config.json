@@ -1,11 +1,11 @@
 {
-    "components" : [
+  "components": [
     {
-      "name": "qubership-java-base-25",
+      "name": "qubership-java-base",
       "file": "./images/java-25/Dockerfile",
       "context": "."
     }
-    ],
-    "platforms" : "linux/amd64,linux/arm64"
-  }
+  ],
+  "platforms": "linux/amd64,linux/arm64"
+}
 
