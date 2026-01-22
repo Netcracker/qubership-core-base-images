@@ -11,21 +11,19 @@ severity_to_number() {
     *) echo 2 ;;
   esac
 }
+CURRENT_LOG_LEVEL=$(severity_to_number "${LOG_LEVEL^^:-INFO}")
 
 log() {
-  local severity severity_number current_log_level message _timestamp script_name script_path
+  local severity severity_number _timestamp script_name script_path
   severity=${1^^:-INFO}
   shift
-  
   severity_number=$(severity_to_number "$severity")
-  current_log_level=$(severity_to_number "${LOG_LEVEL^^:-INFO}")
-  message="$@"
-  _timestamp=$(date +%Y-%m-%dT%H:%M:%S$(printf ".%03d" $(date +%N | cut -c1-3)))
-  script_path="${BASH_SOURCE[0]}"
-  script_name="$(basename "$script_path")"
 
-    if [ "$severity_number" -ge "$current_log_level" ]; then
-       printf '[%s] [%s] [request_id=-] [tenant_id=-] [thread=-] [class=-] [%s] %s\n' "${_timestamp}" "${severity}" "${script_name}" "${message}"
+    if [ "$severity_number" -ge "$CURRENT_LOG_LEVEL" ]; then
+      _timestamp=$(date +%Y-%m-%dT%H:%M:%S$(printf ".%03d" $(date +%N | cut -c1-3)))
+      script_path="${BASH_SOURCE[0]}"
+      script_name="$(basename "$script_path")"
+       printf '[%s] [%s] [request_id=-] [tenant_id=-] [thread=-] [class=-] [%s] %s\n' "${_timestamp}" "${severity}" "${script_name}" "$*"
     fi
 }
 
