@@ -230,6 +230,21 @@ For SIGTERM signals, there is a 10-second delay to prevent 503/502 errors during
 
 **Note**: Signal handling is disabled when running in interactive shell mode (`bash` or `sh` commands) to avoid interfering with terminal signal handling.
 
+## Logging
+
+This project provides a helper logging function named `log` used by the entrypoint script. Below are usage examples and important interpreter limitations.
+The log function is exported from entrypoint script and is available only to child processes that are Bash. For example, `bash -c 'log INFO "msg"'` works, but `sh -c 'log ...'` will not.
+
+custom_script.sh
+```bash
+#!/usr/bin/env bash
+log INFO Hi
+```
+Log output:
+```bash
+#> ./custom_script.sh
+[2026-01-22T08:58:47.000] [INFO] [request_id=-] [tenant_id=-] [thread=-] [class=-] [custom_script.sh] Hi 
+```
 
 ## Contributing
 
