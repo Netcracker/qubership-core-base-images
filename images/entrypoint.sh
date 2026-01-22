@@ -5,16 +5,15 @@
 severity_to_number() {
   case "$1" in
     DEBUG) echo 1 ;;
-    TRACE) echo 2 ;;
-    INFO)  echo 3 ;;
-    WARN|WARNING) echo 4 ;;
-    ERROR) echo 5 ;;
-    *) echo 3 ;;
+    INFO)  echo 2 ;;
+    WARN|WARNING) echo 3 ;;
+    ERROR) echo 4 ;;
+    *) echo 2 ;;
   esac
 }
 
 log() {
-  local severity severity_number current_log_level message _timestamp
+  local severity severity_number current_log_level message _timestamp script_name script_path
   severity=${1^^:-INFO}
   shift
   
@@ -22,11 +21,15 @@ log() {
   current_log_level=$(severity_to_number "${LOG_LEVEL^^:-INFO}")
   message="$@"
   _timestamp=$(date +%Y-%m-%dT%H:%M:%S$(printf ".%03d" $(date +%N | cut -c1-3)))
+  script_path="${BASH_SOURCE[0]}"
+  script_name="$(basename "$script_path")"
 
     if [ "$severity_number" -ge "$current_log_level" ]; then
-       printf '[%s] [%s] [request_id=-] [tenant_id=-] [thread=-] [class=-] [entrypoint.sh] %s\n' "${_timestamp}" "${severity}" "${message}"
+       printf '[%s] [%s] [request_id=-] [tenant_id=-] [thread=-] [class=-] [%s] %s\n' "${_timestamp}" "${severity}" "${script_name}" "${message}"
     fi
 }
+
+export -f log
 
 load_certificates() {
     # shellcheck disable=SC2016
