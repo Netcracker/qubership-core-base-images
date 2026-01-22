@@ -12,18 +12,19 @@ severity_to_number() {
   esac
 }
 CURRENT_LOG_LEVEL=$(severity_to_number "${LOG_LEVEL^^:-INFO}")
+SCRIPT_PATH="${BASH_SOURCE[0]}"
+SCRIPT_NAME="$(basename "$SCRIPT_PATH")"
 
 log() {
-  local severity severity_number _timestamp script_name script_path
+  local severity severity_number _timestamp
   severity=${1^^:-INFO}
   shift
   severity_number=$(severity_to_number "$severity")
 
     if [ "$severity_number" -ge "$CURRENT_LOG_LEVEL" ]; then
       _timestamp=$(date +%Y-%m-%dT%H:%M:%S$(printf ".%03d" $(date +%N | cut -c1-3)))
-      script_path="${BASH_SOURCE[0]}"
-      script_name="$(basename "$script_path")"
-       printf '[%s] [%s] [request_id=-] [tenant_id=-] [thread=-] [class=-] [%s] %s\n' "${_timestamp}" "${severity}" "${script_name}" "$*"
+
+       printf '[%s] [%s] [request_id=-] [tenant_id=-] [thread=-] [class=-] [%s] %s\n' "${_timestamp}" "${severity}" "${SCRIPT_NAME}" "$*"
     fi
 }
 
