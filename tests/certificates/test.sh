@@ -1,34 +1,21 @@
 #!/usr/bin/env bash
 set -ex
 
-TEST_DIR="$SCRIPT_DIR/certs"
+CERTS_DIR="$SCRIPT_DIR/certs"
 
-get_add_params_for_docker_cmd() {
+read_only_params() {
   local fs_mode=${1:-rw}
-  local params=""
-  if [[ "${fs_mode}" == "ro" ]]; then
-    mkdir -p $(pwd)/cert_ro_test
-    chmod -R 777 $(pwd)/cert_ro_test
-    mkdir -p $(pwd)/ca_cert_ro_test
-    chmod -R 777 $(pwd)/ca_cert_ro_test
-    
-    params+="--read-only \
-          -v $(pwd)/cert_ro_test:/etc/ssl/certs:rw \
-          -v $(pwd)/ca_cert_ro_test:/usr/local/share/ca-certificates:rw "
-  fi
-  echo ${params}
+  [[ "${fs_mode}" == "ro" ]] && echo "--read-only --tmpfs /etc/ssl/certs"
 }
 
 export_image_trust_store() {
-  local image=$1
-  local output_file=$2
-  local fs_mode=${3:-rw}
-  echo "Export certificate list from: $image, FS mode: ${fs_mode}"
+  local output_file=$1
+  local fs_mode=${2:-rw}
+  echo "Export certificate list from: $IMAGE, FS mode: ${fs_mode}"
   docker run --rm \
-      -v "${TEST_DIR}":/tmp/cert/ \
-      -v "$(pwd)":/out/ \
-      $(get_add_params_for_docker_cmd $fs_mode) \
-      "${image}" \
+      -v "${CERTS_DIR}":/tmp/cert/ \
+      $(read_only_params $fs_mode) \
+      "$IMAGE" \
       cat /etc/ssl/certs/ca-certificates.crt >"${output_file}.crt"
 
   # extract certificates list from certs file
@@ -36,16 +23,14 @@ export_image_trust_store() {
 }
 
 export_java_keystore() {
-  local image=$1
-  local output_file=$2
-  local fs_mode=${3:-rw}
-  echo "Export certificate list from: $image, FS mode: ${fs_mode}"
+  local output_file=$1
+  local fs_mode=${2:-rw}
+  echo "Export certificate list from: $IMAGE, FS mode: ${fs_mode}"
   docker run --rm \
-      -v "${TEST_DIR}":/tmp/cert/ \
-      -v "$(pwd)":/out/ \
+      -v "${CERTS_DIR}":/tmp/cert/ \
       -e CERTIFICATE_FILE_PASSWORD=abc12345 \
-      $(get_add_params_for_docker_cmd $fs_mode) \
-      "${image}" \
+      $(read_only_params $fs_mode) \
+      "$IMAGE" \
       keytool -list -cacerts -storepass abc12345 -v >${output_file}
 }
 
@@ -58,18 +43,18 @@ assert_tests() {
 }
 
 EXPORTED_CERTS_FILE=$(mktemp /tmp/certificates-test.XXXXXX)
-export_image_trust_store "${IMAGE}" "$EXPORTED_CERTS_FILE"
+export_image_trust_store "$EXPORTED_CERTS_FILE"
 assert_tests "$EXPORTED_CERTS_FILE"
 
 # Test the same with volume mounted to cert path directory in read-only mode
-export_image_trust_store "${IMAGE}" "$EXPORTED_CERTS_FILE" ro
+export_image_trust_store "$EXPORTED_CERTS_FILE" ro
 assert_tests "$EXPORTED_CERTS_FILE"
 
-if docker run --rm "${IMAGE}" java -version 1>&2 2>/dev/null; then
+if [[ "$IMAGE" == *java* ]]; then
   echo "Test certificates imported in JKS"
-  export_java_keystore "${IMAGE}" "$EXPORTED_CERTS_FILE"
+  export_java_keystore "$EXPORTED_CERTS_FILE"
   assert_tests "$EXPORTED_CERTS_FILE"
 
-  export_java_keystore "${IMAGE}" "$EXPORTED_CERTS_FILE" ro
+  export_java_keystore "$EXPORTED_CERTS_FILE" ro
   assert_tests "$EXPORTED_CERTS_FILE"
 fi
