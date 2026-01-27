@@ -40,7 +40,7 @@ run_test version-log
 run_test log-format
 run_test certificates
 run_test nss
-[[ "$IMAGE" == *java* ]] && run_test send-crash-dump
+run_test send-crash-dump
 run_test signal-propagation
 
 echo -e "${GREEN_COLOR}All tests passed${RESET_COLOR}"

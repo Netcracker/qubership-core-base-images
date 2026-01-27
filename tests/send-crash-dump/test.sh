@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+[[ ! "$IMAGE" == *java* ]] && exit 0 # this test relates only to java images
+
 set -ex
 
 PROC_OUTPUT_FILE=$(mktemp)
