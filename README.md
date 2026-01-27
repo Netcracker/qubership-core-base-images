@@ -137,7 +137,7 @@ FROM ghcr.io/netcracker/qubership-java-base-prof:25-alpine-latest
 
 The Java Alpine images (Java 21 and Java 25 profiler variants) include built-in support for the Qubership profiler:
 
-- **Profiler Version**: 3.0.6 (configurable via build arg `QUBERSHIP_PROFILER_VERSION`)
+- **Profiler Version**: 3.1.2 (configurable via build arg `QUBERSHIP_PROFILER_VERSION`)
 - **Artifact Source**: Configurable via build arg `QUBERSHIP_PROFILER_ARTIFACT_SOURCE` (local or remote from Maven Central)
 - **Enable Profiler**: Set environment variable `PROFILER_ENABLED=true`
 - **Profiler Directory**: `/app/diag`
