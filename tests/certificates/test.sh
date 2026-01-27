@@ -5,7 +5,7 @@ CERTS_DIR="$SCRIPT_DIR/certs"
 
 read_only_params() {
   local fs_mode=${1:-rw}
-  [[ "${fs_mode}" == "ro" ]] && echo "--read-only --tmpfs /etc/ssl/certs"
+  [[ "${fs_mode}" == "ro" ]] && echo "--read-only --tmpfs /etc/ssl/certs --tmpfs /usr/local/share/ca-certificates"
 }
 
 export_image_trust_store() {
