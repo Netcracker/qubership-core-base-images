@@ -1,14 +1,7 @@
 #!/usr/bin/env bash
 set -ex
 
-IMAGE=${1:?Missed image label}
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TEST_DIR="$SCRIPT_DIR/certs"
-
-fail() {
-  echo "Test error: $1" >&2
-  false
-}
 
 get_add_params_for_docker_cmd() {
   local fs_mode=${1:-rw}
@@ -64,19 +57,19 @@ assert_tests() {
   <"$output_file" grep -e "CN\s*=\s*testcerts.com" >/dev/null || fail "cert from test-k8s-ca.crt is missed"
 }
 
-export_image_trust_store "${IMAGE}" exported-certs.list
-assert_tests exported-certs.list
+EXPORTED_CERTS_FILE=$(mktemp /tmp/certificates-test.XXXXXX)
+export_image_trust_store "${IMAGE}" "$EXPORTED_CERTS_FILE"
+assert_tests "$EXPORTED_CERTS_FILE"
 
 # Test the same with volume mounted to cert path directory in read-only mode
-export_image_trust_store "${IMAGE}" exported-certs.list ro
-assert_tests exported-certs.list
+export_image_trust_store "${IMAGE}" "$EXPORTED_CERTS_FILE" ro
+assert_tests "$EXPORTED_CERTS_FILE"
 
 if docker run --rm "${IMAGE}" java -version 1>&2 2>/dev/null; then
   echo "Test certificates imported in JKS"
-  export_java_keystore "${IMAGE}" exported-certs.list
-  assert_tests exported-certs.list
+  export_java_keystore "${IMAGE}" "$EXPORTED_CERTS_FILE"
+  assert_tests "$EXPORTED_CERTS_FILE"
 
-  export_java_keystore "${IMAGE}" exported-certs.list ro
-  assert_tests exported-certs.list
+  export_java_keystore "${IMAGE}" "$EXPORTED_CERTS_FILE" ro
+  assert_tests "$EXPORTED_CERTS_FILE"
 fi
-echo "All tests passed"

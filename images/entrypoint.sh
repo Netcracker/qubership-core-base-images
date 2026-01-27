@@ -85,7 +85,7 @@ create_user() {
 }
 
 restore_volumes_data() {
-    cp -Rn /app/volumes/certs/* /etc/ssl/certs
+    [ -d /app/volumes/certs ] && cp -Rn /app/volumes/certs/. /etc/ssl/certs
 }
 
 run_init_scripts() {
