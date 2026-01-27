@@ -18,7 +18,7 @@ fail() {
 export -f fail
 
 run_test() {
-    local test_script=$1/test.sh
+    local test_script=$SUITE_DIR/$1/test.sh
 
     # prepare test environment 
     SCRIPT_DIR="$SUITE_DIR/$1"
