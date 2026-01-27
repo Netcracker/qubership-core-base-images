@@ -137,7 +137,7 @@ FROM ghcr.io/netcracker/qubership-java-base-prof:25-alpine-latest
 
 The Java Alpine images (Java 21 and Java 25 profiler variants) include built-in support for the Qubership profiler:
 
-- **Profiler Version**: 3.0.6 (configurable via build arg `QUBERSHIP_PROFILER_VERSION`)
+- **Profiler Version**: 3.1.2 (configurable via build arg `QUBERSHIP_PROFILER_VERSION`)
 - **Artifact Source**: Configurable via build arg `QUBERSHIP_PROFILER_ARTIFACT_SOURCE` (local or remote from Maven Central)
 - **Enable Profiler**: Set environment variable `PROFILER_ENABLED=true`
 - **Profiler Directory**: `/app/diag`
@@ -230,6 +230,21 @@ For SIGTERM signals, there is a 10-second delay to prevent 503/502 errors during
 
 **Note**: Signal handling is disabled when running in interactive shell mode (`bash` or `sh` commands) to avoid interfering with terminal signal handling.
 
+## Logging
+
+This project provides a helper logging function named `log` used by the entrypoint script. Below are usage examples and important interpreter limitations.
+The log function is exported from entrypoint script and is available only to child processes that are Bash. For example, `bash -c 'log INFO "msg"'` works, but `sh -c 'log ...'` will not.
+
+custom_script.sh
+```bash
+#!/usr/bin/env bash
+log INFO Hi
+```
+Log output:
+```bash
+#> ./custom_script.sh
+[2026-01-22T08:58:47.000] [INFO] [request_id=-] [tenant_id=-] [thread=-] [class=-] [custom_script.sh] Hi 
+```
 
 ## Contributing
 
