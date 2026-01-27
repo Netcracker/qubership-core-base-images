@@ -3,15 +3,11 @@ set -ex
 
 CERTS_DIR="$SCRIPT_DIR/certs"
 
-read_only_params() {
-  local fs_mode=${1:-rw}
-  [[ "${fs_mode}" == "ro" ]] && echo "--read-only --tmpfs /etc/ssl/certs --tmpfs /usr/local/share/ca-certificates"
-}
-
 export_image_trust_store() {
   local output_file=$1
   local fs_mode=${2:-rw}
   echo "Export certificate list from: $IMAGE, FS mode: ${fs_mode}"
+  # shellcheck disable=SC2046
   docker run --rm \
       -v "${CERTS_DIR}":/tmp/cert/ \
       $(read_only_params $fs_mode) \
@@ -26,6 +22,7 @@ export_java_keystore() {
   local output_file=$1
   local fs_mode=${2:-rw}
   echo "Export certificate list from: $IMAGE, FS mode: ${fs_mode}"
+  # shellcheck disable=SC2046
   docker run --rm \
       -v "${CERTS_DIR}":/tmp/cert/ \
       -e CERTIFICATE_FILE_PASSWORD=abc12345 \
