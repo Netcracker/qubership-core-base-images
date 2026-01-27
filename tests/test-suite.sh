@@ -23,6 +23,12 @@ read_only_params() {
 }
 export -f read_only_params
 
+random_name() {
+  local prefix=$1
+  echo "$prefix-$(openssl rand -hex 4 2>/dev/null || echo $RANDOM)"
+}
+export -f random_name
+
 run_test() {
     local test_script=$SUITE_DIR/$1/test.sh
 
@@ -30,7 +36,7 @@ run_test() {
     SCRIPT_DIR="$SUITE_DIR/$1"
     export SCRIPT_DIR
     # this variable is useful as name for running container name 
-    CONTAINER_NAME=test-run-$(openssl rand -hex 4 2>/dev/null || echo $RANDOM)
+    CONTAINER_NAME=$(random_name test-run)
     export CONTAINER_NAME
 
     echo "Run tests: $*"
