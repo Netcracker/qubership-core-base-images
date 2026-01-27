@@ -1,1 +1,4 @@
+# Do not convert line endings — check in and check out as-is (no Windows CRLF conversion)
+* -text
+
 Dockerfile.* linguist-language=Dockerfile
