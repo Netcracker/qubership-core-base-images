@@ -247,16 +247,14 @@ Log output:
 ```
 
 ## Read-only mode support
-This section outlines the terms, conditions, and expectations associated with the base image that includes volume definitions. These volumes are designed to:
+The core-base image includes volume definitions are designed to work in container run with the read-only filesystem option, so we can:
 * Persist temporary files (/tmp)
 * Store environment configurations (/etc/env)
 * Manage NSS (Network Security Services) data (/app/nss)
 * Store diagnostic and troubleshooting data (/app/ncdiag)
-* Handle Java SSL certificates (/etc/ssl/certs/java)
+* Handle any SSL certificates (/etc/ssl/certs) or Java SSL certificates only (/etc/ssl/certs/java)
 
-These volumes are intended for external data binding and persistence. Do not overwrite or delete the volume declarations unless explicitly authorized. Ensure that any data stored in the directories mounted to these volume's paths complies with security policies. Regularly update and manage CA certificates and Java SSL certificates within /etc/ssl/certs/java.
-
-When deploying containers based on this image with the read-only filesystem option, it is required to bind host directories or named volumes to the specified mount points.
+It is required to bind host directories or named volumes to the specified mount points.
 
 ## Contributing
 

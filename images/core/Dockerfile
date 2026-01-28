@@ -42,7 +42,7 @@ RUN echo $BASE_IMAGE_TAG > /etc/base-image-release
 VOLUME /tmp
 VOLUME /etc/env
 VOLUME /app/nss
-VOLUME /etc/ssl/certs/java
+VOLUME /etc/ssl/certs
 VOLUME /etc/secret
 VOLUME /usr/local/share/ca-certificates
 
