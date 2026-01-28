@@ -88,28 +88,12 @@ jobs:
           tags: ghcr.io/netcracker/qubership-java-base-prof:25-test
           file: images/java-25-prof/Dockerfile
 
-      - name: Test ca certificates were processed correctly
+      - name: Run tests on containers
         run: |
-          ./tests/certificates/test-certificates-processing.sh ghcr.io/netcracker/qubership-core-base:test
-          ./tests/certificates/test-certificates-processing.sh ghcr.io/netcracker/qubership-java-base-prof:21-test
-          ./tests/certificates/test-certificates-processing.sh ghcr.io/netcracker/qubership-java-base:25-test
-          ./tests/certificates/test-certificates-processing.sh ghcr.io/netcracker/qubership-java-base-prof:25-test
-
-      - name: Test OS signal propagation
-        run: |
-          ./tests/signal-propagation/test-signal-propagation.sh ghcr.io/netcracker/qubership-core-base:test
-
-      - name: Test NSS wrapper
-        run: |
-          ./tests/nss/test-nss-wrapper.sh ghcr.io/netcracker/qubership-core-base:test
-
-      - name: Validate version "test" in log output
-        run: |
-           docker run --rm ghcr.io/netcracker/qubership-core-base:test | grep "Base image version: ghcr.io/netcracker/qubership-core-base:test"
-
-      - name: Test send-crash-dump function
-        run: |
-          ./tests/send-crash-dump/test-send-crash-dump.sh ghcr.io/netcracker/qubership-java-base:25-test
+          ./tests/test-suite.sh ghcr.io/netcracker/qubership-core-base:test
+          ./tests/test-suite.sh ghcr.io/netcracker/qubership-java-base-prof:21-test
+          ./tests/test-suite.sh ghcr.io/netcracker/qubership-java-base:25-test
+          ./tests/test-suite.sh ghcr.io/netcracker/qubership-java-base-prof:25-test
 
       - name: Set up JDK 21
         uses: actions/setup-java@f2beeb24e141e01a676f977032f5a29d81c9e27e # v5

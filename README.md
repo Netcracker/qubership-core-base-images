@@ -246,6 +246,16 @@ Log output:
 [2026-01-22T08:58:47.000] [INFO] [request_id=-] [tenant_id=-] [thread=-] [class=-] [custom_script.sh] Hi 
 ```
 
+## Read-only mode support
+If you need to run a container in a read-only host environment, you must mount the required writable paths as --tmpfs volumes or as emptyDir volumes in Kubernetes.
+
+* /tmp - to persist temporary files
+* /etc/env - to manage environment configurations
+* /app/nss - to manage NSS (Network Security Services) data
+* /app/ncdiag - to store diagnostic and troubleshooting data
+* /etc/ssl/certs/java - to handle Java SSL certificates or /etc/ssl/certs for all of them
+
+
 ## Contributing
 
 Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
