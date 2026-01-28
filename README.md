@@ -247,7 +247,7 @@ Log output:
 ```
 
 ## Read-only mode support
-It is required to bind host directories or named volumes to the following mount points to run the comtainer in read-only filesystem mode
+If you need to run a container in a read-only host environment, you must mount the required writable paths as --tmpfs volumes or as emptyDir volumes in Kubernetes.
 
 * /tmp - to persist temporary files
 * /etc/env - to manage environment configurations
