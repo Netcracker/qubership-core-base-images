@@ -20,7 +20,6 @@ export -f fail
 read_only_params() {
   local fs_mode=${1:-rw}
   [[ "${fs_mode}" == "ro" ]] && echo "--read-only \
-                                      --tmpfs /etc/ssl/certs \
                                       --tmpfs /tmp
                                       --tmpfs /etc/env
                                       --tmpfs /app/ncdiag

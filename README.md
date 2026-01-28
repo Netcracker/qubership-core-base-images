@@ -247,14 +247,14 @@ Log output:
 ```
 
 ## Read-only mode support
-The core-base image includes volume definitions are designed to work in container run with the read-only filesystem option, so we can:
-* Persist temporary files (/tmp)
-* Store environment configurations (/etc/env)
-* Manage NSS (Network Security Services) data (/app/nss)
-* Store diagnostic and troubleshooting data (/app/ncdiag)
-* Handle any SSL certificates (/etc/ssl/certs) or Java SSL certificates only (/etc/ssl/certs/java)
+It is required to bind host directories or named volumes to the following mount points to run the comtainer in read-only filesystem mode
 
-It is required to bind host directories or named volumes to the specified mount points.
+* /tmp - to persist temporary files
+* /etc/env - to manage environment configurations
+* /app/nss - to manage NSS (Network Security Services) data
+* /app/ncdiag - to store diagnostic and troubleshooting data
+* /etc/ssl/certs/java - to handle Java SSL certificates or /etc/ssl/certs for all of them
+
 
 ## Contributing
 
