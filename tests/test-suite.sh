@@ -19,7 +19,7 @@ export -f fail
 
 read_only_params() {
   local fs_mode=${1:-rw}
-  [[ "${fs_mode}" == "ro" ]] && echo "--read-only --tmpfs /etc/ssl/certs --tmpfs /usr/local/share/ca-certificates"
+  [[ "${fs_mode}" == "ro" ]] && echo "--read-only --tmpfs /etc/ssl/certs"
 }
 export -f read_only_params
 

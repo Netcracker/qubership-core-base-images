@@ -44,6 +44,7 @@ VOLUME /etc/env
 VOLUME /app/nss
 VOLUME /etc/ssl/certs/java
 VOLUME /etc/secret
+VOLUME /usr/local/share/ca-certificates
 
 USER ${UID}:${GID}
 
