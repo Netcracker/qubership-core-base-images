@@ -8,15 +8,26 @@ PROC_OUTPUT_FILE=$(mktemp)
 # import variable declares marker message
 source "$SCRIPT_DIR/diag/diag-bootstrap.sh"
 
+# crate container with app. emulate real container with microservice code
+TMP_IMAGE=$(random_name "app-tmp")
+APP_IMAGE=$(random_name "app-container")
+docker create --name "$TMP_IMAGE" "$IMAGE"
+# add sample application
+docker cp "$SCRIPT_DIR"/Process.class "$TMP_IMAGE":/app
+# substitute diag tool with mock
+docker cp "$SCRIPT_DIR"/diag/diag-bootstrap.sh "$TMP_IMAGE":/app/diag/diag-bootstrap.sh
+docker commit "$TMP_IMAGE" "$APP_IMAGE"
+# use new container with application as test image
+IMAGE=$APP_IMAGE
+
 test() {
   container_name=$(random_name "test-run")
 
-  mkdir -p $SCRIPT_DIR/ncdiag && chmod 777 $SCRIPT_DIR/ncdiag
   # shellcheck disable=SC2046
   docker run -d --rm --name "$container_name" \
         $(read_only_params $1) \
         -e X_JAVA_ARGS=-Xmx64m -e SIGTERM_EXIT_DELAY=0 \
-        -v "$SCRIPT_DIR":/app "$IMAGE" java -cp /app Process
+        "$IMAGE" java -cp /app Process
   sleep 1
   docker exec "$container_name" bash -c 'kill -SIGSEGV $(ps ax | grep -v grep | grep java | grep -v bash | awk "{print \$1}")'
   docker logs -f "$container_name" >"$PROC_OUTPUT_FILE"

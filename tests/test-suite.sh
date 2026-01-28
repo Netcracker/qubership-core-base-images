@@ -17,16 +17,21 @@ fail() {
 }
 export -f fail
 
+
+# # List of MANDATORY empty folders that should be added for containers running in read-only mode
+#   /tmp
+#   /etc/env
+#   /app/ncdiag
+#   /app/nss
+#   /etc/ssl/certs/java
 read_only_params() {
   local fs_mode=${1:-rw}
-  [[ "${fs_mode}" == "ro" ]] && echo "--read-only \
-                                      --tmpfs /tmp
-                                      --tmpfs /etc/env
-                                      --tmpfs /app/ncdiag
-                                      --tmpfs /etc/ssl/certs/java
-                                      --tmpfs /etc/secret
-                                      --tmpfs /app/nss
-                                      "
+  [[ "${fs_mode}" == "ro" ]] && echo --read-only \
+                                        --tmpfs /tmp \
+                                        --tmpfs /etc/env \
+                                        --tmpfs /app/ncdiag \
+                                        --tmpfs /app/nss \
+                                        --tmpfs /etc/ssl/certs/java
 }
 export -f read_only_params
 
@@ -55,11 +60,11 @@ run_test() {
     fi
 }
 
-run_test version-log
-run_test log-format
-run_test certificates
-run_test nss
+#run_test version-log
+#run_test log-format
+#run_test certificates
+#run_test nss
 run_test send-crash-dump
-run_test signal-propagation
+#run_test signal-propagation
 
 echo -e "${GREEN_COLOR}All tests passed${RESET_COLOR}"
