@@ -246,6 +246,18 @@ Log output:
 [2026-01-22T08:58:47.000] [INFO] [request_id=-] [tenant_id=-] [thread=-] [class=-] [custom_script.sh] Hi 
 ```
 
+## Read-only mode support
+This section outlines the terms, conditions, and expectations associated with the base image that includes volume definitions. These volumes are designed to:
+* Persist temporary files (/tmp)
+* Store environment configurations (/etc/env)
+* Manage NSS (Network Security Services) data (/app/nss)
+* Store diagnostic and troubleshooting data (/app/ncdiag)
+* Handle Java SSL certificates (/etc/ssl/certs/java)
+
+These volumes are intended for external data binding and persistence. Do not overwrite or delete the volume declarations unless explicitly authorized. Ensure that any data stored in the directories mounted to these volume's paths complies with security policies. Regularly update and manage CA certificates and Java SSL certificates within /etc/ssl/certs/java.
+
+When deploying containers based on this image with the read-only filesystem option, it is required to bind host directories or named volumes to the specified mount points.
+
 ## Contributing
 
 Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.

@@ -19,7 +19,15 @@ export -f fail
 
 read_only_params() {
   local fs_mode=${1:-rw}
-  [[ "${fs_mode}" == "ro" ]] && echo "--read-only --tmpfs /etc/ssl/certs"
+  [[ "${fs_mode}" == "ro" ]] && echo "--read-only \
+                                      --tmpfs /etc/ssl/certs \
+                                      --tmpfs /tmp
+                                      --tmpfs /etc/env
+                                      --tmpfs /app/ncdiag
+                                      --tmpfs /etc/ssl/certs/java
+                                      --tmpfs /etc/secret
+                                      --tmpfs /app/nss
+                                      "
 }
 export -f read_only_params
 
