@@ -58,7 +58,7 @@ FROM ghcr.io/netcracker/qubership-java-base-prof:25-alpine-latest
 
 ## Base Alpine Image Details
 
-- **Base Image**: `alpine:3.23.2`
+- **Base Image**: `alpine:3.23.3`
 - **Default User**: `appuser` (UID: 10001)
 - **Default Home**: `/app`
 - **Default Language**: `en_US.UTF-8`
