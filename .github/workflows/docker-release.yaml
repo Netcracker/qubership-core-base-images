@@ -40,7 +40,7 @@ jobs:
   core-base-docker-build:
     needs: [ create-tag ]
     name: Build Docker image
-    uses: Netcracker/qubership-core-infra/.github/workflows/docker-build.yaml@32a5b506971a029acc41bc69fd42d06137caeb36
+    uses: Netcracker/qubership-core-infra/.github/workflows/docker-build.yaml@6e3bf762cb1ad30a8439b3fb112c3f15bfb98c6d
     with:
       build-args: |
         BASE_IMAGE_TAG=ghcr.io/netcracker/qubership-core-base:${{ inputs.version }}
@@ -51,7 +51,7 @@ jobs:
   java-prof-21-docker-build:
     needs: [create-tag, core-base-docker-build]
     name: Build Docker image
-    uses: Netcracker/qubership-core-infra/.github/workflows/docker-build.yaml@32a5b506971a029acc41bc69fd42d06137caeb36
+    uses: Netcracker/qubership-core-infra/.github/workflows/docker-build.yaml@6e3bf762cb1ad30a8439b3fb112c3f15bfb98c6d
     with:
       build-args: |
         BASE_IMAGE=ghcr.io/netcracker/qubership-core-base:${{ inputs.version }}
@@ -63,7 +63,7 @@ jobs:
   java-25-docker-build:
     needs: [create-tag, core-base-docker-build]
     name: Build Docker image
-    uses: Netcracker/qubership-core-infra/.github/workflows/docker-build.yaml@32a5b506971a029acc41bc69fd42d06137caeb36
+    uses: Netcracker/qubership-core-infra/.github/workflows/docker-build.yaml@6e3bf762cb1ad30a8439b3fb112c3f15bfb98c6d
     with:
       build-args: |
         BASE_IMAGE=ghcr.io/netcracker/qubership-core-base:${{ inputs.version }}
@@ -75,7 +75,7 @@ jobs:
   java-prof-25-docker-build:
     needs: [create-tag, java-25-docker-build]
     name: Build Docker image
-    uses: Netcracker/qubership-core-infra/.github/workflows/docker-build.yaml@32a5b506971a029acc41bc69fd42d06137caeb36
+    uses: Netcracker/qubership-core-infra/.github/workflows/docker-build.yaml@6e3bf762cb1ad30a8439b3fb112c3f15bfb98c6d
     with:
       build-args: |
         BASE_IMAGE=ghcr.io/netcracker/qubership-java-base:25-alpine-${{ inputs.version }}
