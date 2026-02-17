@@ -190,7 +190,16 @@ if [[ "$1" != "bash" ]] && [[ "$1" != "sh" ]] ; then
     # shellcheck disable=SC2068
     $@ &
     pid=$!
-    wait "$pid" ; retCode=$?
+
+    while true; do
+        wait "$pid"
+        retCode=$?
+        # continue the waiting if wait was interrupted by a signal.
+        if [[ $retCode -ge 128 ]]; then
+            continue
+        fi
+        break
+    done
     log INFO "Process ended with return code ${retCode}"
 
     # save crash dump for future analysis

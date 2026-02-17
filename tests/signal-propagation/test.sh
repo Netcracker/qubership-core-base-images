@@ -3,18 +3,16 @@ PROC_OUTPUT_FILE=$(mktemp /tmp/test_os_sinal_prop.XXXXXX)
 
 echo "Test OS signal propagation to child process on $IMAGE"
 set -ex
-docker run -v "$SCRIPT_DIR:/app/" "$IMAGE" /app/sample-process.sh>"$PROC_OUTPUT_FILE" &
-TEST_PID="$!"
+CID=$(docker run -d -v "$SCRIPT_DIR:/app/" "$IMAGE" /app/sample-process.sh)
 
 # wait for sample application process start
 sleep 5
 
 # send test signal
-kill -SIGUSR1 $TEST_PID
+docker kill --signal=SIGUSR1 "$CID"
 #wait for container exit to make sure that all sample application output is captured
-wait $TEST_PID
+docker wait "$CID" >/dev/null
+docker logs "$CID" > "$PROC_OUTPUT_FILE"
 
 # Test sample application output
 <"$PROC_OUTPUT_FILE" grep "Test application: captured SIGUSR1" >/dev/null
-
-
