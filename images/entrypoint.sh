@@ -194,8 +194,10 @@ if [[ "$1" != "bash" ]] && [[ "$1" != "sh" ]] ; then
     while true; do
         wait "$pid"
         retCode=$?
-        # continue the waiting if wait was interrupted by a signal.
-        if [[ $retCode -ge 128 ]]; then
+        # If wait returned >= 128, either wait was interrupted by a signal or the child
+        # exited with that status (e.g. killed by signal). Only continue when the child
+        # is still running (wait was interrupted); otherwise break with the real exit status.
+        if [[ $retCode -ge 128 ]] && kill -0 "$pid" 2>/dev/null; then
             continue
         fi
         break
