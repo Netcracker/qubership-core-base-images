@@ -110,19 +110,18 @@ run_init_scripts() {
 }
 
 rethrow_handler() {
-    log INFO "Caught $1 sig in entrypoint"
-    #To prevent 503\502 error on rollout new deployment https://rtfm.co.ua/en/kubernetes-nginx-php-fpm-graceful-shutdown-and-502-errors/
-    if [ "$1" == "SIGTERM" ]; then
-      /bin/sleep "${SIGTERM_EXIT_DELAY:-10}"
+    log DEBUG "Caught $1 sig in entrypoint"
+
+    # To prevent 503\502 error on rollout new deployment
+    # https://rtfm.co.ua/en/kubernetes-nginx-php-fpm-graceful-shutdown-and-502-errors/
+    if [ "$1" = "SIGTERM" ]; then
+        sleep "${SIGTERM_EXIT_DELAY:-10}"
     fi
-    local subRetCode=0
-    if [ $pid -ne 0 ]; then
-        log INFO "Rethrow $1 to subprocess: $pid"
+
+    if kill -0 "$pid" 2>/dev/null; then
+        log DEBUG "Rethrow $1 to subprocess: $pid"
         kill -"$1" "$pid"
-        wait "$pid" ; subRetCode=$?
     fi
-    log INFO "Subcommand signaled with $1, exit code $subRetCode"
-    exit $subRetCode
 }
 
 
@@ -190,7 +189,18 @@ if [[ "$1" != "bash" ]] && [[ "$1" != "sh" ]] ; then
     # shellcheck disable=SC2068
     $@ &
     pid=$!
-    wait "$pid" ; retCode=$?
+
+    while true; do
+        wait "$pid"
+        retCode=$?
+        # If wait returned >= 128, either wait was interrupted by a signal or the child
+        # exited with that status (e.g. killed by signal). Only continue when the child
+        # is still running (wait was interrupted); otherwise break with the real exit status.
+        if [[ $retCode -ge 128 ]] && kill -0 "$pid" 2>/dev/null; then
+            continue
+        fi
+        break
+    done
     log INFO "Process ended with return code ${retCode}"
 
     # save crash dump for future analysis
