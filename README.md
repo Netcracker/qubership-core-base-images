@@ -10,7 +10,7 @@ A minimal Alpine-based image with essential security and system utilities.
 
 ### 2. Java Alpine Images
 
-There are tree java images based on Alpine:
+There are three Java images based on Alpine:
 * Java 21 with JDK and profiler: `qubership-java-base:21-alpine-xxx`
 * Java 25 with JRE: `qubership-java-base:25-alpine-xxx`
 * Java 25 with JRE and profiler: `qubership-java-base-prof:25-alpine-xxx`
@@ -46,7 +46,7 @@ FROM ghcr.io/netcracker/qubership-java-base-prof:25-alpine-latest
 
 ## Common Features
 
-- Based on Alpine Linux 3.23.2
+- Based on Alpine Linux 3.23.3
 - Pre-configured with essential security settings
 - Built-in certificate management (including Kubernetes service account certificates)
 - User management with nss_wrapper support
@@ -81,7 +81,7 @@ FROM ghcr.io/netcracker/qubership-java-base-prof:25-alpine-latest
 
 ### Java 21 Image
 
-- **Base Image**: `alpine:3.23.2`
+- **Base Image**: `alpine:3.23.3` (via core base image)
 - **Java Version**: OpenJDK 21 (JDK)
 - **Default User**: `appuser` (UID: 10001)
 - **Default Home**: `/app`
@@ -110,7 +110,7 @@ FROM ghcr.io/netcracker/qubership-java-base-prof:25-alpine-latest
 
 ### Java 25 Images
 
-- **Base Image**: `alpine:3.23.2`
+- **Base Image**: `alpine:3.23.3` (via core base image)
 - **Java Version**: OpenJDK 25 (JRE)
 - **Default User**: `appuser` (UID: 10001)
 - **Default Home**: `/app`
@@ -137,7 +137,7 @@ FROM ghcr.io/netcracker/qubership-java-base-prof:25-alpine-latest
 
 The Java Alpine images (Java 21 and Java 25 profiler variants) include built-in support for the Qubership profiler:
 
-- **Profiler Version**: 3.1.2 (configurable via build arg `QUBERSHIP_PROFILER_VERSION`)
+- **Profiler Version**: 3.1.3 (configurable via build arg `QUBERSHIP_PROFILER_VERSION`)
 - **Artifact Source**: Configurable via build arg `QUBERSHIP_PROFILER_ARTIFACT_SOURCE` (local or remote from Maven Central)
 - **Enable Profiler**: Set environment variable `PROFILER_ENABLED=true`
 - **Profiler Directory**: `/app/diag`
@@ -157,8 +157,9 @@ The Java Alpine images (Java 21 and Java 25 profiler variants) include built-in 
 ```
 /app
 ├── init.d/          # Initialization scripts
-├── nss/            # NSS wrapper data
-├── diag/           # Profiler diagnostics (Java profiler images only)
+├── nss/             # NSS wrapper data
+├── ncdiag/          # Diagnostic and troubleshooting data (base image)
+├── diag/            # Profiler diagnostics (Java profiler images only)
 │   ├── lib/        # Profiler libraries
 │   └── dump/       # Profiler dumps
 └── volumes/
@@ -249,11 +250,11 @@ Log output:
 ## Read-only mode support
 If you need to run a container in a read-only host environment, you must mount the required writable paths as --tmpfs volumes or as emptyDir volumes in Kubernetes.
 
-* /tmp - to persist temporary files
-* /etc/env - to manage environment configurations
-* /app/nss - to manage NSS (Network Security Services) data
-* /app/ncdiag - to store diagnostic and troubleshooting data
-* /etc/ssl/certs/java - to handle Java SSL certificates or /etc/ssl/certs for all of them
+* `/tmp` - to persist temporary files
+* `/etc/env` - to manage environment configurations
+* `/app/nss` - to manage NSS (Network Security Services) data
+* `/app/ncdiag` - to store diagnostic and troubleshooting data
+* `/etc/ssl/certs/java` - to handle Java SSL certificates, or `/etc/ssl/certs` for non-Java images
 
 
 ## Contributing
