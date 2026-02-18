@@ -131,8 +131,7 @@ log INFO "Base image version: $(cat /etc/base-image-release)"
 # Load diag-bootstrap.sh (and diag-lib.sh) to make functions from profiler agent available
 if [ -f /app/diag/diag-bootstrap.sh ]; then
   source /app/diag/diag-bootstrap.sh
-else
-  log INFO "/app/diag/diag-bootstrap.sh file not found. Diagnostic functions are disabled."
+  log INFO "/app/diag/diag-bootstrap.sh file was found. Diagnostic functions are enabled."
 fi
 
 log INFO "Run entrypoint.sh:"
