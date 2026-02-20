@@ -37,7 +37,8 @@ public class JavaBaseImageTest {
                      new MockCollectorServer(0, ProtocolConst.PLAIN_SOCKET_BACKLOG)
                              .started(Duration.ofSeconds(5));
              GenericContainer<?> profilerApp = new GenericContainer<>(CORE_BASE_IMAGE_TAG)
-                     .withEnv("NC_DIAGNOSTIC_MODE", "prod")
+                     // test variable effect
+                     //.withEnv("NC_DIAGNOSTIC_MODE", "prod")
                      .withEnv("ESC_LOG_LEVEL", "debug")
                      .withEnv("PROFILER_ENABLED", "true")
                      .withEnv("REMOTE_DUMP_HOST", "host.testcontainers.internal")
