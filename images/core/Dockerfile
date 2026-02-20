@@ -13,7 +13,8 @@ ENV HOME=/app \
     CERTIFICATE_FILE_LOCATION=/usr/local/share/ca-certificates \
     LANG=en_US.UTF-8 \
     LANGUAGE=en_US:en \
-    LC_ALL=en_US.UTF-8
+    LC_ALL=en_US.UTF-8 \
+    NC_DIAGNOSTIC_MODE=off
 
 RUN adduser -u ${UID} -G ${GID} -S appuser
 
