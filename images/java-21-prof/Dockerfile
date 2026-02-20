@@ -26,7 +26,9 @@ ENV JAVA_HOME=/usr/lib/jvm/java-21-openjdk \
     MALLOC_TRIM_THRESHOLD_=131072 \
     MALLOC_TOP_PAD_=131072 \
     MALLOC_MMAP_MAX=65536 \
-    JAVA_CERTIFICATE_FILE_LOCATION=/etc/ssl/certs/java/cacerts
+    JAVA_CERTIFICATE_FILE_LOCATION=/etc/ssl/certs/java/cacerts \
+    NC_DIAGNOSTIC_MODE=off \
+    NC_DIAGNOSTIC_FOLDER=/app/ncdiag
 
 RUN mkdir -p /tmp/cert && \
     chmod -R ug+rw /tmp && \
