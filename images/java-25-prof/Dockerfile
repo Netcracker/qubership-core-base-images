@@ -12,8 +12,7 @@ USER root
 
 RUN echo $BASE_IMAGE_TAG > /etc/base-image-release
 
-ENV NC_DIAGNOSTIC_MODE=off \
-    NC_DIAGNOSTIC_FOLDER=/app/ncdiag
+ENV NC_DIAGNOSTIC_MODE=off
 
 # renovate: datasource=maven depName=qubership-profiler-installer packageName=org.qubership.profiler:qubership-profiler-installer versioning=maven
 ARG QUBERSHIP_PROFILER_VERSION=3.1.3
