@@ -1,3 +1,5 @@
 /.idea
 /local-artifacts
 !/local-artifacts/README.md
+/.vscode
+/.metals
