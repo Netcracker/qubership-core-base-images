@@ -66,5 +66,6 @@ run_test certificates
 run_test nss
 run_test send-crash-dump
 run_test signal-propagation
+run_test bash-entrypoint-arguments
 
 echo -e "${GREEN_COLOR}All tests passed${RESET_COLOR}"
