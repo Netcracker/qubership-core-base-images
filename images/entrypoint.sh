@@ -210,7 +210,7 @@ if [[ "$1" != "bash" ]] && [[ "$1" != "sh" ]] ; then
 else
     # shellcheck disable=SC2068
     log INFO "Run subcommand:" "$@"
-    exec $@
+    exec "$@"
 fi
 
 
