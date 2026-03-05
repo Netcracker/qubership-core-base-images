@@ -36,22 +36,22 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+        uses: docker/setup-qemu-action@v4
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
         with:
           driver: docker
       
       - name: Build and load test core-image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           build-args: |
             BASE_IMAGE_TAG=ghcr.io/netcracker/qubership-core-base:test
@@ -60,7 +60,7 @@ jobs:
           file: images/core/Dockerfile
 
       - name: Build and load test java 21 image with prof
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           build-args: |
             BASE_IMAGE=ghcr.io/netcracker/qubership-core-base:test
@@ -71,7 +71,7 @@ jobs:
           file: images/java-21-prof/Dockerfile
 
       - name: Build and load test java 25 image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           build-args: |
             BASE_IMAGE=ghcr.io/netcracker/qubership-core-base:test
@@ -80,7 +80,7 @@ jobs:
           file: images/java-25/Dockerfile
 
       - name: Build and load test java 25 image with prof
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           build-args: |
             BASE_IMAGE=ghcr.io/netcracker/qubership-java-base:25-test
@@ -118,12 +118,12 @@ jobs:
           ./mvnw --batch-mode verify -Dqubership.profiler.java-base-image.tag=ghcr.io/netcracker/qubership-java-base-prof:25-test
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
         with:
           driver: docker-container
 
       - name: Build and push core-base image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         if: ${{ !startsWith(github.ref, 'refs/heads/dependabot/') }}
         with:
           push: true
@@ -137,7 +137,7 @@ jobs:
 
 
       - name: Build and push java-image-21
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         if: ${{ !startsWith(github.ref, 'refs/heads/dependabot/') }}
         with:
           push: true
@@ -153,7 +153,7 @@ jobs:
           platforms: ${{ env.PLATFORMS }}
 
       - name: Build and push java-image-25
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         if: ${{ !startsWith(github.ref, 'refs/heads/dependabot/') }}
         with:
           push: true
@@ -167,7 +167,7 @@ jobs:
           platforms: ${{ env.PLATFORMS }}
 
       - name: Build and push java-image-25-prof
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         if: ${{ !startsWith(github.ref, 'refs/heads/dependabot/') }}
         with:
           push: true
