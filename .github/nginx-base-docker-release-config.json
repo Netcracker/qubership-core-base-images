@@ -1,0 +1,10 @@
+{
+    "components" : [
+      {
+        "name": "qubership-nginx-base",
+        "file": "./images/nginx/Dockerfile",
+        "context": "."
+      }
+    ],
+    "platforms" : "linux/amd64,linux/arm64"
+  }

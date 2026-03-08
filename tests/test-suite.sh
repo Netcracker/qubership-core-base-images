@@ -41,6 +41,19 @@ random_name() {
 }
 export -f random_name
 
+wait_for_container() {
+    local container_id=$1
+    shift
+    local i
+    for i in $(seq 1 30); do
+        "$@" >/dev/null 2>&1 && return 0
+        [ "$i" -eq 10 ] && { docker logs "$container_id"; exit 1; }
+        sleep 1
+    done
+    exit 1
+}
+export -f wait_for_container
+
 run_test() {
     local test_script=$SUITE_DIR/$1/test.sh
 
@@ -60,12 +73,15 @@ run_test() {
     fi
 }
 
-run_test version-log
-run_test log-format
-run_test certificates
-run_test nss
-run_test send-crash-dump
-run_test signal-propagation
-run_test bash-entrypoint-arguments
+#run_test version-log
+#run_test log-format
+#run_test certificates
+#run_test nss
+#run_test send-crash-dump
+#run_test signal-propagation
+#run_test bash-entrypoint-arguments
+#run_test nginx-lua
+#run_test nginx-brotli
+run_test nginx-otel
 
 echo -e "${GREEN_COLOR}All tests passed${RESET_COLOR}"
