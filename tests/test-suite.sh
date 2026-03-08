@@ -66,9 +66,9 @@ run_test() {
 
     echo "Run tests: $*"
     if $test_script ; then 
-        echo "Tests passed"
+        echo -e "${GREEN_COLOR}Tests passed: $*${RESET_COLOR}"
     else
-        echo "Tests failed"
+        echo -e "${RED_COLOR}Tests failed: $*${RESET_COLOR}"
         exit 1
     fi
 }
@@ -80,8 +80,8 @@ run_test() {
 #run_test send-crash-dump
 #run_test signal-propagation
 #run_test bash-entrypoint-arguments
-#run_test nginx-lua
-#run_test nginx-brotli
+run_test nginx-lua
+run_test nginx-brotli
 run_test nginx-otel
 
 echo -e "${GREEN_COLOR}All tests passed${RESET_COLOR}"

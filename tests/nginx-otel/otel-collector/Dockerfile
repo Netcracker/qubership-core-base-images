@@ -1,11 +1,10 @@
 FROM golang:1.24-alpine AS builder
 
 WORKDIR /app
-COPY go.mod main.go ./
-RUN go mod tidy && go mod download
+COPY go.mod go.sum main.go ./
 RUN CGO_ENABLED=0 go build -o /stub-collector .
 
-FROM alpine:3.20
+FROM alpine:3.23
 
 COPY --from=builder /stub-collector /usr/local/bin/stub-collector
 

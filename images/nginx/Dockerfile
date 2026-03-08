@@ -217,10 +217,31 @@ COPY --from=builder /etc/nginx/ /etc/nginx/
 COPY --from=builder /usr/lib/nginx/modules/ /usr/lib/nginx/modules/
 COPY --from=builder /usr/local/ /usr/local/
 COPY --from=builder /usr/share/nginx/html/ /usr/share/nginx/html/
-COPY --from=builder /usr/lib/opentelemetry-cpp-contrib/ /usr/lib/opentelemetry-cpp-contrib/
 COPY --from=builder /usr/bin/envsubst /usr/bin/envsubst
-# TODO reduce copying to the minimal required set of libraries
-COPY --from=builder /usr/lib/* /usr/lib/
+COPY --from=builder \
+    /usr/lib/libabsl_*.so* \
+    /usr/lib/libupb_*.so* \
+    /usr/lib/libgrpc*.so* \
+    /usr/lib/libgpr.so* \
+    /usr/lib/libprotobuf.so* \
+    /usr/lib/libstdc++.so* \
+    /usr/lib/libpcre.so* \
+    /usr/lib/libssl.so* \
+    /usr/lib/libcrypto.so* \
+    /usr/lib/libz.so* \
+    /usr/lib/libgcc_s.so* \
+    /usr/lib/libre2.so* \
+    /usr/lib/libcares.so* \
+    /usr/lib/libaddress_sorting.so* \
+    /usr/lib/libutf8_validity.so* \
+    /usr/lib/libutf8_range_lib.so* \
+    /usr/lib/libicuuc.so* \
+    /usr/lib/libicudata.so* \
+    /usr/lib/libbrotli*.so* \
+    /usr/lib/
+COPY --from=builder \
+    /usr/lib/opentelemetry-cpp-contrib/otel_ngx_module.so \
+    /usr/lib/opentelemetry-cpp-contrib/
 
 
 RUN rm -rf /etc/nginx/modules \
