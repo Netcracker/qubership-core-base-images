@@ -1,3 +1,7 @@
+# despite this argument user for runtime docker part, docker buildx failed to builde image if move
+# thid declaration anywhere else
+ARG BASE_IMAGE=ghcr.io/netcracker/qubership-core-base:latest
+
 FROM alpine:3.23 AS builder
 
 ENV NGINX_VERSION=1.28.2
@@ -196,18 +200,21 @@ RUN scanelf --needed --nobanner /usr/sbin/nginx /usr/bin/envsubst \
     > /tmp/rundeps.txt
 
 # ---- Runtime stage ----
-FROM alpine:3.23
+FROM ${BASE_IMAGE}
+LABEL maintainer="qubership"
 
-LABEL maintainer=NetCracker
+ARG BASE_IMAGE_TAG=qubership-nginx-base:unknown
+ARG UID=10001
+ARG GID=root
 
 ENV NGINX_VERSION=1.28.2
 ENV LUA_LIB_ROOT=/usr/local/lib/lua
 ENV LUA_SHARE_ROOT=/usr/local/share/lua/5.4
 ENV LUA_PATH=$LUA_LIB_ROOT/?.lua;$LUA_SHARE_ROOT/?.lua;
 
-RUN addgroup -g 10001 -S nginx \
-    && adduser -u 10001 -S nginx -G nginx -s /sbin/nologin -h /var/cache/nginx \
-    && apk add --no-cache pcre libgcc
+# switch to root for build phase
+USER root
+RUN echo $BASE_IMAGE_TAG > /etc/base-image-release
 
 COPY images/nginx/base-image-conf/probes-locations.conf /usr/src/
 
@@ -245,16 +252,16 @@ COPY --from=builder \
 
 
 RUN rm -rf /etc/nginx/modules \
-    && ln -s ../../usr/lib/nginx/modules /etc/nginx/modules \
+    && ln -s /usr/lib/nginx/modules /etc/nginx/modules \
     && mkdir -p /var/log/nginx \
     && ln -sf /dev/stdout /var/log/nginx/access.log \
     && ln -sf /dev/stderr /var/log/nginx/error.log \
     && mkdir /etc/nginx/base-image-conf \
     && cp /usr/src/probes-locations.conf /etc/nginx/base-image-conf/ \
-    && touch /var/run/nginx.pid \
-    && chown nginx:nginx /var/run/nginx.pid
+    && touch /run/nginx.pid \
+    && chown ${UID}:${GUID} /run /run/nginx.pid
 
 VOLUME /var/log
 VOLUME /tmp
 
-USER 10001
+USER ${UID}
