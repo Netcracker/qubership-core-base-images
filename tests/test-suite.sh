@@ -73,18 +73,18 @@ run_test() {
     fi
 }
 
-#run_test version-log
-#run_test log-format
-#run_test certificates
-#run_test nss
-#run_test args-passing
-#run_test send-crash-dump
-#run_test signal-propagation
-#run_test bash-entrypoint-arguments
-#run_test java-entrypoint-background
-#run_test nginx-lua
-#run_test nginx-brotli
-#run_test nginx-otel
+run_test version-log
+run_test log-format
+run_test certificates
+run_test nss
+run_test args-passing
+run_test send-crash-dump
+run_test signal-propagation
+run_test bash-entrypoint-arguments
+run_test java-entrypoint-background
+run_test nginx-lua
+run_test nginx-brotli
+run_test nginx-otel
 run_test tls
 
 
