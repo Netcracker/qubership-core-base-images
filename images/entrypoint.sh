@@ -215,7 +215,7 @@ java_image_entrypoint() {
 }
 
 default_entrypoint() {
-  log INFO "Substitute shell by:" "$@"
+  log INFO "Exec:" "$@"
   exec "$@"
 }
 
