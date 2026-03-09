@@ -177,52 +177,43 @@ if [[ -n $X_JAVA_ARGS ]]; then
   log INFO "JAVA_TOOL_OPTIONS: $JAVA_TOOL_OPTIONS"
 fi
 
-java_image_entrypoint() {
-  if [[ "$1" != "bash" ]] && [[ "$1" != "sh" ]] ; then
-  # We don't want to mess with shell signal handling in terminal mode.
-  # Otherwise we need to rethrow signals to service to terminate it gracefully
-  # in case of need, while also executing post-mortem if available.
-      log INFO "run init scripts"
-      run_init_scripts
-      # shellcheck disable=SC2064
-      for sig in $SIGNALS_TO_RETHROW; do trap "rethrow_handler $sig" "$sig"; done
-      log INFO "Run subcommand:" "$@"
+if [[ "$1" != "bash" ]] && [[ "$1" != "sh" ]] ; then
+# We don't want to mess with shell signal handling in terminal mode.
+# Otherwise we need to rethrow signals to service to terminate it gracefully
+# in case of need, while also executing post-mortem if available.
+    log INFO "run init scripts"
+    run_init_scripts
+    # shellcheck disable=SC2064
+    for sig in $SIGNALS_TO_RETHROW; do trap "rethrow_handler $sig" "$sig"; done
+    log INFO "Run subcommand:" "$@"
+
+    if [[ -f /etc/base-image-release && $(< /etc/base-image-release) == *java* ]]; then
+      # we need to maintain backward compatibility (even though they had bugs) and replicate differences
       $@ &
-      pid=$!
+    else
+      "$@" &
+    fi
+    pid=$!
 
-      while true; do
-          wait "$pid"
-          retCode=$?
-          # If wait returned >= 128, either wait was interrupted by a signal or the child
-          # exited with that status (e.g. killed by signal). Only continue when the child
-          # is still running (wait was interrupted); otherwise break with the real exit status.
-          if [[ $retCode -ge 128 ]] && kill -0 "$pid" 2>/dev/null; then
-              continue
-          fi
-          break
-      done
-      log INFO "Process ended with return code ${retCode}"
+    while true; do
+        wait "$pid"
+        retCode=$?
+        # If wait returned >= 128, either wait was interrupted by a signal or the child
+        # exited with that status (e.g. killed by signal). Only continue when the child
+        # is still running (wait was interrupted); otherwise break with the real exit status.
+        if [[ $retCode -ge 128 ]] && kill -0 "$pid" 2>/dev/null; then
+            continue
+        fi
+        break
+    done
+    log INFO "Process ended with return code ${retCode}"
 
-      # save crash dump for future analysis
-      [ "$(type -t send_crash_dump)" = "function" ]  && send_crash_dump
+    # save crash dump for future analysis
+    [ "$(type -t send_crash_dump)" = "function" ]  && send_crash_dump
 
-      exit $retCode
-  else
-      # shellcheck disable=SC2068
-      log INFO "Run subcommand:" "$@"
-      exec "$@"
-  fi
-}
-
-default_entrypoint() {
-  log INFO "Exec:" "$@"
-  exec "$@"
-}
-
-# Old base images had their own entry point files, but now we have a single entry point file
-# we need to maintain backward compatibility (even though they had bugs) and replicate differences
-if [[ -f /etc/base-image-release && $(< /etc/base-image-release) == *java* ]]; then
-  java_image_entrypoint "$@"
+    exit $retCode
 else
-  default_entrypoint "$@"
+    # shellcheck disable=SC2068
+    log INFO "Run subcommand:" "$@"
+    exec "$@"
 fi
