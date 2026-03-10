@@ -29,10 +29,9 @@ echo "Start test"
 docker network create "$NETWORK" || true
 
 # Run TLS server (cert and key mounted; entrypoint runs then CMD runs server)
-# TODO do not use root user to access certs
+chown 10001 "$CERTS_DIR"/*
 docker run -d --name "${SERVER_NAME}" --hostname "${SERVER_NAME}" --network "$NETWORK" \
   -p 8443:8443 \
-  -u "0:0" \
   -v "$CERTS_DIR:/certs:ro" \
   -e TLS_CERT=/certs/server.crt \
   -e TLS_KEY=/certs/server.key \
