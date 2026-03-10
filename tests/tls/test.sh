@@ -34,7 +34,7 @@ docker run -d --name "${SERVER_NAME}" --network "$NETWORK" \
   -v "$CERTS_DIR:/certs:ro" \
   -e TLS_CERT=/certs/server.crt \
   -e TLS_KEY=/certs/server.key \
-  -e TLS_ADDR=0.0.0.0:8081
+  -e TLS_ADDR=0.0.0.0:8081 \
   tls-server
 
 cleanup() {
