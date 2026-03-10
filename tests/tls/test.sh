@@ -30,6 +30,7 @@ docker network create "$NETWORK" 2>/dev/null || true
 
 # Run TLS server (cert and key mounted; entrypoint runs then CMD runs server)
 docker run -d --name "${SERVER_NAME}" --network "$NETWORK" \
+  -p 8443:8443 \
   -v "$CERTS_DIR:/certs:ro" \
   -e TLS_CERT=/certs/server.crt \
   -e TLS_KEY=/certs/server.key \
@@ -38,14 +39,16 @@ docker run -d --name "${SERVER_NAME}" --network "$NETWORK" \
 cleanup() {
   docker rm -f "tls-server" 2>/dev/null || true
   docker network rm "$NETWORK" 2>/dev/null || true
+  rm -rf "$SCRIPT_DIR/certs"
 }
 trap cleanup EXIT
 
 # Wait until server is listening
-wait_for_container "tls-server" curl -sfk --connect-timeout 1 --max-time 1 "https://${SERVER_NAME}:8443/" -o /dev/null
+# use localhost and published port just to check connection
+wait_for_container "tls-server" curl -sfk --connect-timeout 1 --max-time 1 "https://localhost:8443/" -o /dev/null
 
 # Run client with CA in /tmp/cert so entrypoint adds it to trust store; client uses system roots
 docker run --rm --network "$NETWORK" \
-  -e "TLS_SERVER=${SERVER_NAME}:8443" \
+  -e "TLS_SERVER=${TLS_SERVER_NAME}:8443" \
   -v "$CERTS_DIR:/tmp/cert:ro" \
   tls-client
