@@ -45,8 +45,8 @@ trap cleanup EXIT
 
 # Wait until server is listening
 # use localhost and published port just to check connection
-wait_for_container "tls-server" curl -sfk --connect-timeout 1 --max-time 1 "https://localhost:8443/" -o /dev/null
-
+#wait_for_container "tls-server" curl -sfk --connect-timeout 1 --max-time 1 "https://localhost:8443/" -o /dev/null
+sleep 5
 # Run client with CA in /tmp/cert so entrypoint adds it to trust store; client uses system roots
 docker run --rm --network "$NETWORK" \
   -e "TLS_SERVER=${TLS_SERVER_NAME}:8443" \
