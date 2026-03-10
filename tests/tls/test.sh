@@ -49,6 +49,6 @@ trap cleanup EXIT
 sleep 5
 # Run client with CA in /tmp/cert so entrypoint adds it to trust store; client uses system roots
 docker run --rm --network "$NETWORK" \
-  -e "TLS_SERVER=${TLS_SERVER_NAME}:8443" \
+  -e "TLS_SERVER=${SERVER_NAME}:8443" \
   -v "$CERTS_DIR:/tmp/cert:ro" \
   tls-client
