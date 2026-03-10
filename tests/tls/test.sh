@@ -28,9 +28,12 @@ docker build --build-arg IMAGE="$IMAGE" -t tls-client -f "$SCRIPT_DIR/client/Doc
 echo "Start test"
 docker network create "$NETWORK" || true
 
+ls -la $CERTS_DIR
+
 # Run TLS server (cert and key mounted; entrypoint runs then CMD runs server)
 docker run -d --name "${SERVER_NAME}" --hostname "${SERVER_NAME}" --network "$NETWORK" \
   -p 8081:8081 \
+  -u "0:0" \
   -v "$CERTS_DIR:/certs:ro" \
   -e TLS_CERT=/certs/server.crt \
   -e TLS_KEY=/certs/server.key \
