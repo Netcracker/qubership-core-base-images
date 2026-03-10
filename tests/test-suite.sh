@@ -73,6 +73,7 @@ run_test() {
     fi
 }
 
+run_test tls
 run_test version-log
 run_test log-format
 run_test certificates
@@ -84,6 +85,5 @@ run_test bash-entrypoint-arguments
 run_test nginx-lua
 run_test nginx-brotli
 run_test nginx-otel
-run_test tls
 
 echo -e "${GREEN_COLOR}All tests passed${RESET_COLOR}"
