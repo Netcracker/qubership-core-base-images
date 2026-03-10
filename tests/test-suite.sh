@@ -73,12 +73,12 @@ run_test() {
     fi
 }
 
-run_test tls
 run_test version-log
 run_test log-format
 run_test certificates
 run_test nss
 run_test args-passing
+run_test tls
 run_test send-crash-dump
 run_test signal-propagation
 run_test bash-entrypoint-arguments
