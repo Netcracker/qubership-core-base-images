@@ -7,9 +7,9 @@ export IMAGE
 
 SUITE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-RED_COLOR='\033[31m'
-GREEN_COLOR='\033[32m'
-RESET_COLOR='\033[0m'
+export RED_COLOR='\033[31m'
+export GREEN_COLOR='\033[32m'
+export RESET_COLOR='\033[0m'
 
 fail() {
   echo -e "${RED_COLOR}Test error: $1${RESET_COLOR}" >&2
@@ -47,7 +47,7 @@ wait_for_container() {
     local i
     for i in $(seq 1 30); do
         "$@" >/dev/null 2>&1 && return 0
-        [ "$i" -eq 10 ] && { docker logs "$container_id"; exit 1; }
+        [ "$i" -eq 10 ] && { fail "Waiting container '$container_id' timeout reached. Container logs:\n$(docker logs "$container_id")"; exit 1; }
         sleep 1
     done
     exit 1

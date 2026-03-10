@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -eu
+set -eux
 
 # Test trust store update: only for core image
 [[ "$IMAGE" != *core* ]] && exit 0
@@ -29,21 +29,20 @@ echo "Start test"
 docker network create "$NETWORK" 2>/dev/null || true
 
 # Run TLS server (cert and key mounted; entrypoint runs then CMD runs server)
-server_id=$(docker run -d --rm --name "${SERVER_NAME}" --network "$NETWORK" \
+docker run -d --name "${SERVER_NAME}" --network "$NETWORK" \
   -v "$CERTS_DIR:/certs:ro" \
   -e TLS_CERT=/certs/server.crt \
   -e TLS_KEY=/certs/server.key \
-  tls-server)
+  tls-server
 
 cleanup() {
-  docker kill "$server_id" 2>/dev/null || true
+  docker rm -f "tls-server" 2>/dev/null || true
   docker network rm "$NETWORK" 2>/dev/null || true
 }
 trap cleanup EXIT
 
 # Wait until server is listening
-wait_for_container "$server_id" docker run --rm --network "$NETWORK" "$IMAGE" \
-  curl -sfk --connect-timeout 2 --max-time 3 "https://${SERVER_NAME}:8443/" -o /dev/null || true
+wait_for_container "tls-server" curl -sfk --connect-timeout 1 --max-time 1 "https://${SERVER_NAME}:8443/" -o /dev/null
 
 # Run client with CA in /tmp/cert so entrypoint adds it to trust store; client uses system roots
 docker run --rm --network "$NETWORK" \
