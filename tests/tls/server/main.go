@@ -9,15 +9,15 @@ import (
 func main() {
 	certFile := os.Getenv("TLS_CERT")
 	if certFile == "" {
-		certFile = "/certs/server.crt"
+		log.Fatal("Missing TLS_CERT environment variable")
 	}
 	keyFile := os.Getenv("TLS_KEY")
 	if keyFile == "" {
-		keyFile = "/certs/server.key"
+		log.Fatal("Missing TLS_KEY environment variable")
 	}
 	addr := os.Getenv("TLS_ADDR")
 	if addr == "" {
-		addr = ":8443"
+		log.Fatal("Missing TLS_ADDR environment variable")
 	}
 
 	http.HandleFunc("/", func(w http.ResponseWriter, _ *http.Request) {

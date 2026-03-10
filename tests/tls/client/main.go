@@ -10,10 +10,11 @@ import (
 func main() {
 	server := os.Getenv("TLS_SERVER")
 	if server == "" {
-		server = "tls-server:8443"
+		log.Fatalf("Missing mandatory TLS_SERVER environment variable")
 	}
 	url := "https://" + server + "/"
 
+	log.Printf("Connecting to %s", url)
 	resp, err := http.Get(url)
 	if err != nil {
 		log.Fatalf("TLS connection failed: %v", err)
