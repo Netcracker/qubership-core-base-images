@@ -1,6 +1,6 @@
 module stub-collector
 
-go 1.24.0
+go 1.25.7
 
 require (
 	go.opentelemetry.io/proto/otlp v1.9.0

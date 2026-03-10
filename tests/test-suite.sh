@@ -64,7 +64,7 @@ run_test() {
     CONTAINER_NAME=$(random_name test-run)
     export CONTAINER_NAME
 
-    echo "${GREEN_COLOR}Run tests: $*${RESET_COLOR}"
+    echo -e "${GREEN_COLOR}Run tests: $*${RESET_COLOR}"
     if $test_script ; then 
         echo -e "${GREEN_COLOR}Tests passed: $*${RESET_COLOR}"
     else
