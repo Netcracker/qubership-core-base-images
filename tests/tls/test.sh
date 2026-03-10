@@ -26,7 +26,7 @@ docker build --build-arg IMAGE="$IMAGE" -t tls-server -f "$SCRIPT_DIR/server/Doc
 docker build --build-arg IMAGE="$IMAGE" -t tls-client -f "$SCRIPT_DIR/client/Dockerfile" "$SCRIPT_DIR/client"
 
 echo "Start test"
-docker network create "$NETWORK"
+docker network create "$NETWORK" || true
 
 # Run TLS server (cert and key mounted; entrypoint runs then CMD runs server)
 docker run -d --name "${SERVER_NAME}" --network "$NETWORK" \
@@ -50,6 +50,6 @@ trap cleanup EXIT
 sleep 5
 # Run client with CA in /tmp/cert so entrypoint adds it to trust store; client uses system roots
 docker run --rm --network "$NETWORK" \
-  -e "TLS_SERVER=${SERVER_NAME}:8081" \
+  -e "URL=http://${SERVER_NAME}:8081/" \
   -v "$CERTS_DIR:/tmp/cert:ro" \
   tls-client

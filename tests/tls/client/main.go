@@ -8,11 +8,10 @@ import (
 )
 
 func main() {
-	server := os.Getenv("TLS_SERVER")
-	if server == "" {
-		log.Fatalf("Missing mandatory TLS_SERVER environment variable")
+	url := os.Getenv("URL")
+	if url == "" {
+		log.Fatalf("Missing mandatory URL environment variable")
 	}
-	url := "https://" + server + "/"
 
 	log.Printf("Connecting to %s", url)
 	resp, err := http.Get(url)
@@ -25,5 +24,5 @@ func main() {
 		log.Fatalf("unexpected status: %s", resp.Status)
 	}
 
-	fmt.Println("TLS connection OK")
+	fmt.Println("Connection OK")
 }
