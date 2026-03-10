@@ -189,6 +189,7 @@ if [[ "$1" != "bash" ]] && [[ "$1" != "sh" ]] ; then
 
     if [[ -f /etc/base-image-release && $(< /etc/base-image-release) == *java* ]]; then
       # we need to maintain backward compatibility (even though they had bugs) and replicate differences
+      # shellcheck disable=SC2068
       $@ &
     else
       "$@" &

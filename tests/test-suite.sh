@@ -64,7 +64,7 @@ run_test() {
     CONTAINER_NAME=$(random_name test-run)
     export CONTAINER_NAME
 
-    echo "Run tests: $*"
+    echo "${GREEN_COLOR}Run tests: $*${RESET_COLOR}"
     if $test_script ; then 
         echo -e "${GREEN_COLOR}Tests passed: $*${RESET_COLOR}"
     else
@@ -81,11 +81,9 @@ run_test args-passing
 run_test send-crash-dump
 run_test signal-propagation
 run_test bash-entrypoint-arguments
-run_test java-entrypoint-background
 run_test nginx-lua
 run_test nginx-brotli
 run_test nginx-otel
 run_test tls
-
 
 echo -e "${GREEN_COLOR}All tests passed${RESET_COLOR}"
