@@ -26,6 +26,6 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: netcracker/qubership-workflow-hub/actions/pr-assigner@753d4a726521a14cafe4d7ff9fe46a1fe1250d74 # 2.1.0
+      - uses: netcracker/qubership-workflow-hub/actions/pr-assigner@5edd67e98d2f0eec5ab77b4deca0e1d481137462 # 2.1.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
