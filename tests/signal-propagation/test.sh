@@ -6,7 +6,7 @@ set -ex
 CID=$(docker run -d -v "$SCRIPT_DIR:/app/" "$IMAGE" /app/sample-process.sh)
 
 # wait for sample application process start
-sleep 5
+wait_for_container "$CID" sh -c 'docker logs '"$CID"' 2>&1 | grep -q "Waiting for signal"'
 
 # signal should be captured by sample application and continue execution
 docker kill --signal=SIGHUP "$CID"
