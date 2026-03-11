@@ -15,6 +15,10 @@ There are three Java images based on Alpine:
 * Java 25 with JRE: `qubership-java-base:25-alpine-xxx`
 * Java 25 with JRE and profiler: `qubership-java-base-prof:25-alpine-xxx`
 
+### 3. Nginx Alpine Image
+
+An Alpine-based NGINX image with Lua, Brotli compression, OpenTelemetry instrumentation, and common modules (HTTP/2, SSL, auth_request, substitutions filter, stub status). Built on the core base image for consistent security and runtime behavior.
+
 ## Usage
 
 ### Base Alpine Image
@@ -43,6 +47,14 @@ FROM ghcr.io/netcracker/qubership-java-base-prof:25-alpine-latest
 
 **Note**: There are obsolete image labels named `qubership/java-base:latest`. Please, do not use them!
 **Note**: Images are available on GitHub Container Registry (`ghcr.io/netcracker/qubership/`) and support multi-platform builds (linux/amd64, linux/arm64). Use platform-specific tags if needed.
+
+### Nginx Alpine Image
+
+```dockerfile
+FROM ghcr.io/netcracker/qubership-nginx-base:latest
+```
+
+**Note**: The Nginx image is published as `ghcr.io/netcracker/qubership-nginx-base` and supports multi-platform builds (linux/amd64, linux/arm64).
 
 ## Common Features
 
@@ -133,11 +145,28 @@ FROM ghcr.io/netcracker/qubership-java-base-prof:25-alpine-latest
 - `MALLOC_TOP_PAD_`: 131072
 - `MALLOC_MMAP_MAX`: 65536
 
+### Nginx Alpine Image Details
+
+- **Base Image**: `ghcr.io/netcracker/qubership-core-base:latest` (Alpine 3.23.3)
+- **NGINX Version**: 1.28.2
+- **Default Language**: `en_US.UTF-8`
+
+#### Features and modules
+
+- HTTP/2, SSL/TLS, gunzip, gzip static
+- Lua (LuaJIT 2.1) with lua-nginx-module, lua-resty-core, lua-resty-websocket, lua-cjson
+- Brotli compression (ngx_brotli)
+- OpenTelemetry instrumentation (OTel C++ webserver)
+- nginx-lua-prometheus for metrics
+- Substitutions filter, auth_request, stub_status, headers-more
+
+The image inherits all base Alpine features (certificate management, nss_wrapper, init.d scripts, signal handling, etc.).
+
 ### Qubership Profiler Integration
 
 The Java Alpine images (Java 21 and Java 25 profiler variants) include built-in support for the Qubership profiler:
 
-- **Profiler Version**: 3.1.3 (configurable via build arg `QUBERSHIP_PROFILER_VERSION`)
+- **Profiler Version**: 3.1.4 (configurable via build arg `QUBERSHIP_PROFILER_VERSION`)
 - **Artifact Source**: Configurable via build arg `QUBERSHIP_PROFILER_ARTIFACT_SOURCE` (local or remote from Maven Central)
 - **Enable Profiler**: Set environment variable `PROFILER_ENABLED=true`
 - **Profiler Directory**: `/app/diag`
@@ -255,6 +284,7 @@ If you need to run a container in a read-only host environment, you must mount t
 * `/app/nss` - to manage NSS (Network Security Services) data
 * `/app/ncdiag` - to store diagnostic and troubleshooting data
 * `/etc/ssl/certs/java` - to handle Java SSL certificates, or `/etc/ssl/certs` for non-Java images
+* `/var/log` and `/var/cache/nginx/*` - for NGINX image (logs and cache directories)
 
 
 ## Contributing
