@@ -1,5 +1,5 @@
 ARG IMAGE=alpine:3.23
-FROM golang:1.25.7-alpine AS builder
+FROM golang:1.26.1-alpine AS builder
 
 WORKDIR /app
 COPY go.mod main.go ./
