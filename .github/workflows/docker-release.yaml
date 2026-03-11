@@ -93,7 +93,7 @@ jobs:
         BASE_IMAGE=ghcr.io/netcracker/qubership-core-base:${{ inputs.version }}
         BASE_IMAGE_TAG=ghcr.io/netcracker/qubership-nginx-base:${{ inputs.version }}
       tags: "${{ inputs.version }},latest"
-      config-filename: "nginx-docker-release-config.json"
+      config-filename: "nginx-base-docker-release-config.json"
       dry-run: ${{ inputs.dry-run }}
 
   github-release:
