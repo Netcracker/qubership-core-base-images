@@ -262,6 +262,10 @@ RUN rm -rf /etc/nginx/modules \
     && chown ${UID}:${GUID} /run /run/nginx.pid
 
 VOLUME /var/log
-VOLUME /tmp
+VOLUME /var/cache/nginx/client_temp
+VOLUME /var/cache/nginx/proxy_temp
+VOLUME /var/cache/nginx/fastcgi_temp
+VOLUME /var/cache/nginx/uwsgi_temp
+VOLUME /var/cache/nginx/scgi_temp
 
 USER ${UID}
