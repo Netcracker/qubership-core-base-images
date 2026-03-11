@@ -14,7 +14,7 @@ docker kill --signal=SIGHUP "$CID"
 docker kill --signal=SIGUSR1 "$CID"
 #wait for container exit to make sure that all sample application output is captured
 docker wait "$CID" >/dev/null
-docker logs "$CID" >"$PROC_OUTPUT_FILE"
+docker logs "$CID" >"$PROC_OUTPUT_FILE" 2>&1
 
 # Test sample application output
 <"$PROC_OUTPUT_FILE" grep "Test application: captured SIGHUP" >/dev/null || fail "SIGHUP signal not captured"
