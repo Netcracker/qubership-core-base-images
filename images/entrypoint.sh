@@ -24,7 +24,7 @@ log() {
     if [ "$severity_number" -ge "$CURRENT_LOG_LEVEL" ]; then
       _timestamp=$(date +%Y-%m-%dT%H:%M:%S$(printf ".%03d" $(date +%N | cut -c1-3)))
 
-       printf '[%s] [%s] [request_id=-] [tenant_id=-] [thread=-] [class=-] [%s] %s\n' "${_timestamp}" "${severity}" "${SCRIPT_NAME}" "$*"
+       printf '[%s] [%s] [request_id=-] [tenant_id=-] [thread=-] [class=-] [%s] %s\n' "${_timestamp}" "${severity}" "${SCRIPT_NAME}" "$*" >&2
     fi
 }
 
@@ -186,8 +186,14 @@ if [[ "$1" != "bash" ]] && [[ "$1" != "sh" ]] ; then
     # shellcheck disable=SC2064
     for sig in $SIGNALS_TO_RETHROW; do trap "rethrow_handler $sig" "$sig"; done
     log INFO "Run subcommand:" "$@"
-    # shellcheck disable=SC2068
-    $@ &
+
+    if [[ -f /etc/base-image-release && $(< /etc/base-image-release) == *java* ]]; then
+      # we need to maintain backward compatibility (even though they had bugs) and replicate differences
+      # shellcheck disable=SC2068
+      $@ &
+    else
+      "$@" &
+    fi
     pid=$!
 
     while true; do
@@ -212,5 +218,3 @@ else
     log INFO "Run subcommand:" "$@"
     exec "$@"
 fi
-
-
