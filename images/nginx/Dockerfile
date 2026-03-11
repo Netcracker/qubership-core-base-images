@@ -216,15 +216,17 @@ ENV LUA_PATH=$LUA_LIB_ROOT/?.lua;$LUA_SHARE_ROOT/?.lua;
 USER root
 RUN echo $BASE_IMAGE_TAG > /etc/base-image-release
 
-COPY images/nginx/base-image-conf/probes-locations.conf /usr/src/
+COPY images/nginx/base-image-conf/probes-locations.conf /etc/nginx/base-image-conf/
 
 COPY --from=builder /usr/sbin/nginx /usr/sbin/nginx
 COPY --from=builder /usr/sbin/nginx-debug /usr/sbin/nginx-debug
 COPY --from=builder /etc/nginx/ /etc/nginx/
 COPY --from=builder /usr/lib/nginx/modules/ /usr/lib/nginx/modules/
-COPY --from=builder /usr/local/ /usr/local/
+COPY --from=builder /usr/local/bin/ /usr/local/bin/
+COPY --from=builder /usr/local/share/luajit* /usr/local/share/
+COPY --from=builder /usr/local/lib/lua/ /usr/local/lib/lua/
+COPY --from=builder /usr/local/lib/libopentelemetry_proto*.so /usr/local/lib/
 COPY --from=builder /usr/share/nginx/html/ /usr/share/nginx/html/
-COPY --from=builder /usr/bin/envsubst /usr/bin/envsubst
 COPY --from=builder \
     /usr/lib/libabsl_*.so* \
     /usr/lib/libupb_*.so* \
@@ -256,8 +258,6 @@ RUN rm -rf /etc/nginx/modules \
     && mkdir -p /var/log/nginx \
     && ln -sf /dev/stdout /var/log/nginx/access.log \
     && ln -sf /dev/stderr /var/log/nginx/error.log \
-    && mkdir /etc/nginx/base-image-conf \
-    && cp /usr/src/probes-locations.conf /etc/nginx/base-image-conf/ \
     && touch /run/nginx.pid \
     && chown ${UID}:${GUID} /run /run/nginx.pid
 
