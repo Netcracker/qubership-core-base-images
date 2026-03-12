@@ -84,17 +84,18 @@ jobs:
       config-filename: "java-prof-25-docker-release-config.json"
       dry-run: ${{ inputs.dry-run }}
 
-  nginx-docker-build:
-    needs: [ create-tag, core-base-docker-build ]
-    name: Nginx image
-    uses: Netcracker/qubership-core-infra/.github/workflows/docker-build.yaml@c36c6cf6875af12c5708dcdbe088a887be55785c
-    with:
-      build-args: |
-        BASE_IMAGE=ghcr.io/netcracker/qubership-core-base:${{ inputs.version }}
-        BASE_IMAGE_TAG=ghcr.io/netcracker/qubership-nginx-base:${{ inputs.version }}
-      tags: "${{ inputs.version }},latest"
-      config-filename: "nginx-base-docker-release-config.json"
-      dry-run: ${{ inputs.dry-run }}
+# Disabled intentionally: we decided to switch OTEL module
+#  nginx-docker-build:
+#    needs: [ create-tag, core-base-docker-build ]
+#    name: Nginx image
+#    uses: Netcracker/qubership-core-infra/.github/workflows/docker-build.yaml@c36c6cf6875af12c5708dcdbe088a887be55785c
+#    with:
+#      build-args: |
+#        BASE_IMAGE=ghcr.io/netcracker/qubership-core-base:${{ inputs.version }}
+#        BASE_IMAGE_TAG=ghcr.io/netcracker/qubership-nginx-base:${{ inputs.version }}
+#      tags: "${{ inputs.version }},latest"
+#      config-filename: "nginx-base-docker-release-config.json"
+#      dry-run: ${{ inputs.dry-run }}
 
   github-release:
     needs: [create-tag]
