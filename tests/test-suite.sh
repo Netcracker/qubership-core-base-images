@@ -73,17 +73,11 @@ run_test() {
     fi
 }
 
-run_test version-log
-run_test log-format
-run_test certificates
-run_test nss
-run_test args-passing
-run_test tls
-run_test send-crash-dump
-run_test signal-propagation
-run_test bash-entrypoint-arguments
-run_test nginx-lua
-run_test nginx-brotli
-run_test nginx-otel
+# optional: glob pattern to filter test folders (default: all)
+TEST_FILTER=${2:-*}
+find "$SUITE_DIR" -maxdepth 1 -mindepth 1 -name "$TEST_FILTER" -type d -printf "%f\n" | while read -r test_name; do
+  run_test "$test_name"
+done
+
 
 echo -e "${GREEN_COLOR}All tests passed${RESET_COLOR}"
