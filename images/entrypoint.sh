@@ -51,7 +51,15 @@ load_certificates() {
         filename { print > filename }
         END { if (!found) exit 1 }" || log ERROR "Error process certificates file ${cert}: invalid certificates file data format. " >&2
     done
-    update-ca-certificates > /dev/null 2>&1 || log ERROR "Error updating CA certificates store" >&2
+
+    # update certificates plugin for java will fail in case of non-standard file permissions and running user id
+    # but we can do workaround by extracting certificates from trust store and copying them to java keystore (openshift case)
+    if ! update-ca-certificates > /dev/null 2>&1; then
+      log WARN "Error updating CA certificates store. Try alternative method to update certificates for java keystore." >&2
+      trust extract --overwrite --format=java-cacerts --filter=ca-anchors --purpose server-auth /tmp/cacerts.tmp || log ERROR "Error extracting certificates for java keystore" >&2
+      cp -f /tmp/cacerts.tmp /etc/ssl/certs/java/cacerts || log ERROR "Error copying certificates to java keystore" >&2
+    fi
+
     log INFO "Done"
 
     if [[ -x /usr/bin/keytool ]]; then
