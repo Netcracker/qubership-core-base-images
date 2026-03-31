@@ -30,7 +30,7 @@ jobs:
     steps:
       - name: Create tag
         if: ${{ !inputs.dry-run }}
-        uses: netcracker/qubership-workflow-hub/actions/tag-action@v2.1.2
+        uses: netcracker/qubership-workflow-hub/actions/tag-action@v2.2.0
         with:
           ref: main
           tag-name: v${{ github.event.inputs.version }}
@@ -40,7 +40,7 @@ jobs:
   core-base-docker-build:
     needs: [ create-tag ]
     name: Core image
-    uses: Netcracker/qubership-core-infra/.github/workflows/docker-build.yaml@f1e8a0537d75dd8a2ba77fd65a1bf4bb411f8959
+    uses: Netcracker/qubership-core-infra/.github/workflows/docker-build.yaml@6e420b55247f775963c3b18319a6bd62afa179ab
     with:
       build-args: |
         BASE_IMAGE_TAG=ghcr.io/netcracker/qubership-core-base:${{ inputs.version }}
@@ -51,7 +51,7 @@ jobs:
   java-prof-21-docker-build:
     needs: [create-tag, core-base-docker-build]
     name: Java 21 image
-    uses: Netcracker/qubership-core-infra/.github/workflows/docker-build.yaml@f1e8a0537d75dd8a2ba77fd65a1bf4bb411f8959
+    uses: Netcracker/qubership-core-infra/.github/workflows/docker-build.yaml@6e420b55247f775963c3b18319a6bd62afa179ab
     with:
       build-args: |
         BASE_IMAGE=ghcr.io/netcracker/qubership-core-base:${{ inputs.version }}
@@ -63,7 +63,7 @@ jobs:
   java-25-docker-build:
     needs: [create-tag, core-base-docker-build]
     name: Java 25 image
-    uses: Netcracker/qubership-core-infra/.github/workflows/docker-build.yaml@f1e8a0537d75dd8a2ba77fd65a1bf4bb411f8959
+    uses: Netcracker/qubership-core-infra/.github/workflows/docker-build.yaml@6e420b55247f775963c3b18319a6bd62afa179ab
     with:
       build-args: |
         BASE_IMAGE=ghcr.io/netcracker/qubership-core-base:${{ inputs.version }}
@@ -75,7 +75,7 @@ jobs:
   java-prof-25-docker-build:
     needs: [create-tag, java-25-docker-build]
     name: Java Prof 25 image
-    uses: Netcracker/qubership-core-infra/.github/workflows/docker-build.yaml@f1e8a0537d75dd8a2ba77fd65a1bf4bb411f8959
+    uses: Netcracker/qubership-core-infra/.github/workflows/docker-build.yaml@6e420b55247f775963c3b18319a6bd62afa179ab
     with:
       build-args: |
         BASE_IMAGE=ghcr.io/netcracker/qubership-java-base:25-alpine-${{ inputs.version }}
@@ -100,7 +100,7 @@ jobs:
   github-release:
     needs: [create-tag]
     if: ${{ !inputs.dry-run }}
-    uses: netcracker/qubership-workflow-hub/.github/workflows/release-drafter.yml@v2.1.2
+    uses: netcracker/qubership-workflow-hub/.github/workflows/release-drafter.yml@v2.2.0
     with:
       version: ${{ github.event.inputs.version }}
       publish: false
