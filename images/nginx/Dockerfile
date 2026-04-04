@@ -8,10 +8,13 @@ RUN apk add curl ca-certificates
 RUN apk add curl-dev pcre-dev zlib-dev protobuf-dev
 RUN apk add c-ares-dev re2-dev
 RUN apk add libstdc++
+RUN apk add luajit-dev
 
 WORKDIR /usr/src
 
 RUN git clone https://github.com/nginx/nginx.git
+RUN git clone --depth 1 --branch v0.3.3 https://github.com/vision5/ngx_devel_kit.git
+RUN git clone --depth 1 --branch v0.10.26 https://github.com/openresty/lua-nginx-module.git
 RUN CONFIG="\
         --prefix=/etc/nginx \
         --sbin-path=/usr/sbin/nginx \
@@ -26,8 +29,7 @@ RUN CONFIG="\
         --http-fastcgi-temp-path=/var/cache/nginx/fastcgi_temp \
         --http-uwsgi-temp-path=/var/cache/nginx/uwsgi_temp \
         --http-scgi-temp-path=/var/cache/nginx/scgi_temp \
-        --user=nginx \
-        --group=nginx \
+        --user=appuser \
         --with-http_gunzip_module \
         --with-http_gzip_static_module \
         --with-http_v2_module \
@@ -38,10 +40,23 @@ RUN CONFIG="\
         --with-http_sub_module \
         --with-http_stub_status_module \
         --with-compat \
+        --add-module=/usr/src/ngx_devel_kit \
+        --add-module=/usr/src/lua-nginx-module \
     " && \
+    export LUAJIT_LIB=/usr/lib && \
+    export LUAJIT_INC=/usr/include/luajit-2.1 && \
     cd nginx/ && auto/configure $CONFIG
 
 RUN cd nginx/ && make -j6 && make install
+
+# lua-nginx-module loads lua-resty-core by default; ship OpenResty libs under default lua_package_path
+RUN mkdir -p /usr/local/share/lua/5.1 && \
+    git clone --depth 1 --branch v0.13 https://github.com/openresty/lua-resty-lrucache.git /tmp/lua-resty-lrucache && \
+    cp -r /tmp/lua-resty-lrucache/lib/resty /usr/local/share/lua/5.1/ && \
+    rm -rf /tmp/lua-resty-lrucache && \
+    git clone --depth 1 --branch v0.1.28 https://github.com/openresty/lua-resty-core.git /tmp/lua-resty-core && \
+    cp -r /tmp/lua-resty-core/lib/resty/* /usr/local/share/lua/5.1/resty/ && \
+    rm -rf /tmp/lua-resty-core
 
 RUN git clone https://github.com/nginxinc/nginx-otel.git
 RUN cd nginx-otel && \
