@@ -15,6 +15,10 @@ WORKDIR /usr/src
 RUN git clone https://github.com/nginx/nginx.git
 RUN git clone --depth 1 --branch v0.3.3 https://github.com/vision5/ngx_devel_kit.git
 RUN git clone --depth 1 --branch v0.10.26 https://github.com/openresty/lua-nginx-module.git
+RUN git clone --recurse-submodules https://github.com/google/ngx_brotli.git
+RUN cd ngx_brotli/deps/brotli && mkdir -p out && cd out && \
+    cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DCMAKE_INSTALL_PREFIX=./installed .. && \
+    cmake --build . -j6 --config Release --target brotlienc
 RUN CONFIG="\
         --prefix=/etc/nginx \
         --sbin-path=/usr/sbin/nginx \
@@ -42,6 +46,7 @@ RUN CONFIG="\
         --with-compat \
         --add-module=/usr/src/ngx_devel_kit \
         --add-module=/usr/src/lua-nginx-module \
+        --add-dynamic-module=/usr/src/ngx_brotli \
     " && \
     export LUAJIT_LIB=/usr/lib && \
     export LUAJIT_INC=/usr/include/luajit-2.1 && \
@@ -67,7 +72,8 @@ RUN cd nginx-otel && \
       ..
 RUN cd nginx-otel/build && make -j6
 
-RUN mkdir -p /usr/lib/nginx/modules/ && mv /usr/src/nginx-otel/build/ngx_otel_module.so /usr/lib/nginx/modules/
+RUN mkdir -p /usr/lib/nginx/modules/ && \
+    mv /usr/src/nginx-otel/build/ngx_otel_module.so /usr/lib/nginx/modules/
 
 ARG UID=10001
 ARG GID=root
