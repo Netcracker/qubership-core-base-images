@@ -116,7 +116,7 @@ COPY --from=builder \
     /usr/lib/libgrpc*.so* \
     /usr/lib/libgpr.so* \
     /usr/lib/libprotobuf.so* \
-    /usr/lib/libstdc++.so* \
+    /usr/lib/libstdc*.so* \
     /usr/lib/libpcre.so* \
     /usr/lib/libssl.so* \
     /usr/lib/libcrypto.so* \
@@ -142,7 +142,7 @@ RUN rm -rf /etc/nginx/modules \
     && ln -sf /dev/stdout /var/log/nginx/access.log \
     && ln -sf /dev/stderr /var/log/nginx/error.log \
     && touch /run/nginx.pid \
-    && chown ${UID}:${GUID} /run /run/nginx.pid
+    && chown ${UID}:${GID} /run /run/nginx.pid
 
 VOLUME /var/log
 VOLUME /var/cache/nginx/client_temp
