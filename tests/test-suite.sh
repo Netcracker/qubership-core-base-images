@@ -79,5 +79,4 @@ find "$SUITE_DIR" -maxdepth 1 -mindepth 1 -name "$TEST_FILTER" -type d -printf "
   run_test "$test_name"
 done
 
-
 echo -e "${GREEN_COLOR}All tests passed${RESET_COLOR}"
