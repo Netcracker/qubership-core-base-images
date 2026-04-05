@@ -14,7 +14,7 @@ RUN apk add --no-cache \
 WORKDIR /usr/src
 
 # renovate: datasource=github-tags depName=nginx/nginx
-ARG NGINX_VERSION=release-1.28.0
+ARG NGINX_VERSION=release-1.28.3
 # renovate: datasource=github-tags depName=vision5/ngx_devel_kit
 ARG NGX_DEVEL_KIT_VERSION=v0.3.4
 # renovate: datasource=github-tags depName=openresty/lua-nginx-module
@@ -96,11 +96,8 @@ ARG BASE_IMAGE_TAG=qubership-nginx-base:unknown
 ARG UID=appuser
 ARG GID=root
 
-ENV NGINX_VERSION=1.28.2
 ENV LUA_LIB_ROOT=/usr/local/lib/lua
-#ENV LUA_SHARE_ROOT=/usr/local/share/lua/5.4
 ENV LUA_PATH=$LUA_LIB_ROOT/?.lua
-#;$LUA_SHARE_ROOT/?.lua;
 
 # switch to root for build phase
 USER root
@@ -113,7 +110,6 @@ COPY --from=builder /usr/local/bin/ /usr/local/bin/
 COPY --from=builder /usr/local/share/luajit* /usr/local/share/
 COPY --from=builder /usr/src/lua/lib/ /usr/local/lib/lua/
 COPY --from=builder /usr/local/lib/libopentelemetry_proto*.so /usr/local/lib/
-#COPY --from=builder /usr/share/nginx/html/ /usr/share/nginx/html/
 COPY --from=builder \
     /usr/lib/libabsl_*.so* \
     /usr/lib/libupb_*.so* \
@@ -136,7 +132,6 @@ COPY --from=builder \
     /usr/lib/libbrotli*.so* \
     /usr/lib/libluajit*.so* \
     /usr/lib/
-# TODO lua 5.1 -> 5.4
 COPY --from=builder \
     /usr/src/nginx-otel/build/ngx_otel_module.so \
     /usr/lib/nginx/modules/
