@@ -8,6 +8,11 @@
     "description" : "Update _VERSION variables in Dockerfiles",
     "fileMatch" : [ "^images/.*/Dockerfile$" ],
     "matchStrings" : [ "# renovate: datasource=(?<datasource>[a-z-]+?) depName=(?<depName>.+?)(?: (?:packageName|lookupName)=(?<packageName>.+?))?(?: versioning=(?<versioning>[a-z-]+?))?\\s(?:ENV|ARG) .+?_VERSION=(?<currentValue>.+?)\\s" ]
+  }, {
+    "customType" : "regex",
+    "description" : "Update _COMMIT variables (git digests) in Dockerfiles",
+    "fileMatch" : [ "^images/.*/Dockerfile$" ],
+    "matchStrings" : [ "# renovate: datasource=(?<datasource>[a-z-]+?) depName=(?<depName>.+?)(?: currentValue=(?<currentValue>.+?))?\\s(?:ENV|ARG) .+?_COMMIT=(?<currentDigest>[a-f0-9]+?)\\s" ]
   } ],
   "packageRules" : [ {
     "groupName" : "org.qubership.profiler",
