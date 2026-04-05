@@ -21,6 +21,8 @@ ARG NGX_DEVEL_KIT_VERSION=v0.3.4
 ARG LUA_NGINX_MODULE_VERSION=v0.10.28
 # renovate: datasource=github-tags depName=google/ngx_brotli
 ARG NGX_BROTLI_VERSION=master
+# renovate: datasource=github-tags depName=openresty/headers-more-nginx-module
+ARG HEADERS_MORE_VERSION=v0.39
 # renovate: datasource=github-tags depName=openresty/lua-resty-lrucache
 ARG LUA_RESTY_LRUCACHE_VERSION=v0.15
 # renovate: datasource=github-tags depName=openresty/lua-resty-core
@@ -31,7 +33,8 @@ ARG NGINX_OTEL_COMMIT=6eb28d7452f6ce2e009cc25470aec091826503b3
 RUN git clone --depth 1 --branch ${NGINX_VERSION} https://github.com/nginx/nginx.git && \
     git clone --depth 1 --branch ${NGX_DEVEL_KIT_VERSION} https://github.com/vision5/ngx_devel_kit.git && \
     git clone --depth 1 --branch ${LUA_NGINX_MODULE_VERSION} https://github.com/openresty/lua-nginx-module.git && \
-    git clone --depth 1 --recurse-submodules --shallow-submodules --branch ${NGX_BROTLI_VERSION} https://github.com/google/ngx_brotli.git
+    git clone --depth 1 --recurse-submodules --shallow-submodules --branch ${NGX_BROTLI_VERSION} https://github.com/google/ngx_brotli.git && \
+    git clone --depth 1 --branch ${HEADERS_MORE_VERSION} https://github.com/openresty/headers-more-nginx-module.git
 
 RUN cd ngx_brotli/deps/brotli && mkdir -p out && cd out && \
     cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DCMAKE_INSTALL_PREFIX=./installed .. && \
@@ -65,6 +68,7 @@ RUN CONFIG="\
         --add-module=/usr/src/ngx_devel_kit \
         --add-module=/usr/src/lua-nginx-module \
         --add-dynamic-module=/usr/src/ngx_brotli \
+        --add-module=/usr/src/headers-more-nginx-module \
     " && \
     export LUAJIT_LIB=/usr/lib && \
     export LUAJIT_INC=/usr/include/luajit-2.1 && \
