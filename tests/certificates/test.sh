@@ -4,13 +4,14 @@ set -ex
 CERTS_DIR="$SCRIPT_DIR/certs"
 
 export_image_trust_store() {
-  local output_file=$1
-  local fs_mode=${2:-rw}
+  local output_file=${1:?Missed mandatory parameter: output file}
+  local fs_mode=${2:?Missed mandatory parameter: fs mode}
+  shift 2
   echo "Export certificate list from: $IMAGE, FS mode: ${fs_mode}"
   # shellcheck disable=SC2046
-  docker run --rm \
+  docker run "${@}" --rm \
       -v "${CERTS_DIR}":/tmp/cert/ \
-      $(read_only_params $fs_mode) \
+      $(read_only_params "$fs_mode") \
       "$IMAGE" \
       cat /etc/ssl/certs/ca-certificates.crt >"${output_file}.crt"
 
@@ -19,16 +20,17 @@ export_image_trust_store() {
 }
 
 export_java_keystore() {
-  local output_file=$1
-  local fs_mode=${2:-rw}
+  local output_file=${1:?Missed mandatory parameter: output file}
+  local fs_mode=${2:?Missed mandatory parameter: fs mode}
+  shift 2
   echo "Export certificate list from: $IMAGE, FS mode: ${fs_mode}"
   # shellcheck disable=SC2046
-  docker run --rm \
+  docker run "${@}" --rm \
       -v "${CERTS_DIR}":/tmp/cert/ \
       -e CERTIFICATE_FILE_PASSWORD=abc12345 \
-      $(read_only_params $fs_mode) \
+      $(read_only_params "$fs_mode") \
       "$IMAGE" \
-      keytool -list -cacerts -storepass abc12345 -v >${output_file}
+      keytool -list -cacerts -storepass abc12345 -v >"${output_file}"
 }
 
 assert_tests() {
@@ -40,18 +42,29 @@ assert_tests() {
 }
 
 EXPORTED_CERTS_FILE=$(mktemp /tmp/certificates-test.XXXXXX)
-export_image_trust_store "$EXPORTED_CERTS_FILE"
+export_image_trust_store "$EXPORTED_CERTS_FILE" rw
 assert_tests "$EXPORTED_CERTS_FILE"
 
 # Test the same with volume mounted to cert path directory in read-only mode
 export_image_trust_store "$EXPORTED_CERTS_FILE" ro
 assert_tests "$EXPORTED_CERTS_FILE"
 
+# OpenShift case with random UID
+export_image_trust_store "$EXPORTED_CERTS_FILE" ro -u 10009000
+assert_tests "$EXPORTED_CERTS_FILE"
+
 if [[ "$IMAGE" == *java* ]]; then
   echo "Test certificates imported in JKS"
-  export_java_keystore "$EXPORTED_CERTS_FILE"
+  export_java_keystore "$EXPORTED_CERTS_FILE" rw
   assert_tests "$EXPORTED_CERTS_FILE"
 
   export_java_keystore "$EXPORTED_CERTS_FILE" ro
+  assert_tests "$EXPORTED_CERTS_FILE"
+
+  # OpenShift case with random UID
+  export_java_keystore "$EXPORTED_CERTS_FILE" rw -u 10009000
+  assert_tests "$EXPORTED_CERTS_FILE"
+
+  export_java_keystore "$EXPORTED_CERTS_FILE" ro -u 10009000
   assert_tests "$EXPORTED_CERTS_FILE"
 fi

@@ -62,7 +62,7 @@ RUN mkdir -p /tmp/cert && \
     find /app \( -type d -exec chmod ug+rwx {} \; -exec chown ${UID}:${GID} {} \; -o -type f -exec chmod ug+rw {} \; -exec chown ${UID}:${GID} {} \; \)
 
 # renovate: datasource=maven depName=qubership-profiler-installer packageName=org.qubership.profiler:qubership-profiler-installer versioning=maven
-ARG QUBERSHIP_PROFILER_VERSION=3.1.5
+ARG QUBERSHIP_PROFILER_VERSION=3.1.6
 ARG MAVEN_CENTRAL_URL=https://repo.maven.apache.org/maven2
 # Supported values are: local, remote. Local artifact enables testing the dockerfile without publishing the profiler to Central.
 ARG QUBERSHIP_PROFILER_ARTIFACT_SOURCE=remote
@@ -92,6 +92,8 @@ RUN --mount=type=bind,source=local-artifacts,target=/build/artifacts mkdir /app/
 RUN echo $BASE_IMAGE_TAG > /etc/base-image-release
 
 COPY images/java-21-prof/font-local.conf /etc/fonts/local.conf
+
+VOLUME /etc/ssl/certs/java/
 
 USER ${UID}:${GID}
 
