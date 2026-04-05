@@ -14,6 +14,8 @@ cleanup() {
 }
 trap 'cleanup' EXIT RETURN
 
+docker network create "$NETWORK" 2>/dev/null || true
+
 docker buildx build -t otel-collector -f "$SCRIPT_DIR/otel-collector/Dockerfile" "$SCRIPT_DIR/otel-collector"
 collector_id=$(docker run -d --rm -p 4317:4317 \
         --name "otel-collector" \
