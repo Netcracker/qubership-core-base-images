@@ -17,7 +17,7 @@ There are three Java images based on Alpine:
 
 ### 3. Nginx Alpine Image
 
-An Alpine-based NGINX image with Lua, Brotli compression, OpenTelemetry instrumentation, and common modules (HTTP/2, SSL, auth_request, substitutions filter, stub status). Built on the core base image for consistent security and runtime behavior.
+An Alpine-based NGINX image with Lua, Brotli compression, OpenTelemetry instrumentation, and common modules (HTTP/2, SSL, auth_request, sub filter, stub status, headers-more). Built on the core base image for consistent security and runtime behavior.
 
 ## Usage
 
@@ -148,17 +148,16 @@ FROM ghcr.io/netcracker/qubership-nginx-base:latest
 ### Nginx Alpine Image Details
 
 - **Base Image**: `ghcr.io/netcracker/qubership-core-base:latest` (Alpine 3.23.3)
-- **NGINX Version**: 1.28.2
+- **NGINX Version**: 1.28.3
 - **Default Language**: `en_US.UTF-8`
 
 #### Features and modules
 
 - HTTP/2, SSL/TLS, gunzip, gzip static
-- Lua (LuaJIT 2.1) with lua-nginx-module, lua-resty-core, lua-resty-websocket, lua-cjson
-- Brotli compression (ngx_brotli)
-- OpenTelemetry instrumentation (OTel C++ webserver)
-- nginx-lua-prometheus for metrics
-- Substitutions filter, auth_request, stub_status, headers-more
+- Lua (LuaJIT 2.1) with lua-nginx-module, lua-resty-core, lua-resty-lrucache
+- Brotli compression (ngx_brotli, dynamic module)
+- OpenTelemetry instrumentation (nginx-otel native module by nginxinc)
+- auth_request, sub filter, stub_status, headers-more
 
 The image inherits all base Alpine features (certificate management, nss_wrapper, init.d scripts, signal handling, etc.).
 
@@ -166,7 +165,7 @@ The image inherits all base Alpine features (certificate management, nss_wrapper
 
 The Java Alpine images (Java 21 and Java 25 profiler variants) include built-in support for the Qubership profiler:
 
-- **Profiler Version**: 3.1.4 (configurable via build arg `QUBERSHIP_PROFILER_VERSION`)
+- **Profiler Version**: 3.1.6 (configurable via build arg `QUBERSHIP_PROFILER_VERSION`)
 - **Artifact Source**: Configurable via build arg `QUBERSHIP_PROFILER_ARTIFACT_SOURCE` (local or remote from Maven Central)
 - **Enable Profiler**: Set environment variable `PROFILER_ENABLED=true`
 - **Profiler Directory**: `/app/diag`
@@ -228,6 +227,8 @@ Certificates can be added in two ways:
 
 For Java images, certificates are imported into the Java keystore. The keystore password can be customized via the `CERTIFICATE_FILE_PASSWORD` environment variable (default: `changeit`).
 
+**OpenShift / random UID support**: When running under a random UID (e.g., on OpenShift), `update-ca-certificates` may fail due to non-standard file permissions. In this case, the entrypoint automatically falls back to using `trust extract` to rebuild the Java keystore from the system trust anchors.
+
 ### Adding Initialization Scripts
 
 Place your initialization scripts (`.sh` files) in `/app/init.d/`. They will be executed in alphabetical order before the main application starts.
@@ -283,7 +284,7 @@ If you need to run a container in a read-only host environment, you must mount t
 * `/etc/env` - to manage environment configurations
 * `/app/nss` - to manage NSS (Network Security Services) data
 * `/app/ncdiag` - to store diagnostic and troubleshooting data
-* `/etc/ssl/certs/java` - to handle Java SSL certificates, or `/etc/ssl/certs` for non-Java images
+* `/etc/ssl/certs/java` - to handle Java SSL certificates (declared as a volume in profiler images), or `/etc/ssl/certs` for non-Java images
 * `/var/log` and `/var/cache/nginx/*` - for NGINX image (logs and cache directories)
 
 
