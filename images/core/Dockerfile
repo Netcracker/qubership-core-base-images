@@ -5,9 +5,9 @@ ARG BASE_IMAGE_TAG=core:unknown
 ARG UID=10001
 ARG GID=root
 
-RUN apk update --no-cache
+RUN apk update --no-cache  && apk upgrade
 RUN apk add --no-cache ca-certificates bash nss_wrapper
-RUn apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/edge/main curl
+RUN apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/edge/main curl
 
 ENV HOME=/app \
     USER_NAME=appuser \
