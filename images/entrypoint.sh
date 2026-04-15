@@ -94,14 +94,10 @@ create_user() {
 
 restore_volumes_data() {
     if [ -d /app/volumes/certs ]; then
-        # BusyBox cp -Rn silently copies nothing on Alpine 3.23+, so we
-        # check whether the target is empty first and fall back to cp -R.
-        if [ -z "$(ls -A /etc/ssl/certs 2>/dev/null)" ]; then
-            cp -R /app/volumes/certs/. /etc/ssl/certs
-        else
-            cp -Rn /app/volumes/certs/. /etc/ssl/certs 2>/dev/null || \
-                cp -R /app/volumes/certs/. /etc/ssl/certs
-        fi
+        # Avoid the "src/." idiom — BusyBox cp -Rn treats "." as the last
+        # path component, sees dest/. already exists, and skips the copy.
+        # Glob expansion sidesteps the issue while keeping -n semantics.
+        cp -Rn /app/volumes/certs/* /app/volumes/certs/.[!.]* /etc/ssl/certs/ 2>/dev/null || true
     fi
 }
 
