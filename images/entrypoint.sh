@@ -93,7 +93,16 @@ create_user() {
 }
 
 restore_volumes_data() {
-    [ -d /app/volumes/certs ] && cp -Rn /app/volumes/certs/. /etc/ssl/certs
+    if [ -d /app/volumes/certs ]; then
+        # BusyBox cp -Rn silently copies nothing on Alpine 3.23+, so we
+        # check whether the target is empty first and fall back to cp -R.
+        if [ -z "$(ls -A /etc/ssl/certs 2>/dev/null)" ]; then
+            cp -R /app/volumes/certs/. /etc/ssl/certs
+        else
+            cp -Rn /app/volumes/certs/. /etc/ssl/certs 2>/dev/null || \
+                cp -R /app/volumes/certs/. /etc/ssl/certs
+        fi
+    fi
 }
 
 run_init_scripts() {
