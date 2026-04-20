@@ -20,6 +20,11 @@ on:
         type: boolean
         default: false
         description: 'Dry run'
+      build-nginx:
+        required: false
+        type: boolean
+        default: true
+        description: 'Build and publish nginx image'
 permissions:
   contents: write
   packages: write
@@ -86,6 +91,7 @@ jobs:
 
   nginx-docker-build:
     needs: [ core-base-docker-build ]
+    if: ${{ inputs.build-nginx }}
     name: Nginx image
     uses: Netcracker/qubership-core-infra/.github/workflows/docker-build.yaml@05f471f3d4da2107a6ed3286f839ec517c2c18b8
     with:
