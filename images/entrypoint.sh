@@ -11,7 +11,9 @@ severity_to_number() {
     *) echo 2 ;;
   esac
 }
-CURRENT_LOG_LEVEL=$(severity_to_number "${LOG_LEVEL^^:-INFO}")
+# Effective log level: IMAGE_LOG_LEVEL (highest), else LOG_LEVEL, else INFO.
+LOG_LEVEL_EFFECTIVE="${IMAGE_LOG_LEVEL:-${LOG_LEVEL:-INFO}}"
+CURRENT_LOG_LEVEL=$(severity_to_number "${LOG_LEVEL_EFFECTIVE^^}")
 SCRIPT_PATH="${BASH_SOURCE[0]}"
 SCRIPT_NAME="$(basename "$SCRIPT_PATH")"
 
@@ -29,117 +31,6 @@ log() {
 }
 
 export -f log
-
-# Set ENTRYPOINT_DEBUG_CERTIFICATES to a non-empty substring to enable diagnostics. If unset/empty, nothing is logged.
-# The value is used as a case-insensitive search token in the keystore listing.
-report_truststore_debug() {
-    [[ -z ${ENTRYPOINT_DEBUG_CERTIFICATES:-} ]] && return 0
-
-    local pass ks ks_list rc n_trusted n_files bytes token
-    pass=${CERTIFICATE_FILE_PASSWORD:-changeit}
-    ks=${JAVA_CERTIFICATE_FILE_LOCATION:-/etc/ssl/certs/java/cacerts}
-    token=${ENTRYPOINT_DEBUG_CERTIFICATES}
-
-    log INFO "DEBUG: truststore diagnostics (ENTRYPOINT_DEBUG_CERTIFICATES is set)"
-
-    if [[ ! -f "$ks" ]]; then
-        log ERROR "DEBUG: Java keystore file is missing: ${ks}"
-        return 0
-    fi
-
-    bytes=$(wc -c <"$ks" | tr -d ' ')
-    log INFO "DEBUG: ${ks} size=${bytes} bytes"
-    if [[ "${bytes:-0}" -lt 10000 ]]; then
-        log WARN "DEBUG: keystore is very small; JVM may report empty trustAnchors"
-    fi
-
-    if [[ -x /usr/bin/keytool ]]; then
-        ks_list=$(keytool -list -keystore "$ks" -storepass "$pass" 2>&1)
-        rc=$?
-        if [[ "$rc" -ne 0 ]]; then
-            log ERROR "DEBUG: keytool -list failed (password or corrupt keystore?): ${ks_list}"
-        else
-            echo "$ks_list" | grep "Your keystore contains" | while read -r line; do
-                log INFO "DEBUG: ${line}"
-            done
-            n_trusted=$(echo "$ks_list" | grep -c "trustedCertEntry" || true)
-            log INFO "DEBUG: trustedCertEntry lines in keystore listing: ${n_trusted:-0}"
-            if echo "$ks_list" | grep -qi -- "$token"; then
-                log INFO "DEBUG: keystore listing contains substring match for provided token"
-            else
-                log WARN "DEBUG: no substring match for provided token in keytool -list output (may still be trusted under other aliases)"
-            fi
-        fi
-    else
-        log WARN "DEBUG: /usr/bin/keytool not available; skipping entry count"
-    fi
-
-    if [[ -f /etc/ssl/certs/ca-certificates.crt ]]; then
-        n_files=$(grep -c "BEGIN CERTIFICATE" /etc/ssl/certs/ca-certificates.crt 2>/dev/null || echo 0)
-        log INFO "DEBUG: PEM blocks in /etc/ssl/certs/ca-certificates.crt: ${n_files}"
-    fi
-
-    if [[ -d ${CERTIFICATE_FILE_LOCATION:-/usr/local/share/ca-certificates} ]]; then
-        n_files=$(find "${CERTIFICATE_FILE_LOCATION:-/usr/local/share/ca-certificates}" -maxdepth 1 -type f \( -name '*.crt' -o -name '*.cer' -o -name '*.pem' \) 2>/dev/null | wc -l | tr -d ' ')
-        log INFO "DEBUG: PEM files in ${CERTIFICATE_FILE_LOCATION:-/usr/local/share/ca-certificates} (maxdepth 1): ${n_files}"
-    fi
-}
-
-force_keytool_import() {
-    [[ ${FORCE_KEYTOOL_IMPORT,,} != "true" ]] && return 0
-
-    local pass ks src_dir files_count imported_count f fp alias rc
-    pass=${CERTIFICATE_FILE_PASSWORD:-changeit}
-    ks=${JAVA_CERTIFICATE_FILE_LOCATION:-/etc/ssl/certs/java/cacerts}
-    src_dir=${CERTIFICATE_FILE_LOCATION:-/usr/local/share/ca-certificates}
-
-    log WARN "FORCE_KEYTOOL_IMPORT=true: importing PEM files into Java keystore: ${ks} (source: ${src_dir})"
-
-    if [[ ! -f "$ks" ]]; then
-        log ERROR "FORCE_KEYTOOL_IMPORT: Java keystore file is missing: ${ks}"
-        return 0
-    fi
-    if [[ ! -x /usr/bin/keytool ]]; then
-        log ERROR "FORCE_KEYTOOL_IMPORT: /usr/bin/keytool not available; cannot import certificates"
-        return 0
-    fi
-    if [[ ! -d "$src_dir" ]]; then
-        log WARN "FORCE_KEYTOOL_IMPORT: source directory does not exist: ${src_dir}"
-        return 0
-    fi
-
-    # NOTE: keytool requires a writable keystore file. In Java images it should be writable for the runtime UID.
-    chmod u+w "$ks" 2>/dev/null || true
-
-    files_count=$(find "$src_dir" -maxdepth 1 -type f \( -name '*.crt' -o -name '*.cer' -o -name '*.pem' \) 2>/dev/null | wc -l | tr -d ' ')
-    if [[ "${files_count:-0}" -eq 0 ]]; then
-        log WARN "FORCE_KEYTOOL_IMPORT: no .crt/.cer/.pem files found in ${src_dir}"
-        return 0
-    fi
-
-    imported_count=0
-    while IFS= read -r f; do
-        # Prefer a stable unique alias based on SHA-256 fingerprint.
-        fp=$(openssl x509 -in "$f" -noout -fingerprint -sha256 2>/dev/null | awk -F= '{print $2}' | tr -d ':' | tr '[:upper:]' '[:lower:]') || fp=""
-        if [[ -n "$fp" ]]; then
-            alias="x509-${fp}"
-        else
-            alias="x509-$(basename "$f")"
-        fi
-
-        keytool -importcert -noprompt -trustcacerts -alias "$alias" -file "$f" -keystore "$ks" -storepass "$pass" >/dev/null 2>&1
-        rc=$?
-        if [[ "$rc" -eq 0 ]]; then
-            imported_count=$((imported_count + 1))
-        else
-            # Common case: alias already exists. We log at DEBUG to avoid noise.
-            log DEBUG "FORCE_KEYTOOL_IMPORT: skip/failed import file=${f} alias=${alias} rc=${rc}"
-        fi
-    done < <(find "$src_dir" -maxdepth 1 -type f \( -name '*.crt' -o -name '*.cer' -o -name '*.pem' \) 2>/dev/null | sort)
-
-    chmod u-w "$ks" 2>/dev/null || true
-    log INFO "FORCE_KEYTOOL_IMPORT: attempted import from ${src_dir}, successful imports=${imported_count}"
-}
 
 load_certificates() {
     # shellcheck disable=SC2016
@@ -165,13 +56,39 @@ load_certificates() {
 
     # update certificates plugin for java will fail in case of non-standard file permissions and running user id
     # but we can do workaround by extracting certificates from trust store and copying them to java keystore (openshift case)
-    if ! update-ca-certificates > /dev/null 2>&1; then
-      log WARN "Error updating CA certificates store. Try alternative method to update certificates for java keystore." >&2
-      trust extract --overwrite --format=java-cacerts --filter=ca-anchors --purpose server-auth /tmp/cacerts.tmp || log ERROR "Error extracting certificates for java keystore" >&2
-      cp -f /tmp/cacerts.tmp /etc/ssl/certs/java/cacerts || log ERROR "Error copying certificates to java keystore" >&2
+    log DEBUG "Running update-ca-certificates"
+
+    # Ensure java-cacerts hook can update the keystore for OpenShift-style random UID with GID=0.
+    # The hook often needs write access to the keystore file (not only the directory).
+    if [[ -n "${JAVA_CERTIFICATE_FILE_LOCATION:-}" ]]; then
+      chmod g+rw "${JAVA_CERTIFICATE_FILE_LOCATION}" 2>/dev/null || true
+      chmod g+rw "$(dirname "${JAVA_CERTIFICATE_FILE_LOCATION}")" 2>/dev/null || true
     fi
 
-    force_keytool_import
+    local _uca_ok=0
+    if [[ "${LOG_LEVEL_EFFECTIVE^^}" == "DEBUG" ]]; then
+      if ! update-ca-certificates -v; then
+        _uca_ok=1
+      fi
+    else
+      if ! update-ca-certificates >/dev/null 2>&1; then
+        _uca_ok=1
+      fi
+    fi
+    if [[ "$_uca_ok" -ne 0 ]]; then
+      log WARN "Error updating CA certificates store. Try alternative method to update certificates for java keystore." >&2
+    fi
+
+    # Refresh Java cacerts from the trust store after system CA update (replaces Alpine's java-cacerts hook).
+    _ks=${JAVA_CERTIFICATE_FILE_LOCATION:-/etc/ssl/certs/java/cacerts}
+    chmod g+rw "$(dirname "${_ks}")" "${_ks}" 2>/dev/null || true
+    if trust extract --overwrite --format=java-cacerts --filter=ca-anchors --purpose server-auth "${_ks}"; then
+      log DEBUG "trust extract: refreshed Java keystore at ${_ks}"
+    else
+      log WARN "trust extract failed for ${_ks}; trying /tmp then copy" >&2
+      trust extract --overwrite --format=java-cacerts --filter=ca-anchors --purpose server-auth /tmp/cacerts.tmp || log ERROR "Error extracting certificates for java keystore" >&2
+      cp -f /tmp/cacerts.tmp "${_ks}" || log ERROR "Error copying certificates to java keystore" >&2
+    fi
 
     log INFO "Done"
 
@@ -186,7 +103,6 @@ load_certificates() {
       fi
     fi
 
-    report_truststore_debug
 }
 
 create_user() {

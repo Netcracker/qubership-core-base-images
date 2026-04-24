@@ -20,6 +20,11 @@ RUN apk --no-cache add \
     font-dejavu \
     procps-ng # top command required by diag tool
 
+# The default java-cacerts hook runs `trust extract` inside `update-ca-certificates` via run-parts
+# and can fail transiently while the system bundle is mid-update.
+# We refresh the Java keystore once after update-ca-certificates in entrypoint.sh instead.
+RUN rm -f /etc/ca-certificates/update.d/java-cacerts
+
 ENV JAVA_HOME=/usr/lib/jvm/java-21-openjdk \
     MALLOC_ARENA_MAX=2 \
     MALLOC_MMAP_THRESHOLD_=131072 \
