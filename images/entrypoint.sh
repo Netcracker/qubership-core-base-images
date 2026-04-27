@@ -58,25 +58,10 @@ load_certificates() {
     # but we can do workaround by extracting certificates from trust store and copying them to java keystore (openshift case)
     log DEBUG "Running update-ca-certificates"
 
-    # Ensure java-cacerts hook can update the keystore for OpenShift-style random UID with GID=0.
-    # The hook often needs write access to the keystore file (not only the directory).
-    if [[ -n "${JAVA_CERTIFICATE_FILE_LOCATION:-}" ]]; then
-      chmod g+rw "${JAVA_CERTIFICATE_FILE_LOCATION}" 2>/dev/null || true
-      chmod g+rw "$(dirname "${JAVA_CERTIFICATE_FILE_LOCATION}")" 2>/dev/null || true
-    fi
-
-    local _uca_ok=0
     if [[ "${LOG_LEVEL_EFFECTIVE^^}" == "DEBUG" ]]; then
-      if ! update-ca-certificates -v; then
-        _uca_ok=1
-      fi
+      update-ca-certificates -v || log WARN "Error updating CA certificates store. Try alternative method to update certificates for java keystore. " >&2
     else
-      if ! update-ca-certificates >/dev/null 2>&1; then
-        _uca_ok=1
-      fi
-    fi
-    if [[ "$_uca_ok" -ne 0 ]]; then
-      log WARN "Error updating CA certificates store. Try alternative method to update certificates for java keystore." >&2
+      update-ca-certificates >/dev/null 2>&1 || log WARN "Error updating CA certificates store. Try alternative method to update certificates for java keystore. For details, run with IMAGE_LOG_LEVEL=DEBUG." >&2
     fi
 
     # Refresh Java cacerts from the trust store after system CA update (replaces Alpine's java-cacerts hook).
@@ -102,7 +87,6 @@ load_certificates() {
         chmod u-w /etc/ssl/certs/java/cacerts
       fi
     fi
-
 }
 
 create_user() {
