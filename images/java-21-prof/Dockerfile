@@ -20,6 +20,11 @@ RUN apk --no-cache add \
     font-dejavu \
     procps-ng # top command required by diag tool
 
+# The default java-cacerts hook runs `trust extract` inside `update-ca-certificates` via run-parts
+# and can fail transiently while the system bundle is mid-update.
+# We refresh the Java keystore once after update-ca-certificates in entrypoint.sh instead.
+RUN rm -f /etc/ca-certificates/update.d/java-cacerts
+
 ENV JAVA_HOME=/usr/lib/jvm/java-21-openjdk \
     MALLOC_ARENA_MAX=2 \
     MALLOC_MMAP_THRESHOLD_=131072 \
@@ -51,12 +56,12 @@ RUN mkdir -p /tmp/cert && \
     chmod ug+rw /var/run && \
     chown ${UID}:${GID} /var/run && \
     mkdir -p /etc/alternatives && ln -s /usr/lib/jvm/java-21-openjdk/bin/java /etc/alternatives/java && \
-    chmod ug+rw -R /etc/ssl/certs && \
-    chown -R ${UID}:${GID} /etc/ssl/certs && \
-    chown -R ${UID}:${GID} /usr/share/ca-certificates/ && \
     chown -R ${UID}:${GID} /etc/ca-certificates.conf && \
     mkdir -p /app/volumes/certs && \
     cp -R /etc/ssl/certs/java /app/volumes/certs && \
+    find /etc/ssl/certs \( -type d -exec chmod ug+rw {} \; -exec chown ${UID}:${GID} {} \; -o -type f -exec chmod 644 {} \; -exec chown ${UID}:${GID} {} \; \) && \
+    find /usr/local/share/ca-certificates/ \( -type d -exec chmod ug+rw {} \; -exec chown ${UID}:${GID} {} \; -o -type f -exec chmod 644 {} \; -exec chown ${UID}:${GID} {} \; \) && \
+    find /usr/share/ca-certificates/ \( -type d -exec chmod ug+rw {} \; -exec chown ${UID}:${GID} {} \; -o -type f -exec chmod 644 {} \; -exec chown ${UID}:${GID} {} \; \) && \
     chmod ug+r -R /app/volumes && \
     chown -R ${UID}:${GID} /app/volumes && \
     find /app \( -type d -exec chmod ug+rwx {} \; -exec chown ${UID}:${GID} {} \; -o -type f -exec chmod ug+rw {} \; -exec chown ${UID}:${GID} {} \; \)

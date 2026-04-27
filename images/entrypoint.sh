@@ -11,7 +11,9 @@ severity_to_number() {
     *) echo 2 ;;
   esac
 }
-CURRENT_LOG_LEVEL=$(severity_to_number "${LOG_LEVEL^^:-INFO}")
+# Effective log level: IMAGE_LOG_LEVEL (highest), else LOG_LEVEL, else INFO.
+LOG_LEVEL_EFFECTIVE="${IMAGE_LOG_LEVEL:-${LOG_LEVEL:-INFO}}"
+CURRENT_LOG_LEVEL=$(severity_to_number "${LOG_LEVEL_EFFECTIVE^^}")
 SCRIPT_PATH="${BASH_SOURCE[0]}"
 SCRIPT_NAME="$(basename "$SCRIPT_PATH")"
 
@@ -54,10 +56,23 @@ load_certificates() {
 
     # update certificates plugin for java will fail in case of non-standard file permissions and running user id
     # but we can do workaround by extracting certificates from trust store and copying them to java keystore (openshift case)
-    if ! update-ca-certificates > /dev/null 2>&1; then
-      log WARN "Error updating CA certificates store. Try alternative method to update certificates for java keystore." >&2
+    log DEBUG "Running update-ca-certificates"
+
+    if [[ "${LOG_LEVEL_EFFECTIVE^^}" == "DEBUG" ]]; then
+      update-ca-certificates -v || log WARN "Error updating CA certificates store. Try alternative method to update certificates for java keystore. " >&2
+    else
+      update-ca-certificates >/dev/null 2>&1 || log WARN "Error updating CA certificates store. Try alternative method to update certificates for java keystore. For details, run with IMAGE_LOG_LEVEL=DEBUG." >&2
+    fi
+
+    # Refresh Java cacerts from the trust store after system CA update (replaces Alpine's java-cacerts hook).
+    _ks=${JAVA_CERTIFICATE_FILE_LOCATION:-/etc/ssl/certs/java/cacerts}
+    chmod g+rw "$(dirname "${_ks}")" "${_ks}" 2>/dev/null || true
+    if trust extract --overwrite --format=java-cacerts --filter=ca-anchors --purpose server-auth "${_ks}"; then
+      log DEBUG "trust extract: refreshed Java keystore at ${_ks}"
+    else
+      log WARN "trust extract failed for ${_ks}; trying /tmp then copy" >&2
       trust extract --overwrite --format=java-cacerts --filter=ca-anchors --purpose server-auth /tmp/cacerts.tmp || log ERROR "Error extracting certificates for java keystore" >&2
-      cp -f /tmp/cacerts.tmp /etc/ssl/certs/java/cacerts || log ERROR "Error copying certificates to java keystore" >&2
+      cp -f /tmp/cacerts.tmp "${_ks}" || log ERROR "Error copying certificates to java keystore" >&2
     fi
 
     log INFO "Done"

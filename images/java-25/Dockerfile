@@ -15,6 +15,11 @@ RUN apk update --no-cache
 RUN apk --no-cache add \
     openjdk25-jre-headless
 
+# The default java-cacerts hook runs `trust extract` inside `update-ca-certificates` via run-parts
+# and can fail transiently while the system bundle is mid-update.
+# We refresh the Java keystore once after update-ca-certificates in entrypoint.sh instead.
+RUN rm -f /etc/ca-certificates/update.d/java-cacerts
+
 ENV JAVA_HOME=/usr/lib/jvm/default-jvm \
     MALLOC_ARENA_MAX=2 \
     MALLOC_MMAP_THRESHOLD_=131072 \
