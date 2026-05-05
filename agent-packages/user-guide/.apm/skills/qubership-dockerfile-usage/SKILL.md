@@ -25,6 +25,8 @@ Obsolete labels like `qubership/core-base:latest` or `qubership/java-base:latest
 
 Pin to a concrete version tag (e.g. `2.2.12`, `25-alpine-2.2.5`) rather than `latest`. The platform releases base images on its own cadence; `latest` makes builds non-reproducible and silently shifts the JDK / Alpine / glibc surface under the service. If the user does not specify a version, ask which one they want or default to the version already in use elsewhere in the same repository (check existing Dockerfiles or `pom.xml` / `go.mod` neighbours first).
 
+> **Note on version numbers in this skill:** the tags shown in the templates below (`2.2.12`, `25-alpine-2.2.5`) are illustrative snapshots and are **not** auto-updated when the skill runs. Always check the upstream release page of `qubership-core-base-images` for the current latest tag before copying a template into a new service.
+
 ## Common contracts every Dockerfile must follow
 
 These come from the base image and breaking them breaks the platform:
@@ -33,7 +35,6 @@ These come from the base image and breaking them breaks the platform:
 - **Ownership of copied files**: use `--chown=10001:0` on every `COPY`. Group `0` is required so OpenShift's random UID still has read access.
 - **Workdir**: `/app` (already set in the base, but re-declaring it is fine and explicit).
 - **Init scripts** (optional): drop `*.sh` files into `/app/init.d/`, they run in alphabetical order before the main process.
-- **Certificates** (optional): mount or copy CA files into `/tmp/cert/` — the entrypoint loads them automatically (into the OS trust store and, for Java images, into the JKS keystore).
 
 Do not override the entrypoint script of the base image unless you know exactly what you're doing — it handles trust store setup, profiler bootstrap, signal handling, and crash dumps.
 
@@ -71,7 +72,11 @@ Key points to preserve when adapting this template:
 
 ## Java microservice template
 
-Java services typically have their fat jar already built by Maven before `docker build` runs, so the Dockerfile is single-stage:
+Java services typically have their fat jar already built by Maven before `docker build` runs, so the Dockerfile is single-stage. **Pick the variant that matches your build framework.**
+
+### Quarkus (fast-jar layout) or Spring Boot with layered jars
+
+Dependencies live alongside the runner jar in `target/lib/`, so both must be copied:
 
 ```dockerfile
 FROM ghcr.io/netcracker/qubership-java-base:25-alpine-2.2.5
@@ -89,9 +94,28 @@ USER 10001:10001
 CMD ["java", "-Xmx512m", "-Dlog.level=INFO", "-jar", "/app/<artifact>.jar"]
 ```
 
+### Spring Boot uber-jar (default Spring Boot Maven plugin output)
+
+The fat jar already contains all dependencies, so no `target/lib/` copy is needed:
+
+```dockerfile
+FROM ghcr.io/netcracker/qubership-java-base:25-alpine-2.2.5
+LABEL maintainer="qubership"
+
+ARG BASE_PATH=.
+
+COPY --chown=10001:0 $BASE_PATH/<module>/target/<artifact>-*.jar /app/<artifact>.jar
+EXPOSE 8080
+
+WORKDIR /app
+USER 10001:10001
+
+CMD ["java", "-Xmx512m", "-Dlog.level=INFO", "-jar", "/app/<artifact>.jar"]
+```
+
 Notes:
 - `BASE_PATH` build-arg lets the same Dockerfile work both from the module dir and from the repo root (CI usually runs from root).
-- Copy `target/lib/*` only if the build produces external dependencies alongside the jar (Quarkus fast-jar layout, Spring Boot with `layers`). Skip it for self-contained uber-jars.
+- The `target/lib/*` copy is **only** for builds that produce external dependencies alongside the jar (Quarkus fast-jar, Spring Boot with `layers` enabled). For a plain Spring Boot uber-jar use the second template — copying `target/lib/*` will fail at build time because the directory doesn't exist.
 - Pick the right Java tag:
   - `25-alpine-<ver>` — default for new services on JRE 25.
   - `25-alpine-<ver>` from the `-prof` image — when the Qubership profiler is needed (set `PROFILER_ENABLED=true` at runtime).
