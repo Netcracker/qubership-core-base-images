@@ -284,7 +284,8 @@ If you need to run a container in a read-only host environment, you must mount t
 * `/etc/env` - to manage environment configurations
 * `/app/nss` - to manage NSS (Network Security Services) data
 * `/app/ncdiag` - to store diagnostic and troubleshooting data
-* `/etc/ssl/certs/java` - to handle Java SSL certificates (declared as a volume in profiler images), or `/etc/ssl/certs` for non-Java images
+* `/etc/ssl/certs/java` - to handle Java SSL certificates (declared as a volume in profiler images)
+* `/etc/ssl/certs` - to handle SSL certificates for all images (including both Java and non-Java images)
 * `/var/log` and `/var/cache/nginx/*` - for NGINX image (logs and cache directories)
 
 
