@@ -33,6 +33,32 @@ test_restore_volumes_data() {
   [ "${count:-0}" -gt 0 ] || fail "restore_volumes_data restored 0 files from /app/volumes/certs"
 }
 
+test_load_certificates_java_keystore_fallback() {
+  echo "Test: load_certificates fallback creates java/cacerts when java/ subdir is absent (Kubernetes emptyDir)"
+  # Kubernetes mounts /etc/ssl/certs as emptyDir, so the java/ subdir does not pre-exist.
+  # When update-ca-certificates fails (e.g. OpenShift SCC), the fallback must mkdir -p first,
+  # otherwise BusyBox cp cannot create java/cacerts and keytool fails with "Not a directory".
+  #
+  # We cannot directly simulate "java/ missing" in local Docker/Podman because both
+  # /etc/ssl/certs and /etc/ssl/certs/java are declared as separate VOLUMEs in the image, so
+  # the nested java/ volume is always mounted even with --tmpfs /etc/ssl/certs.
+  # Instead, we extract load_certificates from each image via awk and redirect the java/
+  # path to /tmp/testjava (a fresh dir with no java/ subdir pre-created), then verify
+  # whether the function creates /tmp/testjava/cacerts.
+  local result
+  result=$(docker run --rm --entrypoint=bash "${@}" "$IMAGE" \
+    -c '
+      log() { true; }
+      eval "$(awk "/^load_certificates\(\)/,/^\}$/ {print; if (/^\}$/) exit}" /usr/bin/entrypoint.sh \
+            | sed "s|/etc/ssl/certs/java|/tmp/testjava|g")"
+      update-ca-certificates() { return 1; }
+      load_certificates 2>/dev/null
+      [ -f /tmp/testjava/cacerts ] && echo "PASS" || echo "FAIL"
+    ')
+  result="${result//[[:space:]]/}"
+  [ "$result" = "PASS" ] || fail "load_certificates fallback did not create java/cacerts: got '$result'"
+}
+
 export_image_trust_store_with_emptydir() {
   local output_file=${1:?Missed mandatory parameter: output file}
   shift
@@ -106,4 +132,7 @@ if [[ "$IMAGE" == *java* ]]; then
 
   export_java_keystore "$EXPORTED_CERTS_FILE" ro -u 10009000
   assert_tests "$EXPORTED_CERTS_FILE"
+
+  # Unit test: fallback path in load_certificates creates java/cacerts when java/ subdir is absent.
+  test_load_certificates_java_keystore_fallback
 fi

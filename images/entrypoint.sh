@@ -57,6 +57,7 @@ load_certificates() {
     if ! update-ca-certificates > /dev/null 2>&1; then
       log WARN "Error updating CA certificates store. Try alternative method to update certificates for java keystore." >&2
       trust extract --overwrite --format=java-cacerts --filter=ca-anchors --purpose server-auth /tmp/cacerts.tmp || log ERROR "Error extracting certificates for java keystore" >&2
+      mkdir -p /etc/ssl/certs/java
       cp -f /tmp/cacerts.tmp /etc/ssl/certs/java/cacerts || log ERROR "Error copying certificates to java keystore" >&2
     fi
 
@@ -147,9 +148,9 @@ if [ -f /app/diag/diag-bootstrap.sh ]; then
 fi
 
 log INFO "Run entrypoint.sh:"
-restore_volumes_data
+restore_volumes_data # - тут наша бага - скопировано 0 файлов. никто не замечал
 create_user
-load_certificates
+load_certificates # потому что здесь происходит копирование реально полезных сертов
 
 # See full current list in http://man7.org/linux/man-pages/man7/signal.7.html
 export SIGNALS_TO_RETHROW="
