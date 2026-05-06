@@ -5,4 +5,4 @@ applyTo: "**/{Dockerfile,Dockerfile.*,*.Dockerfile}"
 
 ## Skill trigger: `qubership-dockerfile-usage`
 
-Invoke the `qubership-dockerfile-usage` skill when creating, editing, or reviewing any `Dockerfile` in a Qubership / Netcracker microservice repository (Java or Go).
+When editing a `Dockerfile` for a Qubership / Netcracker microservice, apply the `qubership-dockerfile-usage` skill.

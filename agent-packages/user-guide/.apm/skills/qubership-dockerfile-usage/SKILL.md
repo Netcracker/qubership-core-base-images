@@ -9,23 +9,24 @@ Microservices in the Qubership platform must be built **on top of the official Q
 
 ## Available base images
 
-All images live on `ghcr.io/netcracker/`:
+All images use `appuser` UID 10001 and `/app` workdir.
 
-| Purpose | Image | Notes |
-|---|---|---|
-| Generic runtime (Go binaries, native, scripts) | `ghcr.io/netcracker/qubership-core-base` | Alpine 3.23.x, `appuser` UID 10001, `/app` workdir |
-| Java 21 (JDK + profiler) | `ghcr.io/netcracker/qubership-java-base:21-alpine-<ver>` | OpenJDK 21 JDK |
-| Java 25 (JRE only) | `ghcr.io/netcracker/qubership-java-base:25-alpine-<ver>` | OpenJDK 25 JRE, smaller |
-| Java 25 (JRE + profiler) | `ghcr.io/netcracker/qubership-java-base-prof:25-alpine-<ver>` | JRE + Qubership profiler |
-| NGINX | `ghcr.io/netcracker/qubership-nginx-base` | NGINX 1.28 + Lua + Brotli + OTel |
+- `ghcr.io/netcracker/qubership-core-base` — generic runtime (Go binaries, native, scripts). Alpine.
+- `ghcr.io/netcracker/qubership-java-base:21-alpine-<ver>` — Java 21 JDK.
+- `ghcr.io/netcracker/qubership-java-base:25-alpine-<ver>` — Java 25 JRE (smaller).
+- `ghcr.io/netcracker/qubership-java-base-prof:25-alpine-<ver>` — Java 25 JRE + Qubership profiler.
+- `ghcr.io/netcracker/qubership-nginx-base` — NGINX + Lua + Brotli + OTel.
 
-Obsolete labels like `qubership/core-base:latest` or `qubership/java-base:latest` exist but **must not be used** — they are kept only for backward compatibility.
+For runtimes not covered above (Python, Node, .NET, etc.), layer on top of `qubership-core-base` and install via `apk` in an intermediate stage.
 
-## Versioning rule
+## Versions
 
-Pin to a concrete version tag (e.g. `2.2.12`, `25-alpine-2.2.5`) rather than `latest`. The platform releases base images on its own cadence; `latest` makes builds non-reproducible and silently shifts the JDK / Alpine / glibc surface under the service. If the user does not specify a version, ask which one they want or default to the version already in use elsewhere in the same repository (check existing Dockerfiles or `pom.xml` / `go.mod` neighbours first).
-
-> **Note on version numbers in this skill:** the tags shown in the templates below (`2.2.12`, `25-alpine-2.2.5`) are illustrative snapshots and are **not** auto-updated when the skill runs. Always check the upstream release page of `qubership-core-base-images` for the current latest tag before copying a template into a new service.
+The tags shown in the templates below (`2.2.12`, `25-alpine-2.2.5`) are
+illustrative snapshots and are **not** auto-updated when the skill runs.
+Always check the upstream release page of `qubership-core-base-images`
+for the current latest tag. If the user does not specify a version,
+default to the version already in use elsewhere in the same repository
+(check existing Dockerfiles or `pom.xml` / `go.mod` neighbours first).
 
 ## Common contracts every Dockerfile must follow
 
@@ -35,6 +36,7 @@ These come from the base image and breaking them breaks the platform:
 - **Ownership of copied files**: use `--chown=10001:0` on every `COPY`. Group `0` is required so OpenShift's random UID still has read access.
 - **Workdir**: `/app` (already set in the base, but re-declaring it is fine and explicit).
 - **Init scripts** (optional): drop `*.sh` files into `/app/init.d/`, they run in alphabetical order before the main process.
+- **No `RUN apk add` in the runtime stage** unless absolutely necessary — the base image is intentionally minimal; additions must be justified.
 
 Do not override the entrypoint script of the base image unless you know exactly what you're doing — it handles trust store setup, profiler bootstrap, signal handling, and crash dumps.
 
@@ -50,11 +52,14 @@ ARG TARGETARCH
 WORKDIR /app
 COPY go.mod go.mod
 COPY go.sum go.sum
-RUN go mod download
+RUN --mount=type=cache,target=/go/pkg/mod \
+    go mod download
 
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH} \
+RUN --mount=type=cache,target=/go/pkg/mod \
+    --mount=type=cache,target=/root/.cache/go-build \
+    CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH} \
     go build -a -o <service-binary> ./cmd/
 
 FROM ghcr.io/netcracker/qubership-core-base:2.2.12
@@ -62,13 +67,14 @@ WORKDIR /app
 COPY --chown=10001:0 --chmod=555 --from=builder /app/<service-binary> /app/<service-binary>
 USER 10001:10001
 
-ENTRYPOINT ["/app/<service-binary>"]
+CMD ["/app/<service-binary>"]
 ```
 
 Key points to preserve when adapting this template:
-- `CGO_ENABLED=0` — produces a static binary so the runtime image doesn't need libc compatibility shims.
+- `CGO_ENABLED=0` — produces static binary that is compatible with Alpine.
 - `--chmod=555` on the binary — read+execute for everyone, no write. Combined with `--chown=10001:0` this is what makes OpenShift random-UID happy.
-- `ENTRYPOINT` (not `CMD`) for Go — the binary is the process; arguments come from k8s.
+- `CMD` (not `ENTRYPOINT`) — keeps the base image's `entrypoint.sh` in charge of certificate loading, `init.d` scripts, signal handling, and crash dumps.
+- `--mount=type=cache,...` — BuildKit cache mounts reuse the Go module and build cache between runs, so repeat builds skip re-downloading modules and re-compiling unchanged packages.
 
 ## Java microservice template
 
@@ -123,18 +129,3 @@ Notes:
 - `CMD` (not `ENTRYPOINT`) for Java — keeps the base image's entrypoint script in charge of init.d, certs, and signal handling.
 - Heap (`-Xmx`) should match the k8s memory limit minus overhead; don't hardcode without checking the service's deployment manifest.
 
-## Reviewing an existing Dockerfile
-
-When asked to review or fix a Dockerfile in a Qubership repo, check in this order:
-
-1. **Runtime base** is one of the `ghcr.io/netcracker/qubership-*` images. Flag any other `FROM` in the final stage.
-2. **Tag is pinned** to a concrete version, not `latest` or moving tag.
-3. **`USER 10001:10001`** is set before the entrypoint/cmd.
-4. **Every `COPY` into the runtime stage uses `--chown=10001:0`**. Group `0` is non-negotiable for OpenShift.
-5. **No `RUN apk add`** in the runtime stage unless absolutely necessary — the base image is intentionally minimal and additions should be justified.
-6. **No overriding `ENTRYPOINT`** of the base image (unless replacing it consciously). Java services should use `CMD`; Go services typically set `ENTRYPOINT` to their static binary, which is fine because the base image's entrypoint chains into it.
-7. **Multi-arch**: Go builders should use `--platform=$BUILDPLATFORM` and consume `TARGETOS`/`TARGETARCH`.
-
-## When the user asks for something the base image doesn't cover
-
-If the user wants a runtime stack that isn't covered (Python, Node, .NET, etc.), the base images repo currently provides only `core-base`, Java, and NGINX. Recommend layering on top of `qubership-core-base` and installing the runtime via `apk` in a small intermediate stage — and mention that if this becomes a recurring need, it's worth proposing a new official base image upstream rather than reinventing per-service.
