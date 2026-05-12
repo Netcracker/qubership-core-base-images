@@ -1,6 +1,6 @@
 ---
 name: qubership-dockerfile-usage
-description: How to write Dockerfiles for Qubership platform microservices using the official Qubership base images from github.com/Netcracker/qubership-core-base-images. Use this skill whenever the user is creating, editing, reviewing, or generating a Dockerfile for a Qubership / Netcracker microservice (Java or Go), even if they don't explicitly mention base images. Trigger on requests like "write a Dockerfile", "containerize this service", "build image for this microservice", "review my Dockerfile", or any time a Dockerfile appears in a Qubership project context.
+description: Use when authoring a Dockerfile for a Qubership / Netcracker microservice (Java or Go) — must layer on the official Qubership base images, not generic alpine/eclipse-temurin/golang.
 ---
 
 # Qubership Dockerfile authoring
@@ -71,10 +71,8 @@ CMD ["/app/<service-binary>"]
 ```
 
 Key points to preserve when adapting this template:
-- `CGO_ENABLED=0` — produces static binary that is compatible with Alpine.
 - `--chmod=555` on the binary — read+execute for everyone, no write. Combined with `--chown=10001:0` this is what makes OpenShift random-UID happy.
 - `CMD` (not `ENTRYPOINT`) — keeps the base image's `entrypoint.sh` in charge of certificate loading, `init.d` scripts, signal handling, and crash dumps.
-- `--mount=type=cache,...` — BuildKit cache mounts reuse the Go module and build cache between runs, so repeat builds skip re-downloading modules and re-compiling unchanged packages.
 
 ## Java microservice template
 
