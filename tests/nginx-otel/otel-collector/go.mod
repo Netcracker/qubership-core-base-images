@@ -1,10 +1,10 @@
 module stub-collector
 
-go 1.26.2
+go 1.26.3
 
 require (
 	go.opentelemetry.io/proto/otlp v1.10.0
-	google.golang.org/grpc v1.81.0
+	google.golang.org/grpc v1.81.1
 )
 
 require (
