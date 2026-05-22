@@ -6,7 +6,7 @@ ARG UID=10001
 ARG GID=root
 
 RUN apk update --no-cache  && apk upgrade
-RUN apk add --no-cache ca-certificates bash nss_wrapper
+RUN apk add --no-cache ca-certificates bash p11-kit nss_wrapper
 RUN apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/edge/main curl
 
 ENV HOME=/app \

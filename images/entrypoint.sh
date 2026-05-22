@@ -58,19 +58,18 @@ load_certificates() {
     # but we can do workaround by extracting certificates from trust store and copying them to java keystore (openshift case)
     log DEBUG "Running update-ca-certificates"
 
+    _uca_ok=0
     if [[ "${LOG_LEVEL_EFFECTIVE^^}" == "DEBUG" ]]; then
-      update-ca-certificates -v || log WARN "Error updating CA certificates store. Try alternative method to update certificates for java keystore. " >&2
+      update-ca-certificates -v || _uca_ok=1
     else
-      update-ca-certificates >/dev/null 2>&1 || log WARN "Error updating CA certificates store. Try alternative method to update certificates for java keystore. For details, run with IMAGE_LOG_LEVEL=DEBUG." >&2
+      update-ca-certificates >/dev/null 2>&1 || _uca_ok=1
     fi
 
-    # Refresh Java cacerts from the trust store after system CA update (replaces Alpine's java-cacerts hook).
-    _ks=${JAVA_CERTIFICATE_FILE_LOCATION:-/etc/ssl/certs/java/cacerts}
-    chmod g+rw "$(dirname "${_ks}")" "${_ks}" 2>/dev/null || true
-    if trust extract --overwrite --format=java-cacerts --filter=ca-anchors --purpose server-auth "${_ks}"; then
-      log DEBUG "trust extract: refreshed Java keystore at ${_ks}"
-    else
-      log WARN "trust extract failed for ${_ks}; trying /tmp then copy" >&2
+    if [[ "${_uca_ok}" -ne 0 ]]; then
+      log WARN "Error updating CA certificates store. Try alternative method to update certificates for java keystore. For details, run with IMAGE_LOG_LEVEL=DEBUG." >&2
+
+      # Fallback: rebuild Java cacerts from the system trust store (OpenShift / random UID cases).
+      _ks=${JAVA_CERTIFICATE_FILE_LOCATION:-/etc/ssl/certs/java/cacerts}
       trust extract --overwrite --format=java-cacerts --filter=ca-anchors --purpose server-auth /tmp/cacerts.tmp || log ERROR "Error extracting certificates for java keystore" >&2
       cp -f /tmp/cacerts.tmp "${_ks}" || log ERROR "Error copying certificates to java keystore" >&2
     fi
