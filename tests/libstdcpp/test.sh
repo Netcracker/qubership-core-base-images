@@ -6,4 +6,5 @@ g++ "${SCRIPT_DIR}"/stdlibc-check.cpp -o "${SCRIPT_DIR}"/stdlibc-check
 chmod +x "${SCRIPT_DIR}"/stdlibc-check
 
 output=$(docker run --rm -v ${SCRIPT_DIR}:/app "$IMAGE" /app/stdlibc-check)
-echo "$output" | grep -q "libstdc++ works" || fail "C++ binary requiring libstdc++ failed to run in: \n$output"
+set +x
+echo "$output" | grep -q "Caught: libstdc++ exception handling works too!" || fail "C++ binary requiring libstdc++ failed to run in: \n$output"
