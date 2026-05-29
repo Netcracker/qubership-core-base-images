@@ -15,7 +15,6 @@ RUN apk update --no-cache
 RUN apk --no-cache add \
     ssl_client \
     openjdk21-jdk \
-    libstdc++ \
     fontconfig \
     font-dejavu \
     procps-ng # top command required by diag tool
