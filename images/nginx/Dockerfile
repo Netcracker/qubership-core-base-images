@@ -2,7 +2,7 @@
 # this declaration anywhere else
 ARG BASE_IMAGE=ghcr.io/netcracker/qubership-core-base:latest@sha256:6f48c26a00389d7a3181da28cff632d7c6f627ea8653cc0f0e880df496ebed6c
 
-FROM alpine:3.23@sha256:5b10f432ef3da1b8d4c7eb6c487f2f5a8f096bc91145e68878dd4a5019afde11 AS builder
+FROM alpine:3.23@sha256:fd791d74b68913cbb027c6546007b3f0d3bc45125f797758156952bc2d6daf40 AS builder
 
 RUN apk add --no-cache \
     build-base linux-headers \
