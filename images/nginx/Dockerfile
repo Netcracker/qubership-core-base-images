@@ -1,6 +1,6 @@
 # despite this argument user for runtime docker part, docker buildx failed to builde image if move
 # this declaration anywhere else
-ARG BASE_IMAGE=ghcr.io/netcracker/qubership-core-base:latest@sha256:6f48c26a00389d7a3181da28cff632d7c6f627ea8653cc0f0e880df496ebed6c
+ARG BASE_IMAGE=ghcr.io/netcracker/qubership-core-base:latest@sha256:1339716127a7d170ba307b89f3a933f5e09c447607c89e16bf8d5a379db4e1f6
 
 FROM alpine:3.24@sha256:28bd5fe8b56d1bd048e5babf5b10710ebe0bae67db86916198a6eec434943f8b AS builder
 
