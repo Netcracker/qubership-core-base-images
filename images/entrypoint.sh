@@ -18,16 +18,17 @@ SCRIPT_PATH="${BASH_SOURCE[0]}"
 SCRIPT_NAME="$(basename "$SCRIPT_PATH")"
 
 log() {
+  { local -; set +x; } 2>/dev/null
   local severity severity_number _timestamp
   severity=${1^^:-INFO}
   shift
   severity_number=$(severity_to_number "$severity")
 
-    if [ "$severity_number" -ge "$CURRENT_LOG_LEVEL" ]; then
-      _timestamp=$(date +%Y-%m-%dT%H:%M:%S$(printf ".%03d" $(date +%N | cut -c1-3)))
+  if [ "$severity_number" -ge "$CURRENT_LOG_LEVEL" ]; then
+    _timestamp=$(date +%Y-%m-%dT%H:%M:%S$(printf ".%03d" $(date +%N | cut -c1-3)))
 
-       printf '[%s] [%s] [request_id=-] [tenant_id=-] [thread=-] [class=-] [%s] %s\n' "${_timestamp}" "${severity}" "${SCRIPT_NAME}" "$*" >&2
-    fi
+     printf '[%s] [%s] [request_id=-] [tenant_id=-] [thread=-] [class=-] [%s] %s\n' "${_timestamp}" "${severity}" "${SCRIPT_NAME}" "$*" >&2
+  fi
 }
 
 export -f log
@@ -65,28 +66,24 @@ load_certificates() {
     fi
 
     # Refresh Java cacerts from the trust store after system CA update (replaces Alpine's java-cacerts hook).
-    _ks=${JAVA_CERTIFICATE_FILE_LOCATION:-/etc/ssl/certs/java/cacerts}
-    chmod g+rw "$(dirname "${_ks}")" "${_ks}" 2>/dev/null || true
-    if trust extract --overwrite --format=java-cacerts --filter=ca-anchors --purpose server-auth "${_ks}"; then
-      log DEBUG "trust extract: refreshed Java keystore at ${_ks}"
-    else
-      log WARN "trust extract failed for ${_ks}; trying /tmp then copy" >&2
-      trust extract --overwrite --format=java-cacerts --filter=ca-anchors --purpose server-auth /tmp/cacerts.tmp || log ERROR "Error extracting certificates for java keystore" >&2
-      cp -f /tmp/cacerts.tmp "${_ks}" || log ERROR "Error copying certificates to java keystore" >&2
+    cacerts_path=${JAVA_CERTIFICATE_FILE_LOCATION:-/etc/ssl/certs/java/cacerts}
+    if [[ -x /usr/bin/trust ]]; then
+      trust extract --overwrite --format=java-cacerts --filter=ca-anchors --purpose server-auth "${cacerts_path}" && \
+        log DEBUG "trust extract: refreshed Java keystore at ${cacerts_path}"
+
+      if [[ -x /usr/bin/keytool ]]; then
+        pass=${CERTIFICATE_FILE_PASSWORD:-changeit}
+        # Change password if passed and default one set as old
+        if [ "$pass" != "changeit" ]; then
+          chmod u+rw "${cacerts_path}"
+          log INFO "Change default keystore password: "
+          keytool -v -storepasswd -keystore "${cacerts_path}" -storepass changeit -new "$pass"
+          chmod u-w "${cacerts_path}"
+        fi
+      fi
     fi
 
     log INFO "Done"
-
-    if [[ -x /usr/bin/keytool ]]; then
-      pass=${CERTIFICATE_FILE_PASSWORD:-changeit}
-      # Change password if passed and default one set as old
-      if [ "$pass" != "changeit" ]; then
-        log INFO "Change default keystore password: "
-        chmod u+w /etc/ssl/certs/java/cacerts
-        keytool -v -storepasswd -cacerts -storepass changeit -new "$pass"
-        chmod u-w /etc/ssl/certs/java/cacerts
-      fi
-    fi
 }
 
 create_user() {
