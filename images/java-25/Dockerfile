@@ -1,4 +1,17 @@
 ARG BASE_IMAGE=ghcr.io/netcracker/qubership-core-base:latest@sha256:b77f160cfd406124b3f1be223e82b21e742d5533638c64409e5992342587304a
+
+FROM amazoncorretto:25-alpine-jdk AS jlink
+RUN apk --no-cache add binutils
+RUN $JAVA_HOME/bin/jlink \
+    --add-modules java.se \
+    --add-modules jdk.jfr \
+    --module-path $JAVA_HOME/jmods \
+    --strip-debug \
+    --no-man-pages \
+    --no-header-files \
+    --compress=zip-6 \
+    --output /opt/jre
+
 FROM ${BASE_IMAGE}
 ARG TARGETOS
 ARG TARGETARCH
@@ -10,14 +23,12 @@ LABEL maintainer="qubership"
 
 USER root
 
-RUN wget -O /etc/apk/keys/amazoncorretto.rsa.pub https://apk.corretto.aws/amazoncorretto.rsa.pub && \
-    echo "https://apk.corretto.aws/" >> /etc/apk/repositories
-
 RUN apk --no-cache add \
-    amazon-corretto-25 \
     p11-kit-trust
 
-ENV JAVA_HOME=/usr/lib/jvm/default-jvm \
+COPY --from=jlink /opt/jre /usr/lib/jvm/java-25-amazon-corretto
+
+ENV JAVA_HOME=/usr/lib/jvm/java-25-amazon-corretto \
     MALLOC_ARENA_MAX=2 \
     MALLOC_MMAP_THRESHOLD_=131072 \
     MALLOC_TRIM_THRESHOLD_=131072 \
@@ -25,7 +36,9 @@ ENV JAVA_HOME=/usr/lib/jvm/default-jvm \
     MALLOC_MMAP_MAX=65536 \
     JAVA_CERTIFICATE_FILE_LOCATION=/etc/ssl/certs/java/cacerts
 
-RUN chown -R ${UID}:${GID} ${JAVA_HOME}/lib/security/ && \
+RUN ln -s ${JAVA_HOME}/bin/java /usr/bin/java && \
+    ln -s ${JAVA_HOME}/bin/keytool /usr/bin/keytool && \
+    chown -R ${UID}:${GID} ${JAVA_HOME}/lib/security/ && \
     mkdir -p $(dirname ${JAVA_CERTIFICATE_FILE_LOCATION}) && \
     touch ${JAVA_CERTIFICATE_FILE_LOCATION} && \
     rm -f ${JAVA_HOME}/lib/security/cacerts && \
@@ -62,4 +75,3 @@ RUN echo $BASE_IMAGE_TAG > /etc/base-image-release
 
 # Set user appuser for image run and all the following RUN, CMD and ENTRYPOINT commands
 USER ${UID}:${GID}
-
