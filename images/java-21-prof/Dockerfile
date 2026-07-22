@@ -10,21 +10,18 @@ LABEL maintainer="qubership"
 
 USER root
 
-RUN apk update --no-cache
+RUN wget -O /etc/apk/keys/amazoncorretto.rsa.pub https://apk.corretto.aws/amazoncorretto.rsa.pub && \
+    echo "https://apk.corretto.aws/" >> /etc/apk/repositories
 
 RUN apk --no-cache add \
     ssl_client \
-    openjdk21-jdk \
+    amazon-corretto-21 \
+    p11-kit-trust \
     fontconfig \
     font-dejavu \
     procps-ng # top command required by diag tool
 
-# The default java-cacerts hook runs `trust extract` inside `update-ca-certificates` via run-parts
-# and can fail transiently while the system bundle is mid-update.
-# We refresh the Java keystore once after update-ca-certificates in entrypoint.sh instead.
-RUN rm -f /etc/ca-certificates/update.d/java-cacerts
-
-ENV JAVA_HOME=/usr/lib/jvm/java-21-openjdk \
+ENV JAVA_HOME=/usr/lib/jvm/java-21-amazon-corretto \
     MALLOC_ARENA_MAX=2 \
     MALLOC_MMAP_THRESHOLD_=131072 \
     MALLOC_TRIM_THRESHOLD_=131072 \
@@ -54,7 +51,7 @@ RUN mkdir -p /tmp/cert && \
     chown ${UID}:${GID} /var/lock && \
     chmod ug+rw /var/run && \
     chown ${UID}:${GID} /var/run && \
-    mkdir -p /etc/alternatives && ln -s /usr/lib/jvm/java-21-openjdk/bin/java /etc/alternatives/java && \
+    mkdir -p /etc/alternatives && ln -s /usr/lib/jvm/java-21-amazon-corretto/bin/java /etc/alternatives/java && \
     chown -R ${UID}:${GID} /etc/ca-certificates.conf && \
     mkdir -p /app/volumes/certs && \
     cp -R /etc/ssl/certs/java /app/volumes/certs && \

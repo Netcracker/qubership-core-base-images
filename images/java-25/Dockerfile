@@ -1,4 +1,17 @@
 ARG BASE_IMAGE=ghcr.io/netcracker/qubership-core-base:latest@sha256:b77f160cfd406124b3f1be223e82b21e742d5533638c64409e5992342587304a
+
+FROM amazoncorretto:25-alpine-jdk AS jlink
+RUN apk --no-cache add binutils
+RUN $JAVA_HOME/bin/jlink \
+    --add-modules java.se \
+    --add-modules jdk.jfr \
+    --module-path $JAVA_HOME/jmods \
+    --strip-debug \
+    --no-man-pages \
+    --no-header-files \
+    --compress=zip-6 \
+    --output /opt/jre
+
 FROM ${BASE_IMAGE}
 ARG TARGETOS
 ARG TARGETARCH
@@ -10,17 +23,12 @@ LABEL maintainer="qubership"
 
 USER root
 
-RUN apk update --no-cache
-
 RUN apk --no-cache add \
-    openjdk25-jre-headless
+    p11-kit-trust
 
-# The default java-cacerts hook runs `trust extract` inside `update-ca-certificates` via run-parts
-# and can fail transiently while the system bundle is mid-update.
-# We refresh the Java keystore once after update-ca-certificates in entrypoint.sh instead.
-RUN rm -f /etc/ca-certificates/update.d/java-cacerts
+COPY --from=jlink /opt/jre /usr/lib/jvm/java-25-amazon-corretto
 
-ENV JAVA_HOME=/usr/lib/jvm/default-jvm \
+ENV JAVA_HOME=/usr/lib/jvm/java-25-amazon-corretto \
     MALLOC_ARENA_MAX=2 \
     MALLOC_MMAP_THRESHOLD_=131072 \
     MALLOC_TRIM_THRESHOLD_=131072 \
@@ -28,7 +36,14 @@ ENV JAVA_HOME=/usr/lib/jvm/default-jvm \
     MALLOC_MMAP_MAX=65536 \
     JAVA_CERTIFICATE_FILE_LOCATION=/etc/ssl/certs/java/cacerts
 
-RUN mkdir -p /tmp/cert && \
+RUN ln -s ${JAVA_HOME}/bin/java /usr/bin/java && \
+    ln -s ${JAVA_HOME}/bin/keytool /usr/bin/keytool && \
+    chown -R ${UID}:${GID} ${JAVA_HOME}/lib/security/ && \
+    mkdir -p $(dirname ${JAVA_CERTIFICATE_FILE_LOCATION}) && \
+    touch ${JAVA_CERTIFICATE_FILE_LOCATION} && \
+    rm -f ${JAVA_HOME}/lib/security/cacerts && \
+    ln -s ${JAVA_CERTIFICATE_FILE_LOCATION} ${JAVA_HOME}/lib/security/cacerts && \
+    mkdir -p /tmp/cert && \
     chmod -R ug+rw /tmp && \
     chown -R ${UID}:${GID} /tmp && \
     mkdir -p /etc/env && \
@@ -51,7 +66,6 @@ RUN mkdir -p /tmp/cert && \
     chown ${UID}:${GID} /var/run && \
     chown -R ${UID}:${GID} /etc/ca-certificates.conf && \
     mkdir -p /app/volumes/certs && \
-    cp -R /etc/ssl/certs/java /app/volumes/certs && \
     find /etc/ssl/certs \( -type d -exec chmod ug+rw {} \; -exec chown ${UID}:${GID} {} \; -o -type f -exec chmod 644 {} \; -exec chown ${UID}:${GID} {} \; \) && \
     find /usr/local/share/ca-certificates/ \( -type d -exec chmod ug+rw {} \; -exec chown ${UID}:${GID} {} \; -o -type f -exec chmod 644 {} \; -exec chown ${UID}:${GID} {} \; \) && \
     find /usr/share/ca-certificates/ \( -type d -exec chmod ug+rw {} \; -exec chown ${UID}:${GID} {} \; -o -type f -exec chmod 644 {} \; -exec chown ${UID}:${GID} {} \; \) && \
@@ -61,4 +75,3 @@ RUN echo $BASE_IMAGE_TAG > /etc/base-image-release
 
 # Set user appuser for image run and all the following RUN, CMD and ENTRYPOINT commands
 USER ${UID}:${GID}
-
