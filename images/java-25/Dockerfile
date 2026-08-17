@@ -3,8 +3,7 @@ ARG BASE_IMAGE=ghcr.io/netcracker/qubership-core-base:latest@sha256:b77f160cfd40
 FROM amazoncorretto:25-alpine-jdk AS jlink
 RUN apk --no-cache add binutils
 RUN $JAVA_HOME/bin/jlink \
-    --add-modules java.se \
-    --add-modules jdk.jfr \
+    --add-modules ALL-MODULE-PATH \
     --module-path $JAVA_HOME/jmods \
     --strip-debug \
     --no-man-pages \
