@@ -17,4 +17,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "cdxgen"
-        uses: netcracker/qubership-workflow-hub/actions/cdxgen@768c088ef2adf0081dd97cff19dae2ef3ccab9b1 # main
+        uses: netcracker/qubership-workflow-hub/actions/cdxgen@3511065e91edef101ca84ed1c88cfef7120dface # main
