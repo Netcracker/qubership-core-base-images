@@ -59,17 +59,14 @@ load_certificates() {
     # but we can do workaround by extracting certificates from trust store and copying them to java keystore (openshift case)
     log DEBUG "Running update-ca-certificates"
 
-    if [[ "${LOG_LEVEL_EFFECTIVE^^}" == "DEBUG" ]]; then
-      update-ca-certificates -v || log WARN "Error updating CA certificates store. Try alternative method to update certificates for java keystore. " >&2
-    else
-      update-ca-certificates >/dev/null 2>&1 || log WARN "Error updating CA certificates store. Try alternative method to update certificates for java keystore. For details, run with IMAGE_LOG_LEVEL=DEBUG." >&2
-    fi
+    update-ca-certificates -v || log ERROR "Error updating CA certificates store"
 
     # Refresh Java cacerts from the trust store after system CA update (replaces Alpine's java-cacerts hook).
     cacerts_path=${JAVA_CERTIFICATE_FILE_LOCATION:-/etc/ssl/certs/java/cacerts}
     if [[ -x /usr/bin/trust ]]; then
-      trust extract --overwrite --format=java-cacerts --filter=ca-anchors --purpose server-auth "${cacerts_path}" && \
-        log DEBUG "trust extract: refreshed Java keystore at ${cacerts_path}"
+      log DEBUG "Update jks using trust tool"
+      trust extract --overwrite --format=java-cacerts --filter=ca-anchors --purpose server-auth "${cacerts_path}" || \
+        log ERROR "Error update jks using trust extract ${cacerts_path}"
 
       if [[ -x /usr/bin/keytool ]]; then
         pass=${CERTIFICATE_FILE_PASSWORD:-changeit}

@@ -30,7 +30,12 @@ ENV JAVA_HOME=/usr/lib/jvm/java-21-amazon-corretto \
     JAVA_CERTIFICATE_FILE_LOCATION=/etc/ssl/certs/java/cacerts \
     NC_DIAGNOSTIC_MODE=off
 
-RUN mkdir -p /tmp/cert && \
+RUN chown -R ${UID}:${GID} ${JAVA_HOME}/lib/security/ && \
+    mkdir -p $(dirname ${JAVA_CERTIFICATE_FILE_LOCATION}) && \
+    touch ${JAVA_CERTIFICATE_FILE_LOCATION} && \
+    rm -f ${JAVA_HOME}/lib/security/cacerts && \
+    ln -s ${JAVA_CERTIFICATE_FILE_LOCATION} ${JAVA_HOME}/lib/security/cacerts && \
+    mkdir -p /tmp/cert && \
     chmod -R ug+rw /tmp && \
     chown -R ${UID}:${GID} /tmp && \
     mkdir -p /etc/env && \
