@@ -58,7 +58,7 @@ FROM ghcr.io/netcracker/qubership-nginx-base:latest
 
 ## Common Features
 
-- Based on Alpine Linux 3.23.3
+- Based on Alpine Linux 3.24.1
 - Pre-configured with essential security settings
 - Built-in certificate management (including Kubernetes service account certificates)
 - User management with nss_wrapper support
@@ -70,7 +70,7 @@ FROM ghcr.io/netcracker/qubership-nginx-base:latest
 
 ## Base Alpine Image Details
 
-- **Base Image**: `alpine:3.23.3`
+- **Base Image**: `alpine:3.24.1`
 - **Default User**: `appuser` (UID: 10001)
 - **Default Home**: `/app`
 - **Default Language**: `en_US.UTF-8`
@@ -93,7 +93,7 @@ FROM ghcr.io/netcracker/qubership-nginx-base:latest
 
 ### Java 21 Image
 
-- **Base Image**: `alpine:3.23.3` (via core base image)
+- **Base Image**: `alpine:3.24.1` (via core base image)
 - **Java Version**: Amazon Corretto 21 (JDK)
 - **Default User**: `appuser` (UID: 10001)
 - **Default Home**: `/app`
@@ -101,7 +101,9 @@ FROM ghcr.io/netcracker/qubership-nginx-base:latest
 
 #### Additional Dependencies
 
-- `amazon-corretto-21`: Latest version
+- `amazon-corretto-21`: Latest version (from the Amazon Corretto apk repository)
+- `p11-kit-trust`: Latest version
+- `ssl_client`: Latest version
 - `fontconfig`: Latest version
 - `font-dejavu`: Latest version
 - `procps-ng`: Latest version
@@ -122,15 +124,16 @@ FROM ghcr.io/netcracker/qubership-nginx-base:latest
 
 ### Java 25 Images
 
-- **Base Image**: `alpine:3.23.3` (via core base image)
-- **Java Version**: Amazon Corretto 25 (JDK)
+- **Base Image**: `alpine:3.24.1` (via core base image)
+- **Java Version**: Amazon Corretto 25 (minimal `jlink` runtime)
 - **Default User**: `appuser` (UID: 10001)
 - **Default Home**: `/app`
 - **Default Language**: `en_US.UTF-8`
 
 #### Additional Dependencies
 
-- `amazon-corretto-25`: Latest version
+- Amazon Corretto 25 runtime: built via `jlink` from the `amazoncorretto:25-alpine-jdk` image and copied into `/usr/lib/jvm/java-25-amazon-corretto`
+- `p11-kit-trust`: Latest version
 - `curl`: Latest version
 - `bash`: Latest version
 - `nss_wrapper`: Latest version
@@ -147,7 +150,7 @@ FROM ghcr.io/netcracker/qubership-nginx-base:latest
 
 ### Nginx Alpine Image Details
 
-- **Base Image**: `ghcr.io/netcracker/qubership-core-base:latest` (Alpine 3.23.3)
+- **Base Image**: `ghcr.io/netcracker/qubership-core-base:latest` (Alpine 3.24.1)
 - **NGINX Version**: 1.28.3
 - **Default Language**: `en_US.UTF-8`
 
@@ -165,7 +168,7 @@ The image inherits all base Alpine features (certificate management, nss_wrapper
 
 The Java Alpine images (Java 21 and Java 25 profiler variants) include built-in support for the Qubership profiler:
 
-- **Profiler Version**: 3.1.6 (configurable via build arg `QUBERSHIP_PROFILER_VERSION`)
+- **Profiler Version**: 4.0.5 (configurable via build arg `QUBERSHIP_PROFILER_VERSION`)
 - **Artifact Source**: Configurable via build arg `QUBERSHIP_PROFILER_ARTIFACT_SOURCE` (local or remote from Maven Central)
 - **Enable Profiler**: Set environment variable `PROFILER_ENABLED=true`
 - **Profiler Directory**: `/app/diag`
