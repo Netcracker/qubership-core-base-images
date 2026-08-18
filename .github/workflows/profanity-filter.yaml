@@ -14,5 +14,18 @@ permissions:
   pull-requests: write
 
 jobs:
-  call-apply-filter:
-    uses: Netcracker/qubership-workflow-hub/.github/workflows/profanityFilter.yaml@3511065e91edef101ca84ed1c88cfef7120dface # main
+  apply-filter:
+    name: "Apply Profanity Filter"
+    runs-on: ubuntu-latest
+    steps:
+    - name: Scan issue or pull request for profanity
+      # Conditionally run the step if the actor isn't a bot
+      if: ${{ github.event.sender.type != 'Bot' }}
+      uses: IEvangelist/profanity-filter@96fb7c017b3219ea65c6a7ca70e5aed3ce5b4d7d # v13.4.6.2
+      id: profanity-filter
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        # See https://bit.ly/potty-mouth-replacement-strategies
+        replacement-strategy: middle-asterisk # See Replacement strategy
+        custom-profane-words-url: https://github.com/Hesham-Elbadawi/list-of-banned-words/raw/refs/heads/master/ru
+        exclude-profane-words: mongo,robot
