@@ -10,21 +10,18 @@ LABEL maintainer="qubership"
 
 USER root
 
-RUN apk update --no-cache
+RUN wget -O /etc/apk/keys/amazoncorretto.rsa.pub https://apk.corretto.aws/amazoncorretto.rsa.pub && \
+    echo "https://apk.corretto.aws/" >> /etc/apk/repositories
 
 RUN apk --no-cache add \
     ssl_client \
-    openjdk21-jdk \
+    amazon-corretto-21 \
+    p11-kit-trust \
     fontconfig \
     font-dejavu \
     procps-ng # top command required by diag tool
 
-# The default java-cacerts hook runs `trust extract` inside `update-ca-certificates` via run-parts
-# and can fail transiently while the system bundle is mid-update.
-# We refresh the Java keystore once after update-ca-certificates in entrypoint.sh instead.
-RUN rm -f /etc/ca-certificates/update.d/java-cacerts
-
-ENV JAVA_HOME=/usr/lib/jvm/java-21-openjdk \
+ENV JAVA_HOME=/usr/lib/jvm/java-21-amazon-corretto \
     MALLOC_ARENA_MAX=2 \
     MALLOC_MMAP_THRESHOLD_=131072 \
     MALLOC_TRIM_THRESHOLD_=131072 \
@@ -33,7 +30,12 @@ ENV JAVA_HOME=/usr/lib/jvm/java-21-openjdk \
     JAVA_CERTIFICATE_FILE_LOCATION=/etc/ssl/certs/java/cacerts \
     NC_DIAGNOSTIC_MODE=off
 
-RUN mkdir -p /tmp/cert && \
+RUN chown -R ${UID}:${GID} ${JAVA_HOME}/lib/security/ && \
+    mkdir -p $(dirname ${JAVA_CERTIFICATE_FILE_LOCATION}) && \
+    touch ${JAVA_CERTIFICATE_FILE_LOCATION} && \
+    rm -f ${JAVA_HOME}/lib/security/cacerts && \
+    ln -s ${JAVA_CERTIFICATE_FILE_LOCATION} ${JAVA_HOME}/lib/security/cacerts && \
+    mkdir -p /tmp/cert && \
     chmod -R ug+rw /tmp && \
     chown -R ${UID}:${GID} /tmp && \
     mkdir -p /etc/env && \
@@ -54,7 +56,7 @@ RUN mkdir -p /tmp/cert && \
     chown ${UID}:${GID} /var/lock && \
     chmod ug+rw /var/run && \
     chown ${UID}:${GID} /var/run && \
-    mkdir -p /etc/alternatives && ln -s /usr/lib/jvm/java-21-openjdk/bin/java /etc/alternatives/java && \
+    mkdir -p /etc/alternatives && ln -s /usr/lib/jvm/java-21-amazon-corretto/bin/java /etc/alternatives/java && \
     chown -R ${UID}:${GID} /etc/ca-certificates.conf && \
     mkdir -p /app/volumes/certs && \
     cp -R /etc/ssl/certs/java /app/volumes/certs && \

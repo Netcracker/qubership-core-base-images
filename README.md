@@ -94,14 +94,14 @@ FROM ghcr.io/netcracker/qubership-nginx-base:latest
 ### Java 21 Image
 
 - **Base Image**: `alpine:3.23.3` (via core base image)
-- **Java Version**: OpenJDK 21 (JDK)
+- **Java Version**: Amazon Corretto 21 (JDK)
 - **Default User**: `appuser` (UID: 10001)
 - **Default Home**: `/app`
 - **Default Language**: `en_US.UTF-8`
 
 #### Additional Dependencies
 
-- `openjdk21-jdk`: Latest version
+- `amazon-corretto-21`: Latest version
 - `fontconfig`: Latest version
 - `font-dejavu`: Latest version
 - `procps-ng`: Latest version
@@ -113,7 +113,7 @@ FROM ghcr.io/netcracker/qubership-nginx-base:latest
 
 #### Java 21 Environment Variables
 
-- `JAVA_HOME`: `/usr/lib/jvm/java-21-openjdk`
+- `JAVA_HOME`: `/usr/lib/jvm/java-21-amazon-corretto`
 - `MALLOC_ARENA_MAX`: 2
 - `MALLOC_MMAP_THRESHOLD_`: 131072
 - `MALLOC_TRIM_THRESHOLD_`: 131072
@@ -123,14 +123,14 @@ FROM ghcr.io/netcracker/qubership-nginx-base:latest
 ### Java 25 Images
 
 - **Base Image**: `alpine:3.23.3` (via core base image)
-- **Java Version**: OpenJDK 25 (JRE)
+- **Java Version**: Amazon Corretto 25 (JDK)
 - **Default User**: `appuser` (UID: 10001)
 - **Default Home**: `/app`
 - **Default Language**: `en_US.UTF-8`
 
 #### Additional Dependencies
 
-- `openjdk25-jre-headless`: Latest version
+- `amazon-corretto-25`: Latest version
 - `curl`: Latest version
 - `bash`: Latest version
 - `nss_wrapper`: Latest version
@@ -138,7 +138,7 @@ FROM ghcr.io/netcracker/qubership-nginx-base:latest
 
 #### Java 25 Environment Variables
 
-- `JAVA_HOME`: `/usr/lib/jvm/default-jvm`
+- `JAVA_HOME`: `/usr/lib/jvm/java-25-amazon-corretto`
 - `MALLOC_ARENA_MAX`: 2
 - `MALLOC_MMAP_THRESHOLD_`: 131072
 - `MALLOC_TRIM_THRESHOLD_`: 131072
