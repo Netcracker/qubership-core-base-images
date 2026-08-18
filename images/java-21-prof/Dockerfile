@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=ghcr.io/netcracker/qubership-core-base:latest@sha256:b77f160cfd406124b3f1be223e82b21e742d5533638c64409e5992342587304a
+ARG BASE_IMAGE=ghcr.io/netcracker/qubership-core-base:latest@sha256:b917b3a1731a2ae26b507d22565f030ec25ff8d28b75a80b8b08bbc946f4d73b
 FROM ${BASE_IMAGE}
 ARG TARGETOS
 ARG TARGETARCH
@@ -68,7 +68,7 @@ RUN chown -R ${UID}:${GID} ${JAVA_HOME}/lib/security/ && \
     find /app \( -type d -exec chmod ug+rwx {} \; -exec chown ${UID}:${GID} {} \; -o -type f -exec chmod ug+rw {} \; -exec chown ${UID}:${GID} {} \; \)
 
 # renovate: datasource=maven depName=qubership-profiler-installer packageName=org.qubership.profiler:qubership-profiler-installer versioning=maven
-ARG QUBERSHIP_PROFILER_VERSION=4.0.4
+ARG QUBERSHIP_PROFILER_VERSION=4.0.5
 ARG MAVEN_CENTRAL_URL=https://repo.maven.apache.org/maven2
 # Supported values are: local, remote. Local artifact enables testing the dockerfile without publishing the profiler to Central.
 ARG QUBERSHIP_PROFILER_ARTIFACT_SOURCE=remote

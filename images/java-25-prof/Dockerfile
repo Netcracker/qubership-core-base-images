@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=ghcr.io/netcracker/qubership-java-base:25-alpine-latest@sha256:1711586b4978ad2dd73f5bd2a384ddff07889b880ac34a5767d0d50810736a5a
+ARG BASE_IMAGE=ghcr.io/netcracker/qubership-java-base:25-alpine-latest@sha256:577def182c22d770bba27ed663b14fff4621cf1ad99979fa3bf415e2ae756fac
 FROM ${BASE_IMAGE}
 ARG TARGETOS
 ARG TARGETARCH
@@ -15,7 +15,7 @@ RUN echo $BASE_IMAGE_TAG > /etc/base-image-release
 ENV NC_DIAGNOSTIC_MODE=off
 
 # renovate: datasource=maven depName=qubership-profiler-installer packageName=org.qubership.profiler:qubership-profiler-installer versioning=maven
-ARG QUBERSHIP_PROFILER_VERSION=4.0.4
+ARG QUBERSHIP_PROFILER_VERSION=4.0.5
 ARG MAVEN_CENTRAL_URL=https://repo.maven.apache.org/maven2
 # Supported values are: local, remote. Local artifact enables testing the dockerfile without publishing the profiler to Central.
 ARG QUBERSHIP_PROFILER_ARTIFACT_SOURCE=remote
