@@ -47,9 +47,7 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4
-        with:
-          driver: docker
-      
+
       - name: Build and load test core-image
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7
         with:
@@ -58,6 +56,9 @@ jobs:
           tags: |
             ghcr.io/netcracker/qubership-core-base:test
           file: images/core/Dockerfile
+          load: true
+          cache-from: type=gha,scope=core-base
+          cache-to: type=gha,scope=core-base,mode=max
 
       - name: Build and load test java 21 image with prof
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7
@@ -69,6 +70,9 @@ jobs:
             ghcr.io/netcracker/qubership-java-base:21-test
             ghcr.io/netcracker/qubership-java-base-prof:21-test
           file: images/java-21-prof/Dockerfile
+          load: true
+          cache-from: type=gha,scope=java-21-prof
+          cache-to: type=gha,scope=java-21-prof,mode=max
 
       - name: Build and load test java 25 image
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7
@@ -78,6 +82,9 @@ jobs:
             BASE_IMAGE_TAG=ghcr.io/netcracker/qubership-java-base:25-test
           tags: ghcr.io/netcracker/qubership-java-base:25-test
           file: images/java-25/Dockerfile
+          load: true
+          cache-from: type=gha,scope=java-25
+          cache-to: type=gha,scope=java-25,mode=max
 
       - name: Build and load test java 25 image with prof
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7
@@ -87,6 +94,9 @@ jobs:
             BASE_IMAGE_TAG=ghcr.io/netcracker/qubership-java-base-prof:25-test
           tags: ghcr.io/netcracker/qubership-java-base-prof:25-test
           file: images/java-25-prof/Dockerfile
+          load: true
+          cache-from: type=gha,scope=java-25-prof
+          cache-to: type=gha,scope=java-25-prof,mode=max
 
       - name: Build and load test nginx base image
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7
@@ -97,6 +107,9 @@ jobs:
           tags: |
             ghcr.io/netcracker/qubership-nginx-base:test
           file: images/nginx/Dockerfile
+          load: true
+          cache-from: type=gha,scope=nginx
+          cache-to: type=gha,scope=nginx,mode=max
 
       - name: Run tests on containers
         run: |
