@@ -9,6 +9,7 @@ RUN $JAVA_HOME/bin/jlink \
     --no-man-pages \
     --no-header-files \
     --compress=zip-6 \
+    --generate-cds-archive \
     --output /opt/jre
 
 FROM ${BASE_IMAGE}
