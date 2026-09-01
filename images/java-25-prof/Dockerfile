@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=ghcr.io/netcracker/qubership-java-base:25-alpine-latest@sha256:577def182c22d770bba27ed663b14fff4621cf1ad99979fa3bf415e2ae756fac
+ARG BASE_IMAGE=ghcr.io/netcracker/qubership-java-base:25-alpine-latest@sha256:caaf4118073ca1863cf20ca351e8411981dbcc802ed3f8d4720b7c5fb59f8971
 FROM ${BASE_IMAGE}
 ARG TARGETOS
 ARG TARGETARCH
