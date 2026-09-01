@@ -21,6 +21,13 @@
   "packageRules" : [ {
     "groupName" : "org.qubership.profiler",
     "matchPackageNames" : [ "org.qubership.profiler{/,}**" ]
+  }, {
+    "description" : "Java base images are pinned per major (images/java-<major>): minor/patch/digest only",
+    "matchManagers" : [ "dockerfile" ],
+    "matchDatasources" : [ "docker" ],
+    "matchPackageNames" : [ "amazoncorretto" ],
+    "matchUpdateTypes" : [ "major" ],
+    "enabled" : false
   } ],
   "extends" : [ "github>Netcracker/qubership-core-infra:renovate-core-config" ]
 }
