@@ -74,7 +74,7 @@ if [ -d "$RESULTS_PATH" ]; then
     echo "Uploading: $FILE"
     echo "       to: $OBJECT_URL"
 
-    curl --fail --show-error --silent \
+    curl -k --fail --show-error --silent \
       --request PUT \
       --aws-sigv4 "aws:amz:${ATP_STORAGE_REGION}:s3" \
       --user "${ATP_STORAGE_ACCESSKEY}:${ATP_STORAGE_SECRETKEY}" \
