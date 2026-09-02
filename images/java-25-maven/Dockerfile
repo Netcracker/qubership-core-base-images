@@ -14,6 +14,8 @@ RUN apk add --no-cache maven
 
 WORKDIR /app
 
+USER ${UID}:${GID}
+
 # Warm-up
 RUN cat > /app/pom.xml <<'EOF'
 <?xml version="1.0" encoding="UTF-8"?>
@@ -88,7 +90,5 @@ echo "Maven exit code: ${TEST_EXIT_CODE}"
 exit "$TEST_EXIT_CODE"
 EOF
 RUN chmod +x /app/integration-tests-run.sh
-
-USER ${UID}:${GID}
 
 CMD ["/app/integration-tests-run.sh"]
