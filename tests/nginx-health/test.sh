@@ -5,8 +5,7 @@
 
 set -xeu
 
-container_id=$(docker run -d --rm -p "8080:8080" "$IMAGE" nginx -g 'daemon off;')
-
+container_id=$(docker run -d --rm -p "8080:8080" -v "$SCRIPT_DIR/nginx.conf:/etc/nginx/nginx.conf:ro" "$IMAGE" nginx -g 'daemon off;')
 trap 'docker kill "$container_id" 1>/dev/null 2>&1' EXIT RETURN
 
 wait_for_container "$container_id" curl -sf --max-time 1 "http://localhost:8080/health"
