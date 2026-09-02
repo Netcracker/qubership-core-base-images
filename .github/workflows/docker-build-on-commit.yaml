@@ -79,6 +79,15 @@ jobs:
           tags: ghcr.io/netcracker/qubership-java-base:25-test
           file: images/java-25/Dockerfile
 
+      - name: Build and load test java 25 image with maven
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7
+        with:
+          build-args: |
+            BASE_IMAGE=ghcr.io/netcracker/qubership-java-base:25-test
+            BASE_IMAGE_TAG=ghcr.io/netcracker/qubership-java-base-maven:25-test
+          tags: ghcr.io/netcracker/qubership-java-base-maven:25-test
+          file: images/java-25-maven/Dockerfile
+
       - name: Build and load test java 25 image with prof
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7
         with:
@@ -104,6 +113,7 @@ jobs:
           ./tests/test-suite.sh ghcr.io/netcracker/qubership-java-base-prof:21-test
           ./tests/test-suite.sh ghcr.io/netcracker/qubership-java-base:25-test
           ./tests/test-suite.sh ghcr.io/netcracker/qubership-java-base-prof:25-test
+          ./tests/test-suite.sh ghcr.io/netcracker/qubership-java-base-maven:25-test
           ./tests/test-suite.sh ghcr.io/netcracker/qubership-nginx-base:test
 
       - name: Set up JDK 21
@@ -148,15 +158,17 @@ jobs:
           docker push ghcr.io/netcracker/qubership-java-base:21-alpine-$TAG_BUILD_NUMBER
           docker push ghcr.io/netcracker/qubership-java-base-prof:21-alpine-$TAG_SNAPSHOT
           docker push ghcr.io/netcracker/qubership-java-base-prof:21-alpine-$TAG_BUILD_NUMBER
-          # java 25 (base and prof)
+          # java 25 (base and prof and maven)
           docker tag ghcr.io/netcracker/qubership-java-base:25-test ghcr.io/netcracker/qubership-java-base:25-alpine-$TAG_SNAPSHOT
           docker tag ghcr.io/netcracker/qubership-java-base:25-test ghcr.io/netcracker/qubership-java-base:25-alpine-$TAG_BUILD_NUMBER
           docker tag ghcr.io/netcracker/qubership-java-base-prof:25-test ghcr.io/netcracker/qubership-java-base-prof:25-alpine-$TAG_SNAPSHOT
           docker tag ghcr.io/netcracker/qubership-java-base-prof:25-test ghcr.io/netcracker/qubership-java-base-prof:25-alpine-$TAG_BUILD_NUMBER
+          docker tag ghcr.io/netcracker/qubership-java-base-maven:25-test ghcr.io/netcracker/qubership-java-base-maven:25-alpine-$TAG_SNAPSHOT
+          docker tag ghcr.io/netcracker/qubership-java-base-maven:25-test ghcr.io/netcracker/qubership-java-base-maven:25-alpine-$TAG_BUILD_NUMBER
           docker push ghcr.io/netcracker/qubership-java-base:25-alpine-$TAG_SNAPSHOT
           docker push ghcr.io/netcracker/qubership-java-base:25-alpine-$TAG_BUILD_NUMBER
-          docker push ghcr.io/netcracker/qubership-java-base-prof:25-alpine-$TAG_SNAPSHOT
-          docker push ghcr.io/netcracker/qubership-java-base-prof:25-alpine-$TAG_BUILD_NUMBER
+          docker push ghcr.io/netcracker/qubership-java-base-maven:25-alpine-$TAG_SNAPSHOT
+          docker push ghcr.io/netcracker/qubership-java-base-maven:25-alpine-$TAG_BUILD_NUMBER
           # nginx-base
           docker tag ghcr.io/netcracker/qubership-nginx-base:test ghcr.io/netcracker/qubership-nginx-base:$TAG_SNAPSHOT
           docker tag ghcr.io/netcracker/qubership-nginx-base:test ghcr.io/netcracker/qubership-nginx-base:$TAG_BUILD_NUMBER

@@ -3,9 +3,8 @@
 ###############
 # This image does not utilize nor test RO fs, due to being a base image needed only for running JUnit ITs and uploading
 # them to remote S3 instance/storage.
-
-FROM ghcr.io/netcracker/qubership-java-base:25-alpine-latest
-
+ARG BASE_IMAGE=ghcr.io/netcracker/qubership-java-base:25-alpine-latest@sha256:577def182c22d770bba27ed663b14fff4621cf1ad99979fa3bf415e2ae756fac
+FROM ${BASE_IMAGE}
 ARG UID=10001
 ARG GID=root
 

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -Eeuo pipefail
 
 cleanup() {
     docker image rm -f "$IMAGE" >/dev/null 2>&1 || true
