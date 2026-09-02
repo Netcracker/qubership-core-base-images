@@ -139,6 +139,7 @@ COPY --from=builder \
 COPY --from=builder \
     /usr/src/nginx-otel/build/ngx_otel_module.so \
     /usr/lib/nginx/modules/
+
 COPY --chown=${UID}:${GID} images/nginx/base-image-conf/probes-locations.conf /etc/nginx/base-image-conf/probes-locations.conf
 
 RUN rm -rf /etc/nginx/modules \
