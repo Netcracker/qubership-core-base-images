@@ -10,12 +10,18 @@ ARG GID=root
 
 USER root
 
-RUN apk add --no-cache maven
+RUN apk add --no-cache maven rclone
 
 USER ${UID}:${GID}
 
 WORKDIR /app
 
-COPY --chown=${UID}:${GID} --chmod=755 images/java-25-maven/integration-tests-run.sh /app/integration-tests-run.sh
+COPY --chown=${UID}:${GID} --chmod=755 images/java-25-atp/integration-tests-run.sh /app/integration-tests-run.sh
+
+# Warm-up
+COPY --chown=${UID}:${GID} --chmod=644 images/java-25-atp/pom.xml /app/pom.xml
+RUN mvn -B verify
+RUN rm -r target
+RUN rm pom.xml
 
 CMD ["/app/integration-tests-run.sh"]

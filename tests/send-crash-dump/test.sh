@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-[[ ! "$IMAGE" == *java*prof ]] && exit 0 # this test relates only to java images
+[[ "$IMAGE" != *java*prof && "$IMAGE" != *java*atp ]] && exit 0 # this test relates only to java images
 
 set -ex
 

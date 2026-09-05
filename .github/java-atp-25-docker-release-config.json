@@ -1,8 +1,8 @@
 {
   "components": [
     {
-      "name": "qubership-java-base-maven",
-      "file": "./images/java-25-maven/Dockerfile",
+      "name": "qubership-java-base-atp",
+      "file": "./images/java-25-atp/Dockerfile",
       "context": "."
     }
   ],
