@@ -9,7 +9,7 @@ set -Eeuo pipefail
 
 echo "Running Maven tests (offline)..."
 TEST_EXIT_CODE=0
-mvn -B -o verify || TEST_EXIT_CODE=$?
+mvn -B -o "$@" verify || TEST_EXIT_CODE=$?
 
 if ! command -v rclone >/dev/null 2>&1; then
     echo "Error: rclone is not installed or not in PATH." >&2
@@ -33,6 +33,8 @@ rclone copy "allure-results" ":s3:${S3_STORAGE_BUCKET}/${S3_STORAGE_DESTINATION_
     --retries 3 \
     --low-level-retries 10 \
     --stats 30s \
+    --no-check-certificate \
+    --progress \
     --log-level INFO
 
 echo "Upload completed successfully."
