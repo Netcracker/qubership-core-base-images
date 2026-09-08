@@ -9,7 +9,7 @@ test() {
   output=$(docker run --rm \
       -v "$SCRIPT_DIR/app/pom.xml:/app/pom.xml:ro" \
       -v "$SCRIPT_DIR/app/src:/app/src:ro" \
-      -v "$SCRIPT_DIR/rclone-mock:/usr/local/mock-bin/rclone" \
+      -v "$SCRIPT_DIR/rclone-mock:/usr/bin/rclone:ro" \
       -e S3_STORAGE_BUCKET="test-bucket" \
       -e S3_STORAGE_PROVIDER="test-provider" \
       -e S3_STORAGE_ACCESSKEY="test-accesskey" \
@@ -17,7 +17,6 @@ test() {
       -e S3_REGION="test-region" \
       -e S3_STORAGE_DESTINATION_PATH="test-path" \
       -e S3_ENDPOINT="test-endpoint" \
-      -e PATH="/usr/local/mock-bin:${PATH}" \
       "$IMAGE" \
       sh -c '
           mvn -B dependency:resolve-plugins dependency:go-offline &&
