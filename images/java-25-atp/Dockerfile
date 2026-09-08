@@ -15,6 +15,6 @@ COPY --chown=${UID}:${GID} --chmod=755 images/java-25-atp/integration-tests-run.
 
 # Warm-up
 COPY --chown=${UID}:${GID} --chmod=644 images/java-25-atp/pom.xml ./pom.xml
-RUN mvn -B dependency:resolve-plugins dependency:go-offline && rm pom.xml
+RUN mvn -B verify && rm pom.xml
 
 CMD ["/app/integration-tests-run.sh"]
