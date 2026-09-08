@@ -1,15 +1,17 @@
 #!/usr/bin/env bash
-set -Eeuo pipefail
+set -euo
 
 : "${S3_STORAGE_BUCKET:?S3_STORAGE_BUCKET is required}"
 : "${S3_STORAGE_PROVIDER:?S3_STORAGE_PROVIDER is required}"
 : "${S3_STORAGE_ACCESSKEY:?S3_STORAGE_ACCESSKEY is required}"
 : "${S3_STORAGE_SECRETKEY:?S3_STORAGE_SECRETKEY is required}"
 : "${S3_REGION:?S3_REGION is required}"
+: "${S3_STORAGE_DESTINATION_PATH:?S3_STORAGE_DESTINATION_PATH is required}"
+: "${S3_ENDPOINT:?S3_ENDPOINT}"
 
 echo "Running Maven tests (offline)..."
 MAVEN_EXIT_CODE=0
-mvn -B -o "$@" verify || MAVEN_EXIT_CODE=$?
+mvn -B -o "$@" verify
 
 if [[ ! -d "allure-results" ]]; then
     echo "Error: source directory does not exist: allure-results" >&2
@@ -31,8 +33,5 @@ rclone copy "allure-results" ":s3:${S3_STORAGE_BUCKET}/${S3_STORAGE_DESTINATION_
     --stats 30s \
     --no-check-certificate \
     --progress \
-    --log-level INFO || RCLONE_EXIT_CODE=$?
-
-echo "Maven exit code: ${MAVEN_EXIT_CODE}"
-echo "RClone exit code: ${RCLONE_EXIT_CODE}"
-exit $(( MAVEN_EXIT_CODE != 0 ? MAVEN_EXIT_CODE : RCLONE_EXIT_CODE ))
+    --log-level INFO
+echo "Uploaded successfully"

@@ -25,9 +25,10 @@ test() {
       ' || {
       fail "Container execution failed. Maven error"
   })
-  echo "$output"| \
-      grep "Maven exit code: 0
-            RClone exit code: 0" >/dev/null || fail "Allure-Results were not generated"
+  grep -Fq -- "Tests run: 1, Failures: 0, Errors: 0, Skipped: 0" <<< "$output" ||
+  fail "Maven failed"
+  grep -Fq -- "Uploaded successfully" <<< "$output" ||
+  fail "Rclone failed"
 }
 
 test "rw"

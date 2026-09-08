@@ -168,6 +168,16 @@ FROM ghcr.io/netcracker/qubership-nginx-base:latest
 - `rclone`: Latest Version
 - And all base Java 25 dependencies
 
+#### Java 25 ATP Environment Variables
+
+- `S3_STORAGE_BUCKET`: Required Bucket name for S3
+- `S3_STORAGE_PROVIDER`: Required S3 provider name
+- `S3_STORAGE_ACCESSKEY`: Required S3 access key ID
+- `S3_STORAGE_SECRETKEY`: Required S3 secret access key
+- `S3_REGION`: Required region of S3 storage
+- `S3_STORAGE_DESTINATION_PATH`: Required path to S3 bucket folder
+- `S3_ENDPOINT`: Required custom S3 endpoint
+
 #### Disclaimer
 
 This image does not test RO fs, due to being a base image needed only for running JUnit ITs and uploading them to remote

@@ -8,8 +8,4 @@ public class AppIT {
     @Test
     @DisplayName("Test #1")
     public void test1() {}
-
-    @Test
-    @DisplayName("Test #2")
-    public void test2() {}
 }
