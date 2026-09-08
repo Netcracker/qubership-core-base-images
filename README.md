@@ -162,6 +162,11 @@ FROM ghcr.io/netcracker/qubership-nginx-base:latest
 - **Default Home**: `/app`
 - **Default Language**: `en_US.UTF-8`
 
+#### Disclaimer
+
+This image does not test RO fs, due to being a base image needed only for running JUnit ITs and uploading them to remote
+S3 instance/storage.
+
 #### Additional Dependencies
 
 - `maven`: Latest version
@@ -177,11 +182,6 @@ FROM ghcr.io/netcracker/qubership-nginx-base:latest
 - `S3_REGION`: Required region of S3 storage
 - `S3_STORAGE_DESTINATION_PATH`: Required path to S3 bucket folder
 - `S3_ENDPOINT`: Required custom S3 endpoint
-
-#### Disclaimer
-
-This image does not test RO fs, due to being a base image needed only for running JUnit ITs and uploading them to remote
-S3 instance/storage.
 
 ### Nginx Alpine Image Details
 
