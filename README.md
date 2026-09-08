@@ -14,6 +14,7 @@ There are three Java images based on Alpine:
 * Java 21 with JDK and profiler: `qubership-java-base:21-alpine-xxx`
 * Java 25 with JRE: `qubership-java-base:25-alpine-xxx`
 * Java 25 with JRE and profiler: `qubership-java-base-prof:25-alpine-xxx`
+* Java 25 with JRE, maven, rclone for ATP: `qubership-java-base-atp:25-alpine-xxx`
 
 ### 3. Nginx Alpine Image
 
@@ -43,6 +44,11 @@ FROM ghcr.io/netcracker/qubership-java-base:25-alpine-latest
 **Java 25 (JRE with profiler):**
 ```dockerfile
 FROM ghcr.io/netcracker/qubership-java-base-prof:25-alpine-latest
+```
+
+**Java 25 (JRE for ATP):**
+```dockerfile
+FROM ghcr.io/netcracker/qubership-java-base-atp:25-alpine-latest
 ```
 
 **Note**: There are obsolete image labels named `qubership/java-base:latest`. Please, do not use them!
@@ -147,6 +153,25 @@ FROM ghcr.io/netcracker/qubership-nginx-base:latest
 - `MALLOC_TRIM_THRESHOLD_`: 131072
 - `MALLOC_TOP_PAD_`: 131072
 - `MALLOC_MMAP_MAX`: 65536
+
+#### Java 25 ATP Images
+
+- **Base Image**: `qubership-java-base:25-alpine-latest` (via java 25 base image)
+- **Java Version**: Amazon Corretto 25 (minimal `jlink` runtime)
+- **Default User**: `appuser` (UID: 10001)
+- **Default Home**: `/app`
+- **Default Language**: `en_US.UTF-8`
+
+#### Additional Dependencies
+
+- `maven`: Latest version
+- `rclone`: Latest Version
+- And all base Java 25 dependencies
+
+#### Disclaimer
+
+This image does not test RO fs, due to being a base image needed only for running JUnit ITs and uploading them to remote
+S3 instance/storage.
 
 ### Nginx Alpine Image Details
 

@@ -167,6 +167,8 @@ jobs:
           docker tag ghcr.io/netcracker/qubership-java-base-atp:25-test ghcr.io/netcracker/qubership-java-base-atp:25-alpine-$TAG_BUILD_NUMBER
           docker push ghcr.io/netcracker/qubership-java-base:25-alpine-$TAG_SNAPSHOT
           docker push ghcr.io/netcracker/qubership-java-base:25-alpine-$TAG_BUILD_NUMBER
+          docker push ghcr.io/netcracker/qubership-java-base-prof:25-alpine-$TAG_SNAPSHOT
+          docker push ghcr.io/netcracker/qubership-java-base-prof:25-alpine-$TAG_BUILD_NUMBER
           docker push ghcr.io/netcracker/qubership-java-base-atp:25-alpine-$TAG_SNAPSHOT
           docker push ghcr.io/netcracker/qubership-java-base-atp:25-alpine-$TAG_BUILD_NUMBER
           # nginx-base

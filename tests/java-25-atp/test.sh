@@ -5,40 +5,29 @@ set -ex
 
 PROC_OUTPUT_FILE=$(mktemp)
 
-# create container with app. emulate real container with microservice code
-TMP_IMAGE=$(random_name "app-tmp")
-APP_IMAGE=$(random_name "app-container")
-docker create --name "$TMP_IMAGE" "$IMAGE"
-# add sample application
-docker cp ./app "$TMP_IMAGE:/app"
-docker cp ./rclone-mock "$TMP_IMAGE:/usr/local/mock-bin/rclone"
-
-docker start "$TMP_IMAGE"
-docker exec "$TMP_IMAGE" chmod +x /usr/local/mock-bin/rclone
-docker stop "$TMP_IMAGE"
-
-docker commit "$TMP_IMAGE" "$APP_IMAGE"
-IMAGE=$APP_IMAGE
-
 test() {
-  container_name=$(random_name "test-run")
-
-  docker run --rm --name "$CONTAINER_NAME" \
+  output=$(docker run --rm \
+      -v "$SCRIPT_DIR/app/pom.xml:/app/pom.xml:ro" \
+      -v "$SCRIPT_DIR/app/src:/app/src:ro" \
+      -v "$SCRIPT_DIR/rclone-mock:/usr/local/mock-bin/rclone" \
       -e S3_STORAGE_BUCKET="test-bucket" \
       -e S3_STORAGE_PROVIDER="test-provider" \
       -e S3_STORAGE_ACCESSKEY="test-accesskey" \
       -e S3_STORAGE_SECRETKEY="test-secretkey" \
       -e S3_REGION="test-region" \
+      -e S3_STORAGE_DESTINATION_PATH="test-path" \
+      -e S3_ENDPOINT="test-endpoint" \
       -e PATH="/usr/local/mock-bin:${PATH}" \
-      "$DOCKER_IMAGE" || {
-      echo "Container execution failed. Maven error"
-  }
-  sleep 1
-  docker exec "$container_name" bash -c 'kill -SIGSEGV $(ps ax | grep -v grep | grep java | grep -v bash | awk "{print \$1}")'
-  docker logs -f "$container_name" >"$PROC_OUTPUT_FILE"
-  docker stop "$container_name"
-
-  <"$PROC_OUTPUT_FILE" grep "Error: source directory does not exist: allure-results" >/dev/null || fail "Test error: allure-results was not generated"
+      "$IMAGE" \
+      sh -c '
+          mvn -B dependency:resolve-plugins dependency:go-offline &&
+          exec /app/integration-tests-run.sh
+      ' || {
+      fail "Container execution failed. Maven error"
+  })
+  echo "$output"| \
+      grep "Maven exit code: 0
+            RClone exit code: 0" >/dev/null || fail "Allure-Results were not generated"
 }
 
 test "rw"
