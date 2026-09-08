@@ -10,6 +10,9 @@ trap 'docker kill "$container_id" 1>/dev/null 2>&1' EXIT RETURN
 
 wait_for_container "$container_id" curl -sf --max-time 1 "http://localhost:8080/health"
 
+resp=$(curl -sf "http://localhost:8080/")
+(echo "$resp" | grep -q '<h1>Welcome to nginx!</h1>') || fail "/ endpoint failed: expected default nginx index page"
+
 resp=$(curl -sf "http://localhost:8080/probes/live")
 (echo "$resp" | grep -q '"status":"UP"') || fail "/probes/live endpoint failed: expected {\"status\":\"UP\"}"
 
