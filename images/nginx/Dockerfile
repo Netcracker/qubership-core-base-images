@@ -140,6 +140,11 @@ COPY --from=builder \
     /usr/src/nginx-otel/build/ngx_otel_module.so \
     /usr/lib/nginx/modules/
 
+RUN mkdir -p /usr/share/nginx/html \
+    && chown ${UID}:${GID} /usr/share/nginx/html
+
+COPY --from=builder --chown=${UID}:${GID} /etc/nginx/html/index.html /usr/share/nginx/html/index.html
+
 RUN mkdir -p /etc/nginx/base-image-conf \
     && chown ${UID}:${GID} /etc/nginx/base-image-conf
 
