@@ -143,7 +143,7 @@ COPY --from=builder \
 RUN mkdir -p /usr/share/nginx/html \
     && chown ${UID}:${GID} /usr/share/nginx/html
 
-COPY --from=builder --chown=${UID}:${GID} /usr/src/nginx/html/index.html /usr/share/nginx/html/index.html
+COPY --from=builder --chown=${UID}:${GID} /etc/nginx/html/index.html /usr/share/nginx/html/index.html
 
 RUN mkdir -p /etc/nginx/base-image-conf \
     && chown ${UID}:${GID} /etc/nginx/base-image-conf
