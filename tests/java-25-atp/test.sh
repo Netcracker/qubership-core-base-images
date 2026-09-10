@@ -4,7 +4,6 @@
 set -ex
 
 TMP_IMAGE=$(random_name "app-tmp")
-APP_IMAGE=$(random_name "app-container")
 
 test() {
   # Create a docker image based on Java ATP which preinstalls dependencies and copies over tests
@@ -13,10 +12,10 @@ test() {
       --build-arg "BASE_IMAGE=$IMAGE" \
       --tag "$TMP_IMAGE" \
       app/
-  # Run it, while mocking rclone and providing all the envs
+
+  # Run IT, while mocking rclone and providing all the envs
   output=$(docker run --rm \
       --network none \
-      --name "$APP_IMAGE" \
       -v "$SCRIPT_DIR/rclone-mock:/usr/bin/rclone:ro" \
       -e S3_STORAGE_BUCKET="test-bucket" \
       -e S3_STORAGE_PROVIDER="test-provider" \
@@ -27,13 +26,12 @@ test() {
       -e S3_ENDPOINT="test-endpoint" \
       "$TMP_IMAGE"
   )
-  # Clean-up\
+  # Clean-up
   docker rmi "$TMP_IMAGE" >/dev/null 2>&1 || true
+
   # Run checks that maven and rclone have not failed
-  grep -Fq -- "Tests run: 1, Failures: 0, Errors: 0, Skipped: 0" <<< "$output" ||
-  fail "Maven failed"
-  grep -Fq -- "RClone exit code: 0" <<< "$output" ||
-  fail "Rclone failed"
+  grep -Fq -- "Tests run: 1, Failures: 0, Errors: 0, Skipped: 0" <<< "$output" || fail "Maven failed"
+  grep -Fq -- "RClone exit code: 0" <<< "$output" || fail "Rclone failed"
 }
 
-test "rw"
+test
