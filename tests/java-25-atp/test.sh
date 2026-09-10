@@ -8,10 +8,10 @@ TMP_IMAGE=$(random_name "app-tmp")
 test() {
   # Create a docker image based on Java ATP which preinstalls dependencies and copies over tests
   docker build \
-      --file app/Dockerfile \
+      --file "$SCRIPT_DIR/app/Dockerfile" \
       --build-arg "BASE_IMAGE=$IMAGE" \
       --tag "$TMP_IMAGE" \
-      app/
+      "$SCRIPT_DIR/app/"
 
   # Run IT, while mocking rclone and providing all the envs
   output=$(docker run --rm \

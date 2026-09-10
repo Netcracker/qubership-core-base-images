@@ -18,10 +18,10 @@ readonly RESULTS_DIR="allure-results"
 : "${S3_STORAGE_DESTINATION_PATH:?S3_STORAGE_DESTINATION_PATH is required}"
 : "${S3_ENDPOINT:?S3_ENDPOINT is required}"
 
-echo "Running Maven tests (offline)..."
+log INFO "Running Maven tests (offline)..."
 mvn -B -o "$@" verify
 maven_code=$?
-echo "Maven exit code: ${maven_code}"
+log INFO "Maven exit code: ${maven_code}"
 
 if [[ -d "$RESULTS_DIR" ]]; then
     rclone copy "$RESULTS_DIR" ":s3:${S3_STORAGE_BUCKET}/${S3_STORAGE_DESTINATION_PATH}" \
@@ -40,11 +40,11 @@ if [[ -d "$RESULTS_DIR" ]]; then
         --progress \
         --log-level INFO
     rclone_code=$?
-    echo "RClone exit code: ${rclone_code}"
+    log INFO "RClone exit code: ${rclone_code}"
     upload_code=0
     [[ $rclone_code -ne 0 ]] && upload_code=$((RCLONE_CODE_OFFSET + rclone_code))
 else
-    echo "Error: source directory does not exist: ${RESULTS_DIR}" >&2
+    log INFO "Error: source directory does not exist: ${RESULTS_DIR}" >&2
     upload_code=$NO_RESULTS_CODE
 fi
 
