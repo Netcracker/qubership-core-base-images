@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=ghcr.io/netcracker/qubership-core-base:latest@sha256:b917b3a1731a2ae26b507d22565f030ec25ff8d28b75a80b8b08bbc946f4d73b
+ARG BASE_IMAGE=ghcr.io/netcracker/qubership-core-base:latest@sha256:78e39e1332035b539eb61f605a9a3b638ccad27b3c64ed0783f76b6b6d4de8c5
 FROM ${BASE_IMAGE}
 ARG TARGETOS
 ARG TARGETARCH
@@ -11,7 +11,7 @@ LABEL maintainer="qubership"
 USER root
 
 RUN wget -O /etc/apk/keys/amazoncorretto.rsa.pub https://apk.corretto.aws/amazoncorretto.rsa.pub && \
-    echo "https://apk.corretto.aws/" >> /etc/apk/repositories
+    mkdir -p /etc/apk/repositories.d && echo "https://apk.corretto.aws/" > /etc/apk/repositories.d/amazoncorretto.list
 
 RUN apk --no-cache add \
     ssl_client \

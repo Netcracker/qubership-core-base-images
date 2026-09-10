@@ -199,6 +199,8 @@ S3 instance/storage.
 
 The image inherits all base Alpine features (certificate management, nss_wrapper, init.d scripts, signal handling, etc.).
 
+Probe snippets are shipped at `/etc/nginx/base-image-conf/probes-locations.conf` (`/probes/live`, `/probes/ready`, `/health`). Include that file from the server block in your `nginx.conf`.
+
 ### Qubership Profiler Integration
 
 The Java Alpine images (Java 21 and Java 25 profiler variants) include built-in support for the Qubership profiler:
