@@ -14,7 +14,10 @@ WORKDIR /app
 COPY --chown=${UID}:${GID} --chmod=755 images/java-25-atp/integration-tests-run.sh ./integration-tests-run.sh
 
 # Warm-up
-COPY --chown=${UID}:${GID} --chmod=644 images/java-25-atp/pom.xml ./pom.xml
-RUN mvn -B verify && rm pom.xml
+RUN cd /tmp/ && \
+    mvn archetype:generate -DgroupId=tmp -DartifactId=warmup -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false && \
+    cd /tmp/warmup \
+    mvn dependency:go-offline && \
+    cd /tmp/ && rm -rf /tmp/warmup
 
 CMD ["/app/integration-tests-run.sh"]
