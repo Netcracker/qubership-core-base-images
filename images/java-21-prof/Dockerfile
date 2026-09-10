@@ -11,7 +11,7 @@ LABEL maintainer="qubership"
 USER root
 
 RUN wget -O /etc/apk/keys/amazoncorretto.rsa.pub https://apk.corretto.aws/amazoncorretto.rsa.pub && \
-    echo "https://apk.corretto.aws/" >> /etc/apk/repositories
+    mkdir -p /etc/apk/repositories.d && echo "https://apk.corretto.aws/" > /etc/apk/repositories.d/amazoncorretto.list
 
 RUN apk --no-cache add \
     ssl_client \
