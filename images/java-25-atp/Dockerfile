@@ -2,6 +2,7 @@ ARG BASE_IMAGE=ghcr.io/netcracker/qubership-java-base:25-alpine-latest@sha256:57
 FROM ${BASE_IMAGE}
 ARG UID=10001
 ARG GID=root
+ARG BASE_IMAGE_TAG=java-25-atp:unknown
 
 USER root
 RUN echo $BASE_IMAGE_TAG > /etc/base-image-release
@@ -15,8 +16,8 @@ RUN cd /tmp/ && \
     mvn dependency:go-offline && \
     cd /tmp/ && rm -rf /tmp/warmup
 
-WORKDIR /app
 COPY --chown=${UID}:${GID} --chmod=755 images/java-25-atp/integration-tests-run.sh ./integration-tests-run.sh
 
 USER ${UID}:${GID}
+
 CMD ["/app/integration-tests-run.sh"]
