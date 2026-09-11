@@ -1,19 +1,7 @@
 ARG BASE_IMAGE
-
 FROM ${BASE_IMAGE}
 
-ARG UID=10001
-ARG GID=root
-
-USER root
-
-WORKDIR /app
-
-USER ${UID}:${GID}
-
-COPY pom.xml pom.xml
-
-# Install dependencies
-RUN mvn -B verify
-
-COPY src/ src/
+COPY . .
+# emulate test for non existing testsuite. This call will request maven to download ALL required plugins to run actual
+# test after this in offline mode
+RUN mvn -B test -Dtest=NoSuchTest -Dsurefire.failIfNoSpecifiedTests=false
