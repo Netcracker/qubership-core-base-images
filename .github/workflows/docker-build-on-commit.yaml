@@ -97,15 +97,15 @@ jobs:
           tags: ghcr.io/netcracker/qubership-java-base-prof:25-test
           file: images/java-25-prof/Dockerfile
 
-      - name: Build and load test nginx base image
-        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7
-        with:
-          build-args: |
-            BASE_IMAGE=ghcr.io/netcracker/qubership-core-base:test
-            BASE_IMAGE_TAG=ghcr.io/netcracker/qubership-nginx-base:test
-          tags: |
-            ghcr.io/netcracker/qubership-nginx-base:test
-          file: images/nginx/Dockerfile
+#      - name: Build and load test nginx base image
+#        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7
+#        with:
+#          build-args: |
+#            BASE_IMAGE=ghcr.io/netcracker/qubership-core-base:test
+#            BASE_IMAGE_TAG=ghcr.io/netcracker/qubership-nginx-base:test
+#          tags: |
+#            ghcr.io/netcracker/qubership-nginx-base:test
+#          file: images/nginx/Dockerfile
 
       - name: Run tests on containers
         run: |
@@ -114,7 +114,7 @@ jobs:
           ./tests/test-suite.sh ghcr.io/netcracker/qubership-java-base:25-test
           ./tests/test-suite.sh ghcr.io/netcracker/qubership-java-base-prof:25-test
           ./tests/test-suite.sh ghcr.io/netcracker/qubership-java-base-atp:25-test
-          ./tests/test-suite.sh ghcr.io/netcracker/qubership-nginx-base:test
+          # ./tests/test-suite.sh ghcr.io/netcracker/qubership-nginx-base:test
 
       - name: Set up JDK 21
         uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6
@@ -172,7 +172,7 @@ jobs:
           docker push ghcr.io/netcracker/qubership-java-base-atp:25-alpine-$TAG_SNAPSHOT
           docker push ghcr.io/netcracker/qubership-java-base-atp:25-alpine-$TAG_BUILD_NUMBER
           # nginx-base
-          docker tag ghcr.io/netcracker/qubership-nginx-base:test ghcr.io/netcracker/qubership-nginx-base:$TAG_SNAPSHOT
-          docker tag ghcr.io/netcracker/qubership-nginx-base:test ghcr.io/netcracker/qubership-nginx-base:$TAG_BUILD_NUMBER
-          docker push ghcr.io/netcracker/qubership-nginx-base:$TAG_SNAPSHOT
-          docker push ghcr.io/netcracker/qubership-nginx-base:$TAG_BUILD_NUMBER
+          # docker tag ghcr.io/netcracker/qubership-nginx-base:test ghcr.io/netcracker/qubership-nginx-base:$TAG_SNAPSHOT
+          # docker tag ghcr.io/netcracker/qubership-nginx-base:test ghcr.io/netcracker/qubership-nginx-base:$TAG_BUILD_NUMBER
+          # docker push ghcr.io/netcracker/qubership-nginx-base:$TAG_SNAPSHOT
+          # docker push ghcr.io/netcracker/qubership-nginx-base:$TAG_BUILD_NUMBER
