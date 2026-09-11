@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-[[ "$IMAGE" == *java*atp ]] && exit 0 # atp image can't be run without S3 params
+[[ "$IMAGE" == *java*atp* ]] && exit 0 # atp image can't be run without S3 params
 
 # Format from entrypoint log(): printf '[%s] [%s] [request_id=-] [tenant_id=-] [thread=-] [class=-] [%s] %s\n' "${_timestamp}" "${severity}" "${SCRIPT_NAME}" "$*"
 LOG_FORMAT_REGEX='^\[[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{3}\] \[(DEBUG|INFO|WARN|WARNING|ERROR)\] \[request_id=-\] \[tenant_id=-\] \[thread=-\] \[class=-\] \[[^]]+\] '

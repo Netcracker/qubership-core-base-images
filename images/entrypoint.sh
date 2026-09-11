@@ -2,36 +2,39 @@
 
 [[ ${LOG_ENTRYPOINT_COMMANDS,,} == "true" ]] && set -x
 
-severity_to_number() {
-  case "$1" in
-    DEBUG) echo 1 ;;
-    INFO)  echo 2 ;;
-    WARN|WARNING) echo 3 ;;
-    ERROR) echo 4 ;;
-    *) echo 2 ;;
-  esac
-}
-# Effective log level: IMAGE_LOG_LEVEL (highest), else LOG_LEVEL, else INFO.
-LOG_LEVEL_EFFECTIVE="${IMAGE_LOG_LEVEL:-${LOG_LEVEL:-INFO}}"
-CURRENT_LOG_LEVEL=$(severity_to_number "${LOG_LEVEL_EFFECTIVE^^}")
-SCRIPT_PATH="${BASH_SOURCE[0]}"
-SCRIPT_NAME="$(basename "$SCRIPT_PATH")"
+CURRENT_LOG_LEVEL="${IMAGE_LOG_LEVEL:-${LOG_LEVEL:-INFO}}"
 
 log() {
   { local -; set +x; } 2>/dev/null
-  local severity severity_number _timestamp
-  severity=${1^^:-INFO}
-  shift
-  severity_number=$(severity_to_number "$severity")
+  # Numeric weight of each level; anything unknown is treated as INFO (2)
+  local DEBUG=1 INFO=2 WARN=3 WARNING=3 ERROR=4
+  local severity effective script_name _timestamp msg_num lvl_num
 
-  if [ "$severity_number" -ge "$CURRENT_LOG_LEVEL" ]; then
+  severity=${1:-INFO}; severity=${severity^^}
+  [ $# -gt 0 ] && shift
+
+  effective=${CURRENT_LOG_LEVEL^^}
+
+  # Only plain names may reach eval, so a caller cannot inject code via $1
+  [[ $severity  =~ ^[A-Z]+$ ]] || severity=INFO
+  [[ $effective =~ ^[A-Z]+$ ]] || effective=INFO
+  eval "msg_num=\${$severity:-2}; lvl_num=\${$effective:-2}"
+
+  # Name of the outermost script, so that child scripts calling log() are labeled with their own name
+  script_name="$(basename "${BASH_SOURCE[-1]:-$0}")"
+
+  if [ "$msg_num" -ge "$lvl_num" ]; then
     _timestamp=$(date +%Y-%m-%dT%H:%M:%S$(printf ".%03d" $(date +%N | cut -c1-3)))
 
-     printf '[%s] [%s] [request_id=-] [tenant_id=-] [thread=-] [class=-] [%s] %s\n' "${_timestamp}" "${severity}" "${SCRIPT_NAME}" "$*" >&2
+    printf '[%s] [%s] [request_id=-] [tenant_id=-] [thread=-] [class=-] [%s] %s\n' \
+      "${_timestamp}" "${severity}" "${script_name}" "$*" >&2
   fi
 }
 
+# log() is exported for child scripts (e.g. init scripts, image commands), so everything it relies on
+# has to be exported as well, otherwise calling it in a child fails
 export -f log
+export CURRENT_LOG_LEVEL
 
 load_certificates() {
     # shellcheck disable=SC2016

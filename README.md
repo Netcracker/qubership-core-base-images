@@ -169,9 +169,15 @@ S3 instance/storage.
 
 #### Additional Dependencies
 
-- `maven`: Latest version
+- `maven`: 3.9.16, installed from the Apache distribution (`repo.maven.apache.org`) into `/opt/maven` with
+  `mvn` symlinked to `/usr/bin/mvn`. The `maven` apk package is not used, because it pulls in a full OpenJDK
+  on top of the JRE the base image already provides. Version is managed by renovate via the `MAVEN_VERSION`
+  build arg.
 - `rclone`: Latest Version
 - And all base Java 25 dependencies
+
+The local Maven repository is set to `/app/.m2/repository` (global `settings.xml` in `/opt/maven/conf`) and is
+warmed up at build time with the plugins a `mvn verify` run needs, so ITs can run offline (`mvn -o`).
 
 #### Java 25 ATP Environment Variables
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-[[ ! "$IMAGE" == *java*atp ]] && exit 0 # this test relates only to java atp images
+[[ ! "$IMAGE" == *java*atp* ]] && exit 0 # this test relates only to java atp images
 
 set -ex
 
@@ -24,7 +24,7 @@ test() {
       -e S3_REGION="test-region" \
       -e S3_STORAGE_DESTINATION_PATH="test-path" \
       -e S3_ENDPOINT="test-endpoint" \
-      "$TMP_IMAGE"
+      "$TMP_IMAGE" 2>&1
   )
   # Clean-up
   docker rmi "$TMP_IMAGE" >/dev/null 2>&1 || true
