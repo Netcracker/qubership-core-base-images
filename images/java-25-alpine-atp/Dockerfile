@@ -30,7 +30,7 @@ RUN cd /app && \
     cd /app/ && rm -rf /app/warmup && \
     find "$(dirname "$MAVEN_REPO_LOCAL")" \( -type d -exec chmod ug+rwx {} \; -exec chown ${UID}:${GID} {} \; -o -type f -exec chmod ug+rw {} \; -exec chown ${UID}:${GID} {} \; \)
 
-COPY --chown=${UID}:${GID} --chmod=755 images/java-25-atp/integration-tests-run.sh ./integration-tests-run.sh
+COPY --chown=${UID}:${GID} --chmod=755 images/java-25-alpine-atp/integration-tests-run.sh ./integration-tests-run.sh
 
 USER ${UID}:${GID}
 

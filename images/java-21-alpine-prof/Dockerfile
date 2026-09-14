@@ -97,7 +97,7 @@ RUN --mount=type=bind,source=local-artifacts,target=/build/artifacts mkdir /app/
 
 RUN echo $BASE_IMAGE_TAG > /etc/base-image-release
 
-COPY images/java-21-prof/font-local.conf /etc/fonts/local.conf
+COPY images/java-21-alpine-prof/font-local.conf /etc/fonts/local.conf
 
 VOLUME /etc/ssl/certs/java/
 

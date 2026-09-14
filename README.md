@@ -2,11 +2,17 @@
 
 This repository contains secure and feature-rich base images for containerized applications, designed with security and flexibility in mind. Images come in two flavours: Alpine Linux and Red Hat UBI (Universal Base Image).
 
+## Tag Naming
+
+**Note**: `qubership-core-base` and `qubership-nginx-base` were previously published without an OS marker in the tag (e.g. `latest`, `1.2.3`). They have been renamed to carry an explicit `alpine-` prefix (`alpine-latest`, `alpine-1.2.3`), mirroring the `ubi-` prefix already used for the Red Hat UBI flavour and the `alpine-`/`ubi-` prefixes already used by the Java images. The old unprefixed tags are still published for backward compatibility.
+
+**Proposal**: we'd like to make tagging fully OS-dependent going forward — every image tag explicitly carrying `alpine-` or `ubi-` — and retire the unprefixed `latest`/`<version>` tags for `qubership-core-base` and `qubership-nginx-base` in a future release. Consumers still relying on the unprefixed tags should migrate to the `alpine-` equivalents.
+
 ## Available Images
 
 ### 1. Base Alpine Image
 
-A minimal Alpine-based image with essential security and system utilities.
+A minimal Alpine-based image with essential security and system utilities: `qubership-core-base:alpine-xxx`.
 
 ### 2. Java Alpine Images
 
@@ -18,7 +24,7 @@ There are three Java images based on Alpine:
 
 ### 3. Nginx Alpine Image
 
-An Alpine-based NGINX image with Lua, Brotli compression, OpenTelemetry instrumentation, and common modules (HTTP/2, SSL, auth_request, sub filter, stub status, headers-more). Built on the core base image for consistent security and runtime behavior.
+An Alpine-based NGINX image with Lua, Brotli compression, OpenTelemetry instrumentation, and common modules (HTTP/2, SSL, auth_request, sub filter, stub status, headers-more). Built on the core base image for consistent security and runtime behavior: `qubership-nginx-base:alpine-xxx`.
 
 ### 4. Base UBI Image
 
@@ -37,8 +43,9 @@ Java 21 is available in the Alpine flavour only.
 ### Base Alpine Image
 
 ```dockerfile
-FROM ghcr.io/netcracker/qubership-core-base:latest
+FROM ghcr.io/netcracker/qubership-core-base:alpine-latest
 ```
+**Note**: Also published as `qubership-core-base:latest` (without the `alpine-` prefix) for backward compatibility.
 **Note**: There is obsolete image labels named `qubership/core-base:latest`. Please, do not use it!
 
 ### Java Alpine Images
@@ -69,10 +76,10 @@ FROM ghcr.io/netcracker/qubership-java-base-atp:25-alpine-latest
 ### Nginx Alpine Image
 
 ```dockerfile
-FROM ghcr.io/netcracker/qubership-nginx-base:latest
+FROM ghcr.io/netcracker/qubership-nginx-base:alpine-latest
 ```
 
-**Note**: The Nginx image is published as `ghcr.io/netcracker/qubership-nginx-base` and supports multi-platform builds (linux/amd64, linux/arm64).
+**Note**: The Nginx image is published as `ghcr.io/netcracker/qubership-nginx-base` and supports multi-platform builds (linux/amd64, linux/arm64). Also published as `qubership-nginx-base:latest` (without the `alpine-` prefix) for backward compatibility.
 
 ### Base UBI Image
 
@@ -221,7 +228,7 @@ warmed up at build time with the plugins a `mvn verify` run needs, so ITs can ru
 
 ### Nginx Alpine Image Details
 
-- **Base Image**: `ghcr.io/netcracker/qubership-core-base:latest` (Alpine 3.24.1)
+- **Base Image**: `ghcr.io/netcracker/qubership-core-base:alpine-latest` (Alpine 3.24.1)
 - **NGINX Version**: 1.28.3
 - **Default Language**: `en_US.UTF-8`
 

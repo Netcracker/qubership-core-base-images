@@ -148,7 +148,7 @@ COPY --from=builder --chown=${UID}:${GID} /etc/nginx/html/index.html /usr/share/
 RUN mkdir -p /etc/nginx/base-image-conf \
     && chown ${UID}:${GID} /etc/nginx/base-image-conf
 
-COPY --chown=${UID}:${GID} images/nginx/base-image-conf/probes-locations.conf /etc/nginx/base-image-conf/probes-locations.conf
+COPY --chown=${UID}:${GID} images/nginx-alpine/base-image-conf/probes-locations.conf /etc/nginx/base-image-conf/probes-locations.conf
 
 RUN rm -rf /etc/nginx/modules \
     && ln -s /usr/lib/nginx/modules /etc/nginx/modules \

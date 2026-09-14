@@ -2,7 +2,7 @@
   "components": [
     {
       "name": "qubership-java-base-atp",
-      "file": "./images/java-25-atp/Dockerfile",
+      "file": "./images/java-25-alpine-atp/Dockerfile",
       "context": "."
     }
   ],
