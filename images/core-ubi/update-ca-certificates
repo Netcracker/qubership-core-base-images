@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# Drop-in replacement for the Debian/Alpine update-ca-certificates on RHEL/UBI, so that the entrypoint
+# refreshes the trust store the very same way in both image flavours.
+#
+# The RHEL native `update-ca-trust extract` rebuilds the whole /etc/pki/ca-trust/extracted tree, which
+# would force every read-only deployment to mount that directory as well. Instead we ask p11-kit for a
+# single PEM bundle and write it to the Alpine location, so a UBI container needs exactly the same
+# writable paths as the Alpine one.
+#
+# Trust sources are the p11-kit defaults: /usr/share/pki/ca-trust-source with the CAs shipped by the
+# distribution and /etc/pki/ca-trust/source/anchors, a symlink to /usr/local/share/ca-certificates where
+# the entrypoint puts the certificates passed to the container. Arguments are accepted and ignored, the
+# Debian/Alpine tool has no option we rely on.
+set -e
+
+# The CA bundle, under its Debian/Alpine name; /etc/pki/tls/certs/ca-bundle.crt, /etc/pki/tls/cert.pem and
+# /etc/ssl/cert.pem are symlinks to it, so the RHEL native locations are refreshed along with it
+trust extract --overwrite --comment --format=pem-bundle --filter=ca-anchors --purpose server-auth \
+  /etc/ssl/certs/ca-certificates.crt
+
+# The RHEL native OpenSSL bundle with trust flags (BEGIN TRUSTED CERTIFICATE), kept in sync so that no
+# consumer of the RHEL paths ends up with a trust store that misses the certificates of the container
+trust extract --overwrite --comment --format=openssl-bundle --filter=certificates \
+  /etc/ssl/certs/ca-bundle.trust.crt
