@@ -24,14 +24,22 @@ export -f fail
 #   /app/ncdiag
 #   /app/nss
 #   /etc/ssl/certs/java
+# # UBI based images keep the system trust store under /etc/pki, so they need in addition:
+#   /etc/pki/ca-trust/extracted
+#   /etc/pki/ca-trust/source/anchors
 read_only_params() {
   local fs_mode=${1:-rw}
-  [[ "${fs_mode}" == "ro" ]] && echo --read-only \
-                                        --tmpfs /tmp \
-                                        --tmpfs /etc/env \
-                                        --tmpfs /app/ncdiag \
-                                        --tmpfs /app/nss \
-                                        --tmpfs /etc/ssl/certs/java
+  [[ "${fs_mode}" != "ro" ]] && return 0
+  local params="--read-only
+                --tmpfs /tmp
+                --tmpfs /etc/env
+                --tmpfs /app/ncdiag
+                --tmpfs /app/nss
+                --tmpfs /etc/ssl/certs/java"
+  [[ "${IMAGE}" == *ubi* ]] && params="$params
+                --tmpfs /etc/pki/ca-trust/extracted
+                --tmpfs /etc/pki/ca-trust/source/anchors"
+  echo $params
 }
 export -f read_only_params
 
