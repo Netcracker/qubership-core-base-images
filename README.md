@@ -128,7 +128,9 @@ FROM ghcr.io/netcracker/qubership-java-base-prof:25-ubi-latest
 ### Volume Mounts
 
 - `/tmp`
+- `/etc/env`
 - `/app/nss`
+- `/etc/secret`
 - `/etc/ssl/certs`
 - `/usr/local/share/ca-certificates`
 
@@ -262,23 +264,32 @@ Probe snippets are shipped at `/etc/nginx/base-image-conf/probes-locations.conf`
 
 ### Trust Store Layout
 
-RHEL keeps the system trust store under `/etc/pki`, so the paths differ from the Alpine flavour while the
-contract stays the same:
+RHEL keeps the system trust store under `/etc/pki`, but the image moves the writable directories to the
+Debian/Alpine paths and symlinks the RHEL ones onto them. Both flavours therefore need the same volumes and
+the same writable paths in read-only mode, while everything that has the RHEL locations compiled in
+(OpenSSL, curl, p11-kit) keeps working:
 
-- `CERTIFICATE_FILE_LOCATION` is `/usr/local/share/ca-certificates`, a symlink to `/etc/pki/ca-trust/source/anchors`
-- `/etc/ssl/certs` is a symlink to `/etc/pki/tls/certs`
-- `/etc/ssl/certs/ca-certificates.crt` is provided as a symlink to `/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem`, next to the RHEL native `ca-bundle.crt`
-- the entrypoint uses `update-ca-trust extract` instead of `update-ca-certificates`
+- `CERTIFICATE_FILE_LOCATION` is `/usr/local/share/ca-certificates`, a real directory;
+  `/etc/pki/ca-trust/source/anchors` is a symlink to it, so p11-kit picks the certificates up
+- `/etc/ssl/certs` is a real directory; `/etc/pki/tls/certs` is a symlink to it
+- `/etc/ssl/certs/ca-certificates.crt` is the CA bundle rebuilt on every start;
+  `/etc/pki/tls/certs/ca-bundle.crt`, `/etc/pki/tls/cert.pem` and `/etc/ssl/cert.pem` are symlinks to it
+- `update-ca-certificates` is a wrapper around `trust extract --format=pem-bundle` (see
+  [images/core-ubi/update-ca-certificates](images/core-ubi/update-ca-certificates)) instead of the RHEL
+  native `update-ca-trust extract`, which would additionally require `/etc/pki/ca-trust/extracted` to be
+  writable. The base CAs still come from `/usr/share/pki/ca-trust-source`, so nothing under `/etc/pki` is
+  written at runtime
 
 ### Volume Mounts
+
+The same list as for the Alpine flavour:
 
 - `/tmp`
 - `/etc/env`
 - `/app/nss`
 - `/etc/secret`
-- `/etc/pki/tls/certs` (i.e. `/etc/ssl/certs`)
-- `/etc/pki/ca-trust/source/anchors` (i.e. `/usr/local/share/ca-certificates`)
-- `/etc/pki/ca-trust/extracted`
+- `/etc/ssl/certs`
+- `/usr/local/share/ca-certificates`
 
 ## Java UBI Image Details
 
@@ -434,10 +445,9 @@ If you need to run a container in a read-only host environment, you must mount t
 * `/etc/ssl/certs/java` - to handle Java SSL certificates (declared as a volume in profiler images), or `/etc/ssl/certs` for non-Java images
 * `/var/log` and `/var/cache/nginx/*` - for NGINX image (logs and cache directories)
 
-For the UBI images the system trust store lives under `/etc/pki`, so these paths must be writable as well:
-
-* `/etc/pki/ca-trust/extracted` - rebuilt by `update-ca-trust` on every start
-* `/etc/pki/ca-trust/source/anchors` - the target of `/usr/local/share/ca-certificates`
+The list is the same for the Alpine and the UBI flavour: the UBI images symlink the RHEL trust store paths
+onto these locations, so no path under `/etc/pki` has to be writable. See
+[Trust Store Layout](#trust-store-layout) for the details.
 
 
 ## Contributing

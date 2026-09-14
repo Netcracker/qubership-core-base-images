@@ -8,7 +8,7 @@ log() {
   { local -; set +x; } 2>/dev/null
   # Numeric weight of each level; anything unknown is treated as INFO (2)
   local DEBUG=1 INFO=2 WARN=3 WARNING=3 ERROR=4
-  local severity effective script_name _timestamp msg_num lvl_num
+  local severity effective script_name _timestamp _nanos _millis msg_num lvl_num
 
   severity=${1:-INFO}; severity=${severity^^}
   [ $# -gt 0 ] && shift
@@ -24,7 +24,12 @@ log() {
   script_name="$(basename "${BASH_SOURCE[-1]:-$0}")"
 
   if [ "$msg_num" -ge "$lvl_num" ]; then
-    _timestamp=$(date +%Y-%m-%dT%H:%M:%S$(printf ".%03d" $(date +%N | cut -c1-3)))
+    # Milliseconds are cut out of the nanoseconds, as printf would treat a value like 098 as an invalid
+    # octal number. BusyBox date does not support %N either, so fall back to .000 when it returns nothing usable
+    _millis=000
+    _nanos=$(date +%N)
+    [[ $_nanos =~ ^[0-9]{3} ]] && _millis=${_nanos:0:3}
+    _timestamp="$(date +%Y-%m-%dT%H:%M:%S).${_millis}"
 
     printf '[%s] [%s] [request_id=-] [tenant_id=-] [thread=-] [class=-] [%s] %s\n' \
       "${_timestamp}" "${severity}" "${script_name}" "$*" >&2
@@ -66,7 +71,9 @@ load_certificates() {
 
     # Refresh Java cacerts from the trust store after system CA update (replaces Alpine's java-cacerts hook).
     cacerts_path=${JAVA_CERTIFICATE_FILE_LOCATION:-/etc/ssl/certs/java/cacerts}
-    if [[ -x /usr/bin/trust ]]; then
+    # The keystore directory only exists in the Java flavours, while /usr/bin/trust is also present in the
+    # UBI base image, where p11-kit-trust backs update-ca-certificates
+    if [[ -x /usr/bin/trust ]] && [[ -d $(dirname "${cacerts_path}") ]]; then
       log DEBUG "Update jks using trust tool"
       trust extract --overwrite --format=java-cacerts --filter=ca-anchors --purpose server-auth "${cacerts_path}" || \
         log ERROR "Error update jks using trust extract ${cacerts_path}"

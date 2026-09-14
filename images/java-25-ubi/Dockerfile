@@ -70,8 +70,9 @@ RUN ln -s ${JAVA_HOME}/bin/java /usr/bin/java && \
     chmod ug+rw /var/run && \
     chown ${UID}:${GID} /var/run && \
     mkdir -p /app/volumes/certs && \
-    find /etc/pki/ca-trust/source /etc/pki/ca-trust/extracted /etc/pki/tls/certs \
-      \( -type d -exec chmod ug+rwx {} \; -o -type f -exec chmod ug+rw {} \; \) -exec chown ${UID}:${GID} {} \; && \
+    find /etc/ssl/certs /usr/local/share/ca-certificates \
+      \( -type d -exec chmod ug+rwx {} + -o -type f -exec chmod ug+rw {} + \) && \
+    chown -R ${UID}:${GID} /etc/ssl/certs /usr/local/share/ca-certificates && \
     find /app \( -type d -exec chmod ug+rwx {} \; -exec chown ${UID}:${GID} {} \; -o -type f -exec chmod ug+rw {} \; -exec chown ${UID}:${GID} {} \; \)
 
 RUN echo $BASE_IMAGE_TAG > /etc/base-image-release
