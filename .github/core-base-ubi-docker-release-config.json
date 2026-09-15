@@ -1,0 +1,10 @@
+{
+    "components" : [
+      {
+        "name": "qubership-core-base",
+        "file": "./images/core-ubi/Dockerfile",
+        "context": "."
+      }
+    ],
+    "platforms" : "linux/amd64,linux/arm64"
+  }
