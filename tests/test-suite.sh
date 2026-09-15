@@ -18,9 +18,7 @@ fail() {
 export -f fail
 
 
-# # List of MANDATORY empty folders that should be added for containers running in read-only mode.
-# # The list is the same for every image flavour, the UBI ones symlink the RHEL trust store paths onto
-# # these Debian/Alpine locations.
+# # List of MANDATORY empty folders that should be added for containers running in read-only mode
 #   /tmp
 #   /etc/env
 #   /app/ncdiag
@@ -28,13 +26,12 @@ export -f fail
 #   /etc/ssl/certs/java
 read_only_params() {
   local fs_mode=${1:-rw}
-  [[ "${fs_mode}" != "ro" ]] && return 0
-  echo "--read-only
-        --tmpfs /tmp
-        --tmpfs /etc/env
-        --tmpfs /app/ncdiag
-        --tmpfs /app/nss
-        --tmpfs /etc/ssl/certs/java"
+  [[ "${fs_mode}" == "ro" ]] && echo --read-only \
+                                        --tmpfs /tmp \
+                                        --tmpfs /etc/env \
+                                        --tmpfs /app/ncdiag \
+                                        --tmpfs /app/nss \
+                                        --tmpfs /etc/ssl/certs/java
 }
 export -f read_only_params
 
