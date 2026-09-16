@@ -43,15 +43,15 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@1f40c72289eff860ee54a304f1438e3cff362e0a # v4
+        uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4
         with:
           driver: docker
       
       - name: Build and load test core-image
-        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
         with:
           build-args: |
             BASE_IMAGE_TAG=ghcr.io/netcracker/qubership-core-base:test
@@ -60,7 +60,7 @@ jobs:
           file: images/core-alpine/Dockerfile
 
       - name: Build and load test java 21 image with prof
-        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
         with:
           build-args: |
             BASE_IMAGE=ghcr.io/netcracker/qubership-core-base:test
@@ -71,7 +71,7 @@ jobs:
           file: images/java-21-alpine-prof/Dockerfile
 
       - name: Build and load test java 25 image
-        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
         with:
           build-args: |
             BASE_IMAGE=ghcr.io/netcracker/qubership-core-base:test
@@ -80,7 +80,7 @@ jobs:
           file: images/java-25-alpine/Dockerfile
 
       - name: Build and load test java 25 image with atp
-        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
         with:
           build-args: |
             BASE_IMAGE=ghcr.io/netcracker/qubership-java-base:25-test
@@ -89,7 +89,7 @@ jobs:
           file: images/java-25-alpine-atp/Dockerfile
 
       - name: Build and load test java 25 image with prof
-        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
         with:
           build-args: |
             BASE_IMAGE=ghcr.io/netcracker/qubership-java-base:25-test
@@ -98,7 +98,7 @@ jobs:
           file: images/java-25-alpine-prof/Dockerfile
 
       - name: Build and load test core-ubi image
-        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
         with:
           build-args: |
             BASE_IMAGE_TAG=ghcr.io/netcracker/qubership-core-base:ubi-test
@@ -107,7 +107,7 @@ jobs:
           file: images/core-ubi/Dockerfile
 
       - name: Build and load test java 25 UBI image
-        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
         with:
           build-args: |
             BASE_IMAGE=ghcr.io/netcracker/qubership-core-base:ubi-test
@@ -116,7 +116,7 @@ jobs:
           file: images/java-25-ubi/Dockerfile
 
       - name: Build and load test java 25 UBI image with prof
-        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
         with:
           build-args: |
             BASE_IMAGE=ghcr.io/netcracker/qubership-java-base:25-ubi-test
@@ -125,7 +125,7 @@ jobs:
           file: images/java-25-ubi-prof/Dockerfile
 
       - name: Build and load test java 21 UBI image with prof
-        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
         with:
           build-args: |
             BASE_IMAGE=ghcr.io/netcracker/qubership-core-base:ubi-test
@@ -136,7 +136,7 @@ jobs:
           file: images/java-21-ubi-prof/Dockerfile
 
       - name: Build and load test nginx base image
-        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
         with:
           build-args: |
             BASE_IMAGE=ghcr.io/netcracker/qubership-core-base:test
