@@ -372,6 +372,11 @@ The Java profiler images (Alpine Java 21, Alpine Java 25, UBI Java 21 and UBI Ja
 - **Certificate Sources**: 
   - `/tmp/cert/` directory (`.crt`, `.cer`, or `.pem` files)
   - Kubernetes service account certificates from `/var/run/secrets/kubernetes.io/serviceaccount/ca.crt`
+- **Available at build time**: the keystore is populated with the system CA anchors in the image itself, not
+  only by the entrypoint. The entrypoint refreshes it on container start, but it does not run during a
+  `docker build`, so a `RUN` step of a downstream image that does TLS (Quarkus augmentation, Keycloak's
+  `kc.sh build`) reads the keystore as the image ships it. An empty keystore fails such steps with
+  `KeyStoreException: problem accessing trust store`
 
 ## Directory Structure
 
