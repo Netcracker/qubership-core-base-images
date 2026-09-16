@@ -32,11 +32,10 @@ A minimal Red Hat UBI based image with the same security settings, entrypoint an
 
 ### 5. Java UBI Images
 
-There are two Java images based on Red Hat UBI:
+There are three Java images based on Red Hat UBI:
+* Java 21 with JDK and profiler: `qubership-java-base-prof:21-ubi-xxx`
 * Java 25 with JRE: `qubership-java-base:25-ubi-xxx`
 * Java 25 with JRE and profiler: `qubership-java-base-prof:25-ubi-xxx`
-
-Java 21 is available in the Alpine flavour only.
 
 ## Usage
 
@@ -88,6 +87,11 @@ FROM ghcr.io/netcracker/qubership-core-base:ubi-latest
 ```
 
 ### Java UBI Images
+
+**Java 21 (JDK with profiler):**
+```dockerfile
+FROM ghcr.io/netcracker/qubership-java-base-prof:21-ubi-latest
+```
 
 **Java 25 (JRE only):**
 ```dockerfile
@@ -293,13 +297,44 @@ The same list as for the Alpine flavour:
 
 ## Java UBI Image Details
 
+### Java 21 Image
+
+- **Base Image**: `registry.access.redhat.com/ubi10/ubi-minimal` (via the UBI core base image)
+- **Java Version**: Amazon Corretto 21 (full JDK, no `jlink` slimming, mirroring the Alpine Java 21 image)
+- **Default User**: `appuser` (UID: 10001)
+- **Default Home**: `/app`
+- **Default Language**: `en_US.UTF-8`
+
+#### Additional Dependencies
+
+- `java-21-amazon-corretto-devel`: installed directly from the official Amazon repository
+  (`https://yum.corretto.aws`); it is the only RPM flavour Amazon publishes for Corretto and provides the full
+  JDK (equivalent to the `amazon-corretto-21` apk package used by the Alpine image)
+- `fontconfig`, `dejavu-sans-fonts`: headless AWT font rendering for the diagnostic tooling (same purpose as
+  `fontconfig`/`font-dejavu` on the Alpine flavour)
+- And all UBI base image dependencies
+
+#### Java 21 Environment Variables
+
+Identical to the Alpine flavour:
+
+- `JAVA_HOME`: `/usr/lib/jvm/java-21-amazon-corretto`
+- `JAVA_CERTIFICATE_FILE_LOCATION`: `/etc/ssl/certs/java/cacerts`
+- `MALLOC_ARENA_MAX`: 2
+- `MALLOC_MMAP_THRESHOLD_`: 131072
+- `MALLOC_TRIM_THRESHOLD_`: 131072
+- `MALLOC_TOP_PAD_`: 131072
+- `MALLOC_MMAP_MAX`: 65536
+
+### Java 25 Images
+
 - **Base Image**: `registry.access.redhat.com/ubi10/ubi-minimal` (via the UBI core base image)
 - **Java Version**: Amazon Corretto 25 (minimal `jlink` runtime)
 - **Default User**: `appuser` (UID: 10001)
 - **Default Home**: `/app`
 - **Default Language**: `en_US.UTF-8`
 
-### Additional Dependencies
+#### Additional Dependencies
 
 - Amazon Corretto 25 runtime: built via `jlink` from the `java-25-amazon-corretto-devel` package of the
   official Amazon repository (`https://yum.corretto.aws`) and copied into `/usr/lib/jvm/java-25-amazon-corretto`.
@@ -307,7 +342,7 @@ The same list as for the Alpine flavour:
   the exact same glibc. The package name pins the Java major version, patch updates are picked up on every rebuild.
 - And all UBI base image dependencies
 
-### Java UBI Environment Variables
+#### Java 25 Environment Variables
 
 Identical to the Alpine flavour:
 
@@ -321,9 +356,9 @@ Identical to the Alpine flavour:
 
 ### Qubership Profiler Integration
 
-The Java profiler images (Alpine Java 21, Alpine Java 25 and UBI Java 25 profiler variants) include built-in support for the Qubership profiler:
+The Java profiler images (Alpine Java 21, Alpine Java 25, UBI Java 21 and UBI Java 25 profiler variants) include built-in support for the Qubership profiler:
 
-- **Profiler Version**: 4.0.5 (configurable via build arg `QUBERSHIP_PROFILER_VERSION`)
+- **Profiler Version**: 4.0.6 (configurable via build arg `QUBERSHIP_PROFILER_VERSION`)
 - **Artifact Source**: Configurable via build arg `QUBERSHIP_PROFILER_ARTIFACT_SOURCE` (local or remote from Maven Central)
 - **Enable Profiler**: Set environment variable `PROFILER_ENABLED=true`
 - **Profiler Directory**: `/app/diag`
@@ -393,7 +428,7 @@ Place your initialization scripts (`.sh` files) in `/app/init.d/`. They will be 
 
 ### Using the Qubership Profiler
 
-To enable the profiler in the Java profiler images (Alpine Java 21, Alpine Java 25 or UBI Java 25):
+To enable the profiler in the Java profiler images (Alpine Java 21, Alpine Java 25, UBI Java 21 or UBI Java 25):
 
 ```bash
 # Set environment variable to enable profiler
