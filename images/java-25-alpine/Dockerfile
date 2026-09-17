@@ -36,13 +36,16 @@ ENV JAVA_HOME=/usr/lib/jvm/java-25-amazon-corretto \
     MALLOC_MMAP_MAX=65536 \
     JAVA_CERTIFICATE_FILE_LOCATION=/etc/ssl/certs/java/cacerts
 
+# The trust store is filled in here and not only by the entrypoint, which never runs for a downstream
+# `docker build`: build steps doing TLS (Quarkus augmentation, Keycloak's `kc.sh build`) read this file
+# directly, and an empty keystore fails them with "problem accessing trust store"
 RUN ln -s ${JAVA_HOME}/bin/java /usr/bin/java && \
     ln -s ${JAVA_HOME}/bin/keytool /usr/bin/keytool && \
     chown -R ${UID}:${GID} ${JAVA_HOME}/lib/security/ && \
     mkdir -p $(dirname ${JAVA_CERTIFICATE_FILE_LOCATION}) && \
-    touch ${JAVA_CERTIFICATE_FILE_LOCATION} && \
     rm -f ${JAVA_HOME}/lib/security/cacerts && \
     ln -s ${JAVA_CERTIFICATE_FILE_LOCATION} ${JAVA_HOME}/lib/security/cacerts && \
+    trust extract --overwrite --format=java-cacerts --filter=ca-anchors --purpose server-auth ${JAVA_CERTIFICATE_FILE_LOCATION} && \
     mkdir -p /tmp/cert && \
     chmod -R ug+rw /tmp && \
     chown -R ${UID}:${GID} /tmp && \
