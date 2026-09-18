@@ -26,7 +26,7 @@ log INFO "Maven exit code: ${maven_code}"
 rclone_upload() {
    local target="$1"
    local type="$2"
-   rclone copy "$target" ":s3:${S3_STORAGE_BUCKET}/${S3_STORAGE_DESTINATION_PATH}/$([[ $type == "folder" ]] && printf '%s' target)" \
+   rclone copy "$target" ":s3:${S3_STORAGE_BUCKET}/${S3_STORAGE_DESTINATION_PATH}/$([[ $type == "folder" ]] && printf '%s' $target)" \
           --s3-provider "$S3_STORAGE_PROVIDER" \
           --s3-access-key-id "$S3_STORAGE_ACCESSKEY" \
           --s3-secret-access-key "$S3_STORAGE_SECRETKEY" \
