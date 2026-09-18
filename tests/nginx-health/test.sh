@@ -19,6 +19,9 @@ resp=$(curl -sf "http://localhost:8080/probes/ready")
 resp=$(curl -sf "http://localhost:8080/health")
 (echo "$resp" | grep -q '"status":"UP"') || fail "/health endpoint failed: expected {\"status\":\"UP\"}"
 
+resp=$(curl -sf "http://localhost:8080/actuator/health")
+(echo "$resp" | grep -q '"status":"UP"') || fail "/actuator/health endpoint failed: expected {\"status\":\"UP\"}"
+
 content_type=$(curl -sI "http://localhost:8080/health" | grep -i "content-type" | grep -i "application/json")
 [[ -n "$content_type" ]] || fail "Content-Type is not application/json"
 
