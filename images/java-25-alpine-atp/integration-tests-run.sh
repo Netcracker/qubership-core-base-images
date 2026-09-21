@@ -41,17 +41,17 @@ rclone_upload() {
           --no-check-certificate \
           --progress \
           --log-level INFO
+   status=$?
+   log INFO "RClone exit code: ${status}"
+   return "$status"
 }
 
 if [[ -d "$RESULTS_DIR" ]]; then
     rclone_upload "${RESULTS_DIR}" "folder"
     rclone_code=$?
-    log INFO "RClone exit code: ${rclone_code}"
     if [[ $rclone_code -eq 0 ]]; then
       echo "false" > "$RESULTS_DIR.uploaded"
       rclone_upload "${RESULTS_DIR}.uploaded" "file"
-      rclone_uploaded_code=$?
-      log INFO "RClone exit code: ${rclone_uploaded_code}"
     fi
     upload_code=0
     [[ $rclone_code -ne 0 ]] && upload_code=$((RCLONE_CODE_OFFSET + rclone_code))
