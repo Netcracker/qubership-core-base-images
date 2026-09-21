@@ -41,7 +41,7 @@ rclone_upload() {
           --no-check-certificate \
           --progress \
           --log-level INFO
-   status=$?
+   local status=$?
    log INFO "RClone exit code: ${status}"
    return "$status"
 }
