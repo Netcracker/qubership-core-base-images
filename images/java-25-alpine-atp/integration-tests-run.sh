@@ -24,9 +24,9 @@ maven_code=$?
 log INFO "Maven exit code: ${maven_code}"
 
 rclone_upload() {
-   local target="$1"
-   local type="$2"
-   rclone copy "$target" ":s3:${S3_STORAGE_BUCKET}/${S3_STORAGE_DESTINATION_PATH}/$([[ $type == "folder" ]] && printf '%s' $target)" \
+   local src="$1"
+   local dest="$2"
+   rclone copy "$src" ":s3:${S3_STORAGE_BUCKET}/${S3_STORAGE_DESTINATION_PATH}/$dest" \
           --s3-provider "$S3_STORAGE_PROVIDER" \
           --s3-access-key-id "$S3_STORAGE_ACCESSKEY" \
           --s3-secret-access-key "$S3_STORAGE_SECRETKEY" \
@@ -47,11 +47,11 @@ rclone_upload() {
 }
 
 if [[ -d "$RESULTS_DIR" ]]; then
-    rclone_upload "${RESULTS_DIR}" "folder"
+    rclone_upload "${RESULTS_DIR}" "${RESULTS_DIR}"
     rclone_code=$?
     if [[ $rclone_code -eq 0 ]]; then
       echo "false" > "$RESULTS_DIR.uploaded"
-      rclone_upload "${RESULTS_DIR}.uploaded" "file"
+      rclone_upload "${RESULTS_DIR}.uploaded" ""
     fi
     upload_code=0
     [[ $rclone_code -ne 0 ]] && upload_code=$((RCLONE_CODE_OFFSET + rclone_code))
