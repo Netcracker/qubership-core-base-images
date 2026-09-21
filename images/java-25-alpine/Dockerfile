@@ -1,6 +1,6 @@
 ARG BASE_IMAGE=ghcr.io/netcracker/qubership-core-base:latest@sha256:4322223aac660a4a25582187368d973db1be81d7c63872ba3d69d7963530432b
 
-FROM amazoncorretto:25-alpine-jdk@sha256:2ad5f5cf03a3970f2478b130dc28f51b179ce13c58154fe3ec1a6fdeb3b86e3a AS jlink
+FROM amazoncorretto:25-alpine-jdk@sha256:4955796538972099d9c7de6e31c6a259b1de65393a58b7e0996b7cc50d7d20a7 AS jlink
 RUN apk --no-cache add binutils
 RUN $JAVA_HOME/bin/jlink \
     --add-modules ALL-MODULE-PATH \
