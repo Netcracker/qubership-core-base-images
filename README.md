@@ -358,7 +358,7 @@ Identical to the Alpine flavour:
 
 The Java profiler images (Alpine Java 21, Alpine Java 25, UBI Java 21 and UBI Java 25 profiler variants) include built-in support for the Qubership profiler:
 
-- **Profiler Version**: 4.0.6 (configurable via build arg `QUBERSHIP_PROFILER_VERSION`)
+- **Profiler Version**: 4.0.7 (configurable via build arg `QUBERSHIP_PROFILER_VERSION`)
 - **Artifact Source**: Configurable via build arg `QUBERSHIP_PROFILER_ARTIFACT_SOURCE` (local or remote from Maven Central)
 - **Enable Profiler**: Set environment variable `PROFILER_ENABLED=true`
 - **Profiler Directory**: `/app/diag`
