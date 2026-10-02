@@ -10,7 +10,7 @@ RUN echo $BASE_IMAGE_TAG > /etc/base-image-release
 RUN apk add --no-cache rclone
 
 # renovate: datasource=maven depName=apache-maven packageName=org.apache.maven:apache-maven versioning=maven
-ARG MAVEN_VERSION=3.9.16
+ARG MAVEN_VERSION=3.10.0
 ARG MAVEN_URL=https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/$MAVEN_VERSION/apache-maven-$MAVEN_VERSION-bin.tar.gz
 ENV MAVEN_HOME=/opt/maven \
     MAVEN_REPO_LOCAL=/app/.m2/repository
