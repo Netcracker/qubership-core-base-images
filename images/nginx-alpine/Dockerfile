@@ -18,7 +18,7 @@ ARG NGINX_VERSION=release-1.28.3
 # renovate: datasource=github-tags depName=vision5/ngx_devel_kit
 ARG NGX_DEVEL_KIT_VERSION=v0.3.4
 # renovate: datasource=github-tags depName=openresty/lua-nginx-module
-ARG LUA_NGINX_MODULE_VERSION=v0.10.28
+ARG LUA_NGINX_MODULE_VERSION=v0.10.31
 # renovate: datasource=github-tags depName=google/ngx_brotli
 ARG NGX_BROTLI_VERSION=master
 # renovate: datasource=github-tags depName=openresty/headers-more-nginx-module
