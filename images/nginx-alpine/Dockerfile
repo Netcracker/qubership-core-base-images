@@ -20,8 +20,8 @@ ARG NGINX_VERSION=release-1.28.3
 ARG NGX_DEVEL_KIT_VERSION=v0.3.4
 # renovate: datasource=github-tags depName=openresty/lua-nginx-module
 ARG LUA_NGINX_MODULE_VERSION=v0.10.28
-# renovate: datasource=github-tags depName=google/ngx_brotli
-ARG NGX_BROTLI_VERSION=master
+# renovate: datasource=git-refs depName=https://github.com/google/ngx_brotli.git currentValue=master
+ARG NGX_BROTLI_COMMIT=a71f9312c2deb28875acc7bacfdd5695a111aa53
 # renovate: datasource=github-tags depName=openresty/headers-more-nginx-module
 ARG HEADERS_MORE_VERSION=v0.39
 # renovate: datasource=github-tags depName=openresty/lua-resty-lrucache
@@ -34,7 +34,7 @@ ARG NGINX_OTEL_COMMIT=6eb28d7452f6ce2e009cc25470aec091826503b3
 RUN git clone --depth 1 --branch ${NGINX_VERSION} https://github.com/nginx/nginx.git && \
     git clone --depth 1 --branch ${NGX_DEVEL_KIT_VERSION} https://github.com/vision5/ngx_devel_kit.git && \
     git clone --depth 1 --branch ${LUA_NGINX_MODULE_VERSION} https://github.com/openresty/lua-nginx-module.git && \
-    git clone --depth 1 --recurse-submodules --shallow-submodules --branch ${NGX_BROTLI_VERSION} https://github.com/google/ngx_brotli.git && \
+    git clone --depth 1 --recurse-submodules --shallow-submodules --revision ${NGX_BROTLI_COMMIT} https://github.com/google/ngx_brotli.git && \
     git clone --depth 1 --branch ${HEADERS_MORE_VERSION} https://github.com/openresty/headers-more-nginx-module.git
 
 RUN cd ngx_brotli/deps/brotli && mkdir -p out && cd out && \
