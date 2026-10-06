@@ -23,7 +23,7 @@ ARG LUA_NGINX_MODULE_VERSION=v0.10.28
 # renovate: datasource=git-refs depName=https://github.com/google/ngx_brotli.git currentValue=master
 ARG NGX_BROTLI_COMMIT=a71f9312c2deb28875acc7bacfdd5695a111aa53
 # renovate: datasource=github-tags depName=openresty/headers-more-nginx-module
-ARG HEADERS_MORE_VERSION=v0.39
+ARG HEADERS_MORE_VERSION=v0.40
 # renovate: datasource=github-tags depName=openresty/lua-resty-lrucache
 ARG LUA_RESTY_LRUCACHE_VERSION=v0.15
 # renovate: datasource=github-tags depName=openresty/lua-resty-core
