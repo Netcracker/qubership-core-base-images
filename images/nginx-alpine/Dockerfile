@@ -9,7 +9,8 @@ RUN apk add --no-cache \
     cmake pkgconfig \
     git ca-certificates \
     curl-dev pcre-dev zlib-dev protobuf-dev \
-    c-ares-dev re2-dev libstdc++ luajit-dev
+    c-ares-dev re2-dev libstdc++ luajit-dev \
+    grpc-dev abseil-cpp-dev
 
 WORKDIR /usr/src
 
@@ -81,6 +82,8 @@ RUN git clone https://github.com/nginxinc/nginx-otel.git && \
     git checkout ${NGINX_OTEL_COMMIT} && \
     mkdir build && cd build && \
     cmake -DNGX_OTEL_NGINX_BUILD_DIR=/usr/src/nginx/objs \
+      -DNGX_OTEL_GRPC=package \
+      -DCMAKE_BUILD_TYPE=Release \
       -DCMAKE_CXX_FLAGS="-D_LARGEFILE64_SOURCE -Wno-attributes -Wno-trigraphs -Wno-deprecated-declarations -Wno-return-type" \
       .. && \
     make -j$(nproc)
