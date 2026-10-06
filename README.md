@@ -105,7 +105,7 @@ FROM ghcr.io/netcracker/qubership-java-base-prof:25-ubi-latest
 
 ## Common Features
 
-- Based on Alpine Linux 3.24.1 or Red Hat UBI 10 (minimal), depending on the flavour
+- Based on Alpine Linux 3.24.2 or Red Hat UBI 10 (minimal), depending on the flavour
 - Pre-configured with essential security settings
 - Built-in certificate management (including Kubernetes service account certificates)
 - User management with nss_wrapper support
@@ -117,7 +117,7 @@ FROM ghcr.io/netcracker/qubership-java-base-prof:25-ubi-latest
 
 ## Base Alpine Image Details
 
-- **Base Image**: `alpine:3.24.1`
+- **Base Image**: `alpine:3.24.2`
 - **Default User**: `appuser` (UID: 10001)
 - **Default Home**: `/app`
 - **Default Language**: `en_US.UTF-8`
@@ -142,7 +142,7 @@ FROM ghcr.io/netcracker/qubership-java-base-prof:25-ubi-latest
 
 ### Java 21 Image
 
-- **Base Image**: `alpine:3.24.1` (via core base image)
+- **Base Image**: `alpine:3.24.2` (via core base image)
 - **Java Version**: Amazon Corretto 21 (JDK)
 - **Default User**: `appuser` (UID: 10001)
 - **Default Home**: `/app`
@@ -173,7 +173,7 @@ FROM ghcr.io/netcracker/qubership-java-base-prof:25-ubi-latest
 
 ### Java 25 Images
 
-- **Base Image**: `alpine:3.24.1` (via core base image)
+- **Base Image**: `alpine:3.24.2` (via core base image)
 - **Java Version**: Amazon Corretto 25 (minimal `jlink` runtime)
 - **Default User**: `appuser` (UID: 10001)
 - **Default Home**: `/app`
@@ -234,7 +234,7 @@ warmed up at build time with the plugins a `mvn verify` run needs, so ITs can ru
 
 ### Nginx Alpine Image Details
 
-- **Base Image**: `ghcr.io/netcracker/qubership-core-base:alpine-latest` (Alpine 3.24.1)
+- **Base Image**: `ghcr.io/netcracker/qubership-core-base:alpine-latest` (Alpine 3.24.2)
 - **NGINX Version**: 1.28.3
 - **Default Language**: `en_US.UTF-8`
 
