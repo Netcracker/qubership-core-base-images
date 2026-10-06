@@ -29,7 +29,7 @@ ARG LUA_RESTY_LRUCACHE_VERSION=v0.15
 # renovate: datasource=github-tags depName=openresty/lua-resty-core
 ARG LUA_RESTY_CORE_VERSION=v0.1.31
 # renovate: datasource=git-refs depName=https://github.com/nginxinc/nginx-otel.git currentValue=main
-ARG NGINX_OTEL_COMMIT=6eb28d7452f6ce2e009cc25470aec091826503b3
+ARG NGINX_OTEL_COMMIT=e3b6c98b1556e4c82cec39acc7be91a62449fa84
 
 RUN git clone --depth 1 --branch ${NGINX_VERSION} https://github.com/nginx/nginx.git && \
     git clone --depth 1 --branch ${NGX_DEVEL_KIT_VERSION} https://github.com/vision5/ngx_devel_kit.git && \
