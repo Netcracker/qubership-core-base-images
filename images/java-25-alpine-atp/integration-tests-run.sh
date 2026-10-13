@@ -24,6 +24,8 @@ maven_code=$?
 log INFO "Maven exit code: ${maven_code}"
 
 rclone_upload() {
+   log INFO "Uploading allure results to ${S3_ENDPOINT%/}/${S3_STORAGE_BUCKET}/${S3_STORAGE_DESTINATION_PATH#/}/${dest#/}"
+
    local src="$1"
    local dest="$2"
    rclone copy "$src" ":s3:${S3_STORAGE_BUCKET}/${S3_STORAGE_DESTINATION_PATH}/$dest" \
