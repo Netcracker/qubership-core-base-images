@@ -27,7 +27,7 @@ ARG HEADERS_MORE_VERSION=v0.40
 # renovate: datasource=github-tags depName=openresty/lua-resty-lrucache
 ARG LUA_RESTY_LRUCACHE_VERSION=v0.15
 # renovate: datasource=github-tags depName=openresty/lua-resty-core
-ARG LUA_RESTY_CORE_VERSION=v0.1.31
+ARG LUA_RESTY_CORE_VERSION=v0.1.32
 # renovate: datasource=git-refs depName=https://github.com/nginxinc/nginx-otel.git currentValue=main
 ARG NGINX_OTEL_COMMIT=e3b6c98b1556e4c82cec39acc7be91a62449fa84
 
