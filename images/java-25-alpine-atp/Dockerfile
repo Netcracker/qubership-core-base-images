@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=ghcr.io/netcracker/qubership-java-base:25-alpine-latest@sha256:6cedc42b248c0c11d49daf97c25bf293b0d76f28213e7e54a9d43966b1ab6b69
+ARG BASE_IMAGE=ghcr.io/netcracker/qubership-java-base:25-alpine-latest@sha256:54d135e72a4045f06583b9add6673458799eb87f549df882af619ce5e37264f0
 FROM ${BASE_IMAGE}
 ARG UID=10001
 ARG GID=root
