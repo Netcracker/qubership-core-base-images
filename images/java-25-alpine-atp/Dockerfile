@@ -13,7 +13,8 @@ RUN apk add --no-cache rclone
 ARG MAVEN_VERSION=3.10.0
 ARG MAVEN_URL=https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/$MAVEN_VERSION/apache-maven-$MAVEN_VERSION-bin.tar.gz
 ENV MAVEN_HOME=/opt/maven \
-    MAVEN_REPO_LOCAL=/app/.m2/repository
+    MAVEN_REPO_LOCAL=/app/.m2/repository \
+    MAVEN_ARGS="-DexcludeArtifactIds=maven-release-plugin"
 RUN mkdir -p "$MAVEN_HOME"
 RUN curl --fail-with-body -L "$MAVEN_URL" | tar -xz -C "$MAVEN_HOME" --strip-components=1
 RUN ln -s "$MAVEN_HOME/bin/mvn" /usr/bin/mvn && \

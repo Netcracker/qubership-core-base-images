@@ -26,6 +26,7 @@ log INFO "Maven exit code: ${maven_code}"
 rclone_upload() {
    local src="$1"
    local dest="$2"
+   log INFO "Uploading allure results to ${S3_ENDPOINT%/}/${S3_STORAGE_BUCKET}/${S3_STORAGE_DESTINATION_PATH#/}/${dest#/}"
    rclone copy "$src" ":s3:${S3_STORAGE_BUCKET}/${S3_STORAGE_DESTINATION_PATH}/$dest" \
           --s3-provider "$S3_STORAGE_PROVIDER" \
           --s3-access-key-id "$S3_STORAGE_ACCESSKEY" \
