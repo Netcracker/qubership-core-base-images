@@ -231,6 +231,16 @@ warmed up at build time with the plugins a `mvn verify` run needs, so ITs can ru
 - `S3_REGION`: Required region of S3 storage
 - `S3_STORAGE_DESTINATION_PATH`: Required path to S3 bucket folder
 - `S3_ENDPOINT`: Required custom S3 endpoint
+- `S3_RESULTS_BASE_URL`: Optional HTTP(S) viewer root that maps directly to the bucket contents, without the bucket
+  name or run path. After a successful results upload, the runner logs this URL with `S3_STORAGE_DESTINATION_PATH`
+  appended. Post-processed files may appear later. If unset or empty, no browser URL is logged.
+
+For example, set `S3_RESULTS_BASE_URL=https://atp3-results-cpcap.atp3prod.managed.netcracker.cloud` and
+`S3_STORAGE_DESTINATION_PATH=result/saas-rnd-cap-01/next-3/2026-10-14_20-57-57` to log:
+
+```text
+Results browser URL (post-processing may still be in progress): https://atp3-results-cpcap.atp3prod.managed.netcracker.cloud/result/saas-rnd-cap-01/next-3/2026-10-14_20-57-57/
+```
 
 ### Nginx Alpine Image Details
 

@@ -38,9 +38,7 @@ rclone_upload() {
           --checkers 8 \
           --retries 3 \
           --low-level-retries 10 \
-          --stats 30s \
           --no-check-certificate \
-          --progress \
           --log-level INFO
    local status=$?
    log INFO "RClone exit code: ${status}"
@@ -51,6 +49,10 @@ if [[ -d "$RESULTS_DIR" ]]; then
     rclone_upload "${RESULTS_DIR}" "${RESULTS_DIR}"
     rclone_code=$?
     if [[ $rclone_code -eq 0 ]]; then
+      if [[ -n "${S3_RESULTS_BASE_URL:-}" ]]; then
+        results_url="${S3_RESULTS_BASE_URL%/}/${S3_STORAGE_DESTINATION_PATH#/}"
+        log INFO "Results browser URL (post-processing may still be in progress): ${results_url%/}/"
+      fi
       echo "false" > "$RESULTS_DIR.uploaded"
       rclone_upload "${RESULTS_DIR}.uploaded" ""
     fi
