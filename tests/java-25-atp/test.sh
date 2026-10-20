@@ -17,13 +17,13 @@ test() {
   output=$(docker run --rm \
       --network none \
       -v "$SCRIPT_DIR/rclone-mock:/usr/bin/rclone:ro" \
-      -e S3_STORAGE_BUCKET="test-bucket" \
-      -e S3_STORAGE_PROVIDER="test-provider" \
-      -e S3_STORAGE_ACCESSKEY="test-accesskey" \
-      -e S3_STORAGE_SECRETKEY="test-secretkey" \
-      -e S3_REGION="test-region" \
-      -e S3_STORAGE_DESTINATION_PATH="test-path" \
-      -e S3_ENDPOINT="test-endpoint" \
+      -e ATP_STORAGE_BUCKET="test-bucket" \
+      -e ATP_STORAGE_PROVIDER="test-provider" \
+      -e ATP_STORAGE_USERNAME="test-accesskey" \
+      -e ATP_STORAGE_PASSWORD="test-secretkey" \
+      -e ATP_STORAGE_REGION="test-region" \
+      -e ATP_STORAGE_DESTINATION_PATH="test-path" \
+      -e ATP_STORAGE_SERVER_URL="test-endpoint" \
       "$TMP_IMAGE" 2>&1
   )
   # Clean-up
@@ -32,6 +32,8 @@ test() {
   # Run checks that maven and rclone have not failed
   grep -Fq -- "Tests run: 1, Failures: 0, Errors: 0, Skipped: 0" <<< "$output" || fail "Maven failed"
   grep -Fq -- "RClone exit code: 0" <<< "$output" || fail "Rclone failed"
+  grep -Fq -- "Mock rclone called: target/surefire-reports -> :s3:test-bucket/test-path/surefire-reports" <<< "$output" || fail "Surefire reports were not uploaded"
+  grep -Fq -- "Mock rclone called: allure-results -> :s3:test-bucket/test-path/allure-results" <<< "$output" || fail "Allure results were not uploaded"
 }
 
 test

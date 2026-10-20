@@ -222,15 +222,31 @@ S3 instance/storage.
 The local Maven repository is set to `/app/.m2/repository` (global `settings.xml` in `/opt/maven/conf`) and is
 warmed up at build time with the plugins a `mvn verify` run needs, so ITs can run offline (`mvn -o`).
 
+After Maven finishes, the runner uploads `allure-results/` and the complete
+`target/surefire-reports/` directory to sibling `allure-results/` and `surefire-reports/`
+folders under `ATP_STORAGE_DESTINATION_PATH`. A missing Surefire reports directory is skipped.
+A failed Surefire upload makes the run fail when Maven and the Allure upload succeed;
+Maven failures retain precedence over upload failures.
+
 #### Java 25 ATP Environment Variables
 
-- `S3_STORAGE_BUCKET`: Required Bucket name for S3
-- `S3_STORAGE_PROVIDER`: Required S3 provider name
-- `S3_STORAGE_ACCESSKEY`: Required S3 access key ID
-- `S3_STORAGE_SECRETKEY`: Required S3 secret access key
-- `S3_REGION`: Required region of S3 storage
-- `S3_STORAGE_DESTINATION_PATH`: Required path to S3 bucket folder
-- `S3_ENDPOINT`: Required custom S3 endpoint
+- `ATP_STORAGE_BUCKET`: Required Bucket name for S3
+- `ATP_STORAGE_PROVIDER`: Required S3 provider name
+- `ATP_STORAGE_USERNAME`: Required S3 access key ID
+- `ATP_STORAGE_PASSWORD`: Required S3 secret access key
+- `ATP_STORAGE_REGION`: Required region of S3 storage
+- `ATP_STORAGE_DESTINATION_PATH`: Required path to S3 bucket folder
+- `ATP_STORAGE_SERVER_URL`: Required custom S3 endpoint
+- `ATP_STORAGE_RESULTS_BASE_URL`: Optional HTTP(S) viewer root that maps directly to the bucket contents, without the bucket
+  name or run path. After a successful results upload, the runner logs this URL with `ATP_STORAGE_DESTINATION_PATH`
+  appended. Post-processed files may appear later. If unset or empty, no browser URL is logged.
+
+For example, set `ATP_STORAGE_RESULTS_BASE_URL=https://atp3-results-cpcap.atp3prod.managed.netcracker.cloud` and
+`ATP_STORAGE_DESTINATION_PATH=result/saas-rnd-cap-01/next-3/2026-10-14_20-57-57` to log:
+
+```text
+Test results URL: https://atp3-results-cpcap.atp3prod.managed.netcracker.cloud/result/saas-rnd-cap-01/next-3/2026-10-14_20-57-57/
+```
 
 ### Nginx Alpine Image Details
 
