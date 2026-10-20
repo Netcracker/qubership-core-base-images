@@ -32,6 +32,8 @@ test() {
   # Run checks that maven and rclone have not failed
   grep -Fq -- "Tests run: 1, Failures: 0, Errors: 0, Skipped: 0" <<< "$output" || fail "Maven failed"
   grep -Fq -- "RClone exit code: 0" <<< "$output" || fail "Rclone failed"
+  grep -Fq -- "Mock rclone called: target/surefire-reports -> :s3:test-bucket/test-path/surefire-reports" <<< "$output" || fail "Surefire reports were not uploaded"
+  grep -Fq -- "Mock rclone called: allure-results -> :s3:test-bucket/test-path/allure-results" <<< "$output" || fail "Allure results were not uploaded"
 }
 
 test

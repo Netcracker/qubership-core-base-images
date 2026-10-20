@@ -2,13 +2,14 @@
 set -uo pipefail
 
 # Exit codes:
-#   0        - tests passed and Allure results uploaded
+#   0        - tests passed and test results uploaded
 #   1..29    - Maven exit code (tests failed / build error), takes precedence over upload problems
 #   31..40   - RCLONE_CODE_OFFSET + rclone exit code (1..10), upload failed
 #   41       - NO_RESULTS_CODE, Maven succeeded but produced no Allure results
 readonly RCLONE_CODE_OFFSET=30
 readonly NO_RESULTS_CODE=41
 readonly RESULTS_DIR="allure-results"
+readonly SUREFIRE_REPORTS_DIR="target/surefire-reports"
 
 : "${ATP_STORAGE_BUCKET:?ATP_STORAGE_BUCKET is required}"
 : "${ATP_STORAGE_PROVIDER:?ATP_STORAGE_PROVIDER is required}"
@@ -44,13 +45,20 @@ rclone_upload() {
    return "$status"
 }
 
+# Upload Surefire reports before signaling that Allure results are ready.
+surefire_code=0
+if [[ -d "$SUREFIRE_REPORTS_DIR" ]]; then
+    rclone_upload "$SUREFIRE_REPORTS_DIR" "surefire-reports"
+    surefire_code=$?
+fi
+
 if [[ -d "$RESULTS_DIR" ]]; then
     rclone_upload "${RESULTS_DIR}" "${RESULTS_DIR}"
     rclone_code=$?
     if [[ $rclone_code -eq 0 ]]; then
       if [[ -n "${ATP_STORAGE_RESULTS_BASE_URL:-}" ]]; then
         results_url="${ATP_STORAGE_RESULTS_BASE_URL%/}/${ATP_STORAGE_DESTINATION_PATH#/}"
-        log INFO "Results browser URL (post-processing may still be in progress): ${results_url%/}/"
+        log INFO "Test results URL: ${results_url%/}/"
       fi
       echo "false" > "$RESULTS_DIR.uploaded"
       rclone_upload "${RESULTS_DIR}.uploaded" ""
@@ -60,6 +68,11 @@ if [[ -d "$RESULTS_DIR" ]]; then
 else
     log INFO "Error: source directory does not exist: ${RESULTS_DIR}" >&2
     upload_code=$NO_RESULTS_CODE
+fi
+
+# Preserve the Allure error if both result uploads fail.
+if [[ $upload_code -eq 0 && $surefire_code -ne 0 ]]; then
+    upload_code=$((RCLONE_CODE_OFFSET + surefire_code))
 fi
 
 # Maven failure is the primary result, upload problems are reported only when Maven succeeded

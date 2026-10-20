@@ -222,6 +222,12 @@ S3 instance/storage.
 The local Maven repository is set to `/app/.m2/repository` (global `settings.xml` in `/opt/maven/conf`) and is
 warmed up at build time with the plugins a `mvn verify` run needs, so ITs can run offline (`mvn -o`).
 
+After Maven finishes, the runner uploads `allure-results/` and the complete
+`target/surefire-reports/` directory to sibling `allure-results/` and `surefire-reports/`
+folders under `ATP_STORAGE_DESTINATION_PATH`. A missing Surefire reports directory is skipped.
+A failed Surefire upload makes the run fail when Maven and the Allure upload succeed;
+Maven failures retain precedence over upload failures.
+
 #### Java 25 ATP Environment Variables
 
 - `ATP_STORAGE_BUCKET`: Required Bucket name for S3
@@ -239,7 +245,7 @@ For example, set `ATP_STORAGE_RESULTS_BASE_URL=https://atp3-results-cpcap.atp3pr
 `ATP_STORAGE_DESTINATION_PATH=result/saas-rnd-cap-01/next-3/2026-10-14_20-57-57` to log:
 
 ```text
-Results browser URL (post-processing may still be in progress): https://atp3-results-cpcap.atp3prod.managed.netcracker.cloud/result/saas-rnd-cap-01/next-3/2026-10-14_20-57-57/
+Test results URL: https://atp3-results-cpcap.atp3prod.managed.netcracker.cloud/result/saas-rnd-cap-01/next-3/2026-10-14_20-57-57/
 ```
 
 ### Nginx Alpine Image Details
