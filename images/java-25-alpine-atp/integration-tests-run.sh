@@ -10,13 +10,13 @@ readonly RCLONE_CODE_OFFSET=30
 readonly NO_RESULTS_CODE=41
 readonly RESULTS_DIR="allure-results"
 
-: "${S3_STORAGE_BUCKET:?S3_STORAGE_BUCKET is required}"
-: "${S3_STORAGE_PROVIDER:?S3_STORAGE_PROVIDER is required}"
-: "${S3_STORAGE_ACCESSKEY:?S3_STORAGE_ACCESSKEY is required}"
-: "${S3_STORAGE_SECRETKEY:?S3_STORAGE_SECRETKEY is required}"
-: "${S3_REGION:?S3_REGION is required}"
-: "${S3_STORAGE_DESTINATION_PATH:?S3_STORAGE_DESTINATION_PATH is required}"
-: "${S3_ENDPOINT:?S3_ENDPOINT is required}"
+: "${ATP_STORAGE_BUCKET:?ATP_STORAGE_BUCKET is required}"
+: "${ATP_STORAGE_PROVIDER:?ATP_STORAGE_PROVIDER is required}"
+: "${ATP_STORAGE_USERNAME:?ATP_STORAGE_USERNAME is required}"
+: "${ATP_STORAGE_PASSWORD:?ATP_STORAGE_PASSWORD is required}"
+: "${ATP_STORAGE_REGION:?ATP_STORAGE_REGION is required}"
+: "${ATP_STORAGE_DESTINATION_PATH:?ATP_STORAGE_DESTINATION_PATH is required}"
+: "${ATP_STORAGE_SERVER_URL:?ATP_STORAGE_SERVER_URL is required}"
 
 log INFO "Running Maven tests (offline)..."
 mvn -B -o "$@" verify
@@ -26,13 +26,12 @@ log INFO "Maven exit code: ${maven_code}"
 rclone_upload() {
    local src="$1"
    local dest="$2"
-   log INFO "Uploading allure results to ${S3_ENDPOINT%/}/${S3_STORAGE_BUCKET}/${S3_STORAGE_DESTINATION_PATH#/}/${dest#/}"
-   rclone copy "$src" ":s3:${S3_STORAGE_BUCKET}/${S3_STORAGE_DESTINATION_PATH}/$dest" \
-          --s3-provider "$S3_STORAGE_PROVIDER" \
-          --s3-access-key-id "$S3_STORAGE_ACCESSKEY" \
-          --s3-secret-access-key "$S3_STORAGE_SECRETKEY" \
-          --s3-region "$S3_REGION" \
-          --s3-endpoint "$S3_ENDPOINT" \
+   rclone copy "$src" ":s3:${ATP_STORAGE_BUCKET}/${ATP_STORAGE_DESTINATION_PATH}/$dest" \
+          --s3-provider "$ATP_STORAGE_PROVIDER" \
+          --s3-access-key-id "$ATP_STORAGE_USERNAME" \
+          --s3-secret-access-key "$ATP_STORAGE_PASSWORD" \
+          --s3-region "$ATP_STORAGE_REGION" \
+          --s3-endpoint "$ATP_STORAGE_SERVER_URL" \
           --create-empty-src-dirs \
           --transfers 4 \
           --checkers 8 \
@@ -49,8 +48,8 @@ if [[ -d "$RESULTS_DIR" ]]; then
     rclone_upload "${RESULTS_DIR}" "${RESULTS_DIR}"
     rclone_code=$?
     if [[ $rclone_code -eq 0 ]]; then
-      if [[ -n "${S3_RESULTS_BASE_URL:-}" ]]; then
-        results_url="${S3_RESULTS_BASE_URL%/}/${S3_STORAGE_DESTINATION_PATH#/}"
+      if [[ -n "${ATP_STORAGE_RESULTS_BASE_URL:-}" ]]; then
+        results_url="${ATP_STORAGE_RESULTS_BASE_URL%/}/${ATP_STORAGE_DESTINATION_PATH#/}"
         log INFO "Results browser URL (post-processing may still be in progress): ${results_url%/}/"
       fi
       echo "false" > "$RESULTS_DIR.uploaded"
