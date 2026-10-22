@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=ghcr.io/netcracker/qubership-core-base:alpine-latest@sha256:f0836415633bc2a63c2a0431c4c0701d17bd7b31132176b26651b49927d9ad7e
+ARG BASE_IMAGE=ghcr.io/netcracker/qubership-core-base:alpine-latest@sha256:0c2c9e4b49e73efffb30edf8d3de8b3eb43194a6c4f688da08ec3236b570b486
 
 FROM amazoncorretto:25-alpine-jdk@sha256:b79cd12dceb279962a585059498694fd66965df39244bbab2879aad39dd6278d AS jlink
 RUN apk --no-cache add binutils
