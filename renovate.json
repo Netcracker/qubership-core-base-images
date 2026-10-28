@@ -28,6 +28,12 @@
     "matchPackageNames" : [ "amazoncorretto" ],
     "matchUpdateTypes" : [ "major" ],
     "enabled" : false
+  }, {
+    "description" : "ARG IMAGE placeholders in test Dockerfiles are overridden via --build-arg: do not update",
+    "matchManagers" : [ "dockerfile" ],
+    "matchFileNames" : [ "tests/**/Dockerfile" ],
+    "matchDepTypes" : [ "final" ],
+    "enabled" : false
   } ],
   "extends" : [ "github>Netcracker/qubership-core-infra:renovate-core-config" ]
 }
