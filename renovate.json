@@ -28,6 +28,13 @@
     "matchPackageNames" : [ "amazoncorretto" ],
     "matchUpdateTypes" : [ "major" ],
     "enabled" : false
+  }, {
+    "description" : "In-repo base images: CI and release pass BASE_IMAGE explicitly, so the default in Dockerfiles stays a plain tag without a digest",
+    "matchDatasources" : [ "docker" ],
+    "matchPackageNames" : [ "ghcr.io/netcracker/qubership-core-base", "ghcr.io/netcracker/qubership-java-base" ],
+    "matchFileNames" : [ "images/**/Dockerfile" ],
+    "matchUpdateTypes" : [ "digest", "pin", "pinDigest" ],
+    "enabled" : false
   } ],
   "extends" : [ "github>Netcracker/qubership-core-infra:renovate-core-config" ]
 }

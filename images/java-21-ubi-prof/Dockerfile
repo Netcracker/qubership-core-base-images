@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=ghcr.io/netcracker/qubership-core-base:ubi-latest@sha256:3d70522c3cb7b88dab08e634b4fb3c162a92e8edac3610baee92fee119281975
+ARG BASE_IMAGE=ghcr.io/netcracker/qubership-core-base:ubi-latest
 FROM ${BASE_IMAGE}
 ARG TARGETOS
 ARG TARGETARCH
