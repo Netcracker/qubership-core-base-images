@@ -44,9 +44,8 @@ legacy variable only when `NC_DIAGNOSTIC_MODE` is empty.
   release together. In a repository without one, take the latest
   [release](https://github.com/Netcracker/qubership-core-base-images/releases). All images of one release share the
   version.
-- Pin a release, not a `*-latest` tag: those move with every release of the base images. Qubership services usually
-  pin the digest as well (`:alpine-<version>@sha256:<digest>`) and let Renovate update both; keep the style the
-  repository uses.
+- Qubership services usually pin the digest as well (`:alpine-<version>@sha256:<digest>`) and let Renovate update
+  both; keep the style the repository uses.
 - The `alpine-` and `ubi-` tags start with release 2.5.0. `qubership-core-base` and `qubership-nginx-base` also
   publish tags without a flavour (`<version>`, `latest`) for existing users, and upstream plans to retire them. Move
   `qubership-core-base:<version>` to `qubership-core-base:alpine-<version>` with a version of 2.5.0 or later.
