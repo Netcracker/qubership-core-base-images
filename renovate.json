@@ -29,10 +29,10 @@
     "matchUpdateTypes" : [ "major" ],
     "enabled" : false
   }, {
-    "description" : "In-repo base images: CI and release pass BASE_IMAGE explicitly, so the default in Dockerfiles stays a plain tag without a digest",
+    "description" : "In-repo images: CI, release and tests pass BASE_IMAGE explicitly, so the default in Dockerfiles stays a plain tag without a digest",
     "matchDatasources" : [ "docker" ],
-    "matchPackageNames" : [ "ghcr.io/netcracker/qubership-core-base", "ghcr.io/netcracker/qubership-java-base" ],
-    "matchFileNames" : [ "images/**/Dockerfile" ],
+    "matchPackageNames" : [ "ghcr.io/netcracker/qubership-core-base", "ghcr.io/netcracker/qubership-java-base", "ghcr.io/netcracker/qubership-java-base-atp", "ghcr.io/netcracker/qubership-java-base-prof", "ghcr.io/netcracker/qubership-nginx-base" ],
+    "matchFileNames" : [ "images/**/Dockerfile", "tests/**/Dockerfile" ],
     "matchUpdateTypes" : [ "digest", "pin", "pinDigest" ],
     "enabled" : false
   } ],
