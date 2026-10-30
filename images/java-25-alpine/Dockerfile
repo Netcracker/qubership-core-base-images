@@ -1,6 +1,6 @@
 ARG BASE_IMAGE
 
-FROM amazoncorretto:25-alpine-jdk@sha256:b611ab31a8cff0ab60ff5ee26de46d06922bfff0c54f5029ac588d5337bc533b AS jlink
+FROM amazoncorretto:25-alpine-jdk@sha256:e3ec06bdc025f54f1dbeeb92a8cc537665371badec999ce832c1cb6c00a2c828 AS jlink
 RUN apk --no-cache add binutils
 RUN $JAVA_HOME/bin/jlink \
     --add-modules ALL-MODULE-PATH \
