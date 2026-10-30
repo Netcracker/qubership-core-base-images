@@ -23,8 +23,8 @@ Every image runs as `appuser` (UID `10001`, group `0`) with `/app` as home and w
   Java 25, a `jlink` runtime of Amazon Corretto. The default for Java services.
 - `ghcr.io/netcracker/qubership-java-base-prof:25-alpine-<version>` or `:25-ubi-<version>`
   Java 25 with the Qubership profiler.
-- `ghcr.io/netcracker/qubership-java-base:21-alpine-<version>` or `:21-ubi-<version>`
-  Java 21, the full Amazon Corretto JDK with the profiler built in. For services that have not moved to Java 25.
+- `ghcr.io/netcracker/qubership-java-base-prof:21-alpine-<version>` or `:21-ubi-<version>`
+  Java 21, the full Amazon Corretto JDK with the Qubership profiler. For services that have not moved to Java 25.
 - `ghcr.io/netcracker/qubership-nginx-base:alpine-<version>`
   NGINX with Lua, Brotli, and OpenTelemetry.
 
@@ -32,8 +32,8 @@ Alpine is the default flavour. Take `ubi-` when the service needs glibc, for exa
 linked against it, or when the product requires a Red Hat base. Both flavours have the same entrypoint, user, and
 volumes.
 
-The profiler in the `-prof` and Java 21 images stays off until the deployment sets `NC_DIAGNOSTIC_MODE=prod`, because
-the images set it to `off`. `PROFILER_ENABLED=true` has no effect on these images: the profiler bootstrap reads that
+The profiler in the `-prof` images stays off until the deployment sets `NC_DIAGNOSTIC_MODE=prod`, because the images
+set it to `off`. `PROFILER_ENABLED=true` has no effect on these images: the profiler bootstrap reads that
 legacy variable only when `NC_DIAGNOSTIC_MODE` is empty.
 
 ## Tags
