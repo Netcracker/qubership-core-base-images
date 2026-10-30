@@ -73,30 +73,18 @@ legacy variable only when `NC_DIAGNOSTIC_MODE` is empty.
 
 ## Go service
 
-```dockerfile
-FROM --platform=$BUILDPLATFORM golang:<go-version> AS builder
-ARG TARGETOS
-ARG TARGETARCH
-WORKDIR /src
-COPY go.mod go.sum ./
-RUN --mount=type=cache,target=/go/pkg/mod \
-    go mod download
-COPY . .
-RUN --mount=type=cache,target=/go/pkg/mod \
-    --mount=type=cache,target=/root/.cache/go-build \
-    CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH} \
-    go build -o /out/<service> ./<main-package>
+The builder stage is ordinary Go and is not shown here. The runtime stage needs only these lines:
 
+```dockerfile
 FROM ghcr.io/netcracker/qubership-core-base:alpine-<version>
 COPY --chown=10001:0 --chmod=555 --from=builder /out/<service> /app/<service>
 CMD ["/app/<service>"]
 ```
 
-`<go-version>` is the `go` line of `go.mod`.
-
 ## Java service
 
-Maven builds the application before `docker build`, so the Dockerfile copies the build output. Both templates copy the
+The build tool builds the application before `docker build`, and the Dockerfile copies its output. The templates show
+Maven paths; under Gradle the same files are in `build/quarkus-app/` and `build/libs/`. Both templates copy the
 dependencies and the application code as separate layers, so a commit that changes only the code reuses the dependency
 layer.
 
@@ -113,9 +101,6 @@ COPY --chown=10001:0 target/quarkus-app/quarkus/ /app/quarkus/
 EXPOSE 8080
 CMD ["java", "-jar", "/app/quarkus-run.jar"]
 ```
-
-Build the image from a Dockerfile rather than with `quarkus-container-image-jib`: by default Jib replaces the base
-`ENTRYPOINT` with its own `java` command.
 
 ### Spring Boot
 
@@ -136,9 +121,38 @@ EXPOSE 8080
 CMD ["java", "-jar", "/app/application.jar"]
 ```
 
+Spring Boot's `spring-boot:build-image` does not fit this base: it builds with Cloud Native Buildpacks, whose image
+starts through the buildpacks launcher and runs a JVM the buildpack installs.
+
+### Jib
+
+Jib (`jib-maven-plugin`, `quarkus-container-image-jib`) replaces the base `ENTRYPOINT` with its own `java` command. Set
+the entrypoint to `INHERIT` and give the `java` command as the arguments: the base image sets no `CMD`, so with
+`INHERIT` alone the container starts with no command and exits at once.
+
+```xml
+<container>
+  <entrypoint>INHERIT</entrypoint>
+  <args>
+    <arg>java</arg>
+    <arg>-cp</arg>
+    <arg>@/app/jib-classpath-file</arg>
+    <arg>@/app/jib-main-class-file</arg>
+  </args>
+</container>
+```
+
+In Quarkus the same goes in `application.properties`. The application lands in `/home/jboss`, the working directory
+Quarkus sets:
+
+```properties
+quarkus.jib.jvm-entrypoint=INHERIT
+quarkus.jib.jvm-arguments=java,-Djava.util.logging.manager=org.jboss.logmanager.LogManager,-jar,quarkus-run.jar
+```
+
 ### JVM options and paths
 
-- Start `java` from `PATH`, as both templates do. The Java images ship Amazon Corretto under
+- Start `java` from `PATH`, as the templates above do. The Java images ship Amazon Corretto under
   `/usr/lib/jvm/java-<major>-amazon-corretto`, and a path from an earlier distribution, such as
   `/usr/lib/jvm/java-21-openjdk/bin/java`, fails at startup.
 - Set JVM options that differ per environment, such as the heap size, in the deployment as `X_JAVA_ARGS`, not in `CMD`.
