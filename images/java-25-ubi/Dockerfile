@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=ghcr.io/netcracker/qubership-core-base:ubi-latest
+ARG BASE_IMAGE
 
 # The runtime is built in the very same image the final one is based on, so the jlink output is linked
 # against the exact glibc of the target image. Amazon Corretto 25 is taken from the official Amazon yum
