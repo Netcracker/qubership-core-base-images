@@ -27,8 +27,6 @@ Every image runs as `appuser` (UID `10001`, group `0`) with `/app` as home and w
   Java 21, the full Amazon Corretto JDK with the profiler built in. For services that have not moved to Java 25.
 - `ghcr.io/netcracker/qubership-nginx-base:alpine-<version>`
   NGINX with Lua, Brotli, and OpenTelemetry.
-- `ghcr.io/netcracker/qubership-java-base-atp:25-alpine-<version>`
-  Java 25 with Maven and rclone, for ATP integration-test runners. It is not a service runtime.
 
 Alpine is the default flavour. Take `ubi-` when the service needs glibc, for example a binary or a native library
 linked against it, or when the product requires a Red Hat base. Both flavours have the same entrypoint, user, and
@@ -43,12 +41,9 @@ legacy variable only when `NC_DIAGNOSTIC_MODE` is empty.
 - Take `<version>` from the other Dockerfiles of the repository, so every image of the service moves to a new base
   release together. In a repository without one, take the latest
   [release](https://github.com/Netcracker/qubership-core-base-images/releases). All images of one release share the
-  version.
+  version, and the `alpine-` and `ubi-` tags start with release 2.5.0.
 - Qubership services usually pin the digest as well (`:alpine-<version>@sha256:<digest>`) and let Renovate update
   both; keep the style the repository uses.
-- The `alpine-` and `ubi-` tags start with release 2.5.0. `qubership-core-base` and `qubership-nginx-base` also
-  publish tags without a flavour (`<version>`, `latest`) for existing users, and upstream plans to retire them. Move
-  `qubership-core-base:<version>` to `qubership-core-base:alpine-<version>` with a version of 2.5.0 or later.
 
 ## Runtime contract
 
@@ -59,10 +54,9 @@ legacy variable only when `NC_DIAGNOSTIC_MODE` is empty.
 - **Ownership.** Copy every file with `--chown=10001:0`. Add `--chmod=555` to a binary and `--chmod=444` to a single
   file the service only reads, such as `application.yaml`. On a directory copy, `444` also removes the execute bit the
   service needs to open the directories.
-- **Entrypoint.** Keep the base `ENTRYPOINT` and give the service command as `CMD` in exec form. The entrypoint runs
-  the command as a child process and forwards signals to it. It holds `SIGTERM` back for `SIGTERM_EXIT_DELAY` seconds
-  (default `10`) to avoid 502 and 503 errors during a rollout, and on the profiler images it calls the crash-dump hook
-  after the process exits.
+- **Entrypoint.** Keep the base `ENTRYPOINT` and give the service command as `CMD` in exec form: an `ENTRYPOINT` of
+  your own replaces the base one. On `SIGTERM` the entrypoint waits `SIGTERM_EXIT_DELAY` seconds (default `10`) before
+  it forwards the signal, to avoid 502 and 503 errors during a rollout.
 - **No `sh` or `bash` in front of `CMD`.** The entrypoint treats a command that starts with `sh` or `bash` as an
   interactive shell and `exec`s it directly, without init scripts, signal forwarding, or the crash dump.
   `CMD ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]` loses all three. JVM options have their own channel (see

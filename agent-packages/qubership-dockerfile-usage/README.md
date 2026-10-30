@@ -6,14 +6,13 @@ agent applies it when it writes or edits a `Dockerfile`.
 
 ## What it covers
 
-- The base images and their tags: Alpine and UBI flavours, Java 21 and 25, the profiler images, NGINX, ATP, and where
-  the version comes from.
+- The base images and their tags: Alpine and UBI flavours, Java 21 and 25, the profiler images, NGINX, and where the
+  version comes from.
 - The runtime contract: user `10001:0`, `--chown=10001:0`, the base entrypoint with the service command in `CMD`,
   `/app/init.d` scripts, packages added in the runtime stage, and writable paths under a read-only root filesystem.
 - Templates for a Go service, a Quarkus service, a Spring Boot service, and an NGINX frontend.
 - Mistakes that build fine and break at runtime: `sh -c` in `CMD`, `PROFILER_ENABLED`, a hard-coded JVM path, Jib, a
   space inside a Java `CMD` argument, a user name in `USER` under `runAsNonRoot`.
-- The migration from the deprecated tags without a flavour (`qubership-core-base:<version>`).
 
 ## Contents
 
