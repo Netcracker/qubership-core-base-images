@@ -21,7 +21,7 @@
         <dependency>
             <groupId>io.qameta.allure</groupId>
             <artifactId>allure-jupiter</artifactId>
-            <version>2.35.3</version>
+            <version>3.0.1</version>
             <scope>test</scope>
         </dependency>
 
@@ -49,14 +49,14 @@
         <dependency>
             <groupId>io.qameta.allure</groupId>
             <artifactId>allure-model</artifactId>
-            <version>2.35.3</version>
+            <version>3.0.1</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>io.qameta.allure</groupId>
             <artifactId>allure-java-commons</artifactId>
-            <version>2.35.3</version>
+            <version>3.0.1</version>
             <scope>test</scope>
         </dependency>
 
