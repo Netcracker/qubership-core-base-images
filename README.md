@@ -33,7 +33,7 @@ A minimal Red Hat UBI based image with the same security settings, entrypoint an
 ### 5. Java UBI Images
 
 There are three Java images based on Red Hat UBI:
-* Java 21 with JDK and profiler: `qubership-java-base-prof:21-ubi-xxx`
+* Java 21 with JDK and profiler: `qubership-java-base:21-ubi-xxx`
 * Java 25 with JRE: `qubership-java-base:25-ubi-xxx`
 * Java 25 with JRE and profiler: `qubership-java-base-prof:25-ubi-xxx`
 
@@ -90,7 +90,7 @@ FROM ghcr.io/netcracker/qubership-core-base:ubi-latest
 
 **Java 21 (JDK with profiler):**
 ```dockerfile
-FROM ghcr.io/netcracker/qubership-java-base-prof:21-ubi-latest
+FROM ghcr.io/netcracker/qubership-java-base:21-ubi-latest
 ```
 
 **Java 25 (JRE only):**
@@ -376,7 +376,8 @@ The Java profiler images (Alpine Java 21, Alpine Java 25, UBI Java 21 and UBI Ja
 
 - **Profiler Version**: 4.0.7 (configurable via build arg `QUBERSHIP_PROFILER_VERSION`)
 - **Artifact Source**: Configurable via build arg `QUBERSHIP_PROFILER_ARTIFACT_SOURCE` (local or remote from Maven Central)
-- **Enable Profiler**: Set environment variable `PROFILER_ENABLED=true`
+- **Enable Profiler**: Set environment variable `NC_DIAGNOSTIC_MODE=prod` (the images default to `off`); see
+  [Using the Qubership Profiler](#using-the-qubership-profiler)
 - **Profiler Directory**: `/app/diag`
 - **Dump Directory**: `/app/diag/dump`
 - **Multi-platform Support**: Automatically downloads platform-specific artifacts based on `TARGETOS` and `TARGETARCH` build args
@@ -449,15 +450,18 @@ Place your initialization scripts (`.sh` files) in `/app/init.d/`. They will be 
 
 ### Using the Qubership Profiler
 
-To enable the profiler in the Java profiler images (Alpine Java 21, Alpine Java 25, UBI Java 21 or UBI Java 25):
+The Java profiler images (Alpine Java 21, Alpine Java 25, UBI Java 21 and UBI Java 25) set `NC_DIAGNOSTIC_MODE=off`, so
+the profiler is off by default. To enable it, set `NC_DIAGNOSTIC_MODE=prod` in the container environment:
 
 ```bash
-# Set environment variable to enable profiler
-export PROFILER_ENABLED=true
-
-# Run your Java application
-java -jar your-app.jar
+docker run -e NC_DIAGNOSTIC_MODE=prod <your-image>
 ```
+
+The entrypoint reads the variable when the container starts, so set it with `-e`, with `ENV` in a Dockerfile, or in the
+container's `env` in a Kubernetes pod spec. `PROFILER_ENABLED` is a legacy variable that the profiler bootstrap reads
+only when `NC_DIAGNOSTIC_MODE` is unset or empty, so `PROFILER_ENABLED=true` alone has no effect on these images. The
+other `NC_DIAGNOSTIC_*` variables are listed in the profiler's
+[environment variables reference](https://github.com/Netcracker/qubership-profiler-agent/blob/v4.0.7/backend/docs/add-cdt-agent.md#environment-variables-of-cdt-agent-itself).
 
 The profiler will automatically:
 - Load the profiler agent from `/app/diag/lib/agent.jar`
