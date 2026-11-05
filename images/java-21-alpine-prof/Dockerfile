@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=ghcr.io/netcracker/qubership-core-base:alpine-latest
+ARG BASE_IMAGE
 FROM ${BASE_IMAGE}
 ARG TARGETOS
 ARG TARGETARCH

@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=ghcr.io/netcracker/qubership-java-base:25-ubi-latest
+ARG BASE_IMAGE
 FROM ${BASE_IMAGE}
 ARG TARGETOS
 ARG TARGETARCH

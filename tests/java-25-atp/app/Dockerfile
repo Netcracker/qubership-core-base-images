@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=ghcr.io/netcracker/qubership-java-base-atp:25-alpine-latest
+ARG BASE_IMAGE
 FROM ${BASE_IMAGE}
 
 COPY . .
