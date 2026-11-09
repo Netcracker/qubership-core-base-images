@@ -21,6 +21,11 @@ RUN apk --no-cache add \
     font-dejavu \
     procps-ng # top command required by diag tool
 
+# Explicitly upgrade OS packages with known CVEs in the Alpine base. Upgrade only if a newer version is available in the repos:
+# zlib must reach 1.4-r0 or newer (CVE-2026-4738); brotli-libs must be newer than 1.2.1-r0 (CVE-2026-111497) once published.
+RUN apk upgrade --no-cache zlib brotli-libs && \
+    apk list -I zlib brotli-libs
+
 ENV JAVA_HOME=/usr/lib/jvm/java-21-amazon-corretto \
     MALLOC_ARENA_MAX=2 \
     MALLOC_MMAP_THRESHOLD_=131072 \

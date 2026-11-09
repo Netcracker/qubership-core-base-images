@@ -151,6 +151,8 @@ FROM ghcr.io/netcracker/qubership-java-base-prof:25-ubi-latest
 #### Additional Dependencies
 
 - `amazon-corretto-21`: Latest version (from the Amazon Corretto apk repository)
+- `zlib`: Explicitly upgraded (`apk upgrade`) to 1.4-r0 or newer (fixes CVE-2026-4738)
+- `brotli-libs`: Explicitly upgraded (`apk upgrade`) to the newest version in the Alpine repositories at build time; must be newer than 1.2.1-r0 (fixes CVE-2026-111497)
 - `p11-kit-trust`: Latest version
 - `ssl_client`: Latest version
 - `fontconfig`: Latest version
