@@ -19,7 +19,7 @@ ARG NGINX_VERSION=release-1.28.3
 # renovate: datasource=github-tags depName=vision5/ngx_devel_kit
 ARG NGX_DEVEL_KIT_VERSION=v0.3.4
 # lua-nginx-module and lua-resty-core must be updated together: lua-resty-core pins an exact
-# ngx_lua version (e.g. v0.1.32 requires v0.10.29) and nginx fails to init Lua otherwise
+# ngx_lua version (e.g. v0.1.34rc3 requires v0.10.31) and nginx fails to init Lua otherwise
 # renovate: datasource=github-tags depName=openresty/lua-nginx-module
 ARG LUA_NGINX_MODULE_VERSION=v0.10.31
 # renovate: datasource=git-refs depName=https://github.com/google/ngx_brotli.git currentValue=master
@@ -29,7 +29,7 @@ ARG HEADERS_MORE_VERSION=v0.41
 # renovate: datasource=github-tags depName=openresty/lua-resty-lrucache
 ARG LUA_RESTY_LRUCACHE_VERSION=v0.15
 # renovate: datasource=github-tags depName=openresty/lua-resty-core
-ARG LUA_RESTY_CORE_VERSION=v0.1.32
+ARG LUA_RESTY_CORE_VERSION=v0.1.34rc3
 # renovate: datasource=git-refs depName=https://github.com/nginxinc/nginx-otel.git currentValue=main
 ARG NGINX_OTEL_COMMIT=e3b6c98b1556e4c82cec39acc7be91a62449fa84
 
