@@ -257,7 +257,7 @@ Test results URL: https://atp3-results-cpcap.atp3prod.managed.netcracker.cloud/r
 #### Features and modules
 
 - HTTP/2, SSL/TLS, gunzip, gzip static
-- Lua (LuaJIT 2.1) with lua-nginx-module, lua-resty-core, lua-resty-lrucache
+- Lua (LuaJIT 2.1) with lua-nginx-module, lua-resty-core, lua-resty-lrucache (lua-resty-core requires an exact lua-nginx-module version, so both are always updated together)
 - Brotli compression (ngx_brotli, dynamic module)
 - OpenTelemetry instrumentation (nginx-otel native module by nginxinc), linked against the Alpine `grpc` package
 - auth_request, sub filter, stub_status, headers-more
