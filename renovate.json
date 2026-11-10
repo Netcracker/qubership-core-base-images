@@ -22,6 +22,10 @@
     "groupName" : "org.qubership.profiler",
     "matchPackageNames" : [ "org.qubership.profiler{/,}**" ]
   }, {
+    "description" : "lua-resty-core pins an exact lua-nginx-module version: update them in one PR",
+    "groupName" : "openresty lua modules",
+    "matchPackageNames" : [ "openresty/lua-nginx-module", "openresty/lua-resty-core" ]
+  }, {
     "description" : "Java base images are pinned per major (images/java-<major>): minor/patch/digest only",
     "matchManagers" : [ "dockerfile" ],
     "matchDatasources" : [ "docker" ],
