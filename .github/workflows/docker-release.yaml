@@ -161,6 +161,32 @@ jobs:
       config-filename: "nginx-base-docker-release-config.json"
       dry-run: ${{ inputs.dry-run }}
 
+  python-base-docker-build:
+    needs: [ create-tag ]
+    name: Python Debian image
+    uses: Netcracker/qubership-core-infra/.github/workflows/docker-build.yaml@05f471f3d4da2107a6ed3286f839ec517c2c18b8
+    with:
+      build-args: |
+        BASE_IMAGE_TAG=ghcr.io/netcracker/qubership-python-base:debian-${{ inputs.version }}
+      tags: "debian-${{ inputs.version }},debian-latest"
+      config-filename: "python-base-docker-release-config.json"
+      dry-run: ${{ inputs.dry-run }}
+
+  node-base-docker-build:
+    needs: [ core-base-docker-build ]
+    name: Node.js ${{ matrix.major }} Alpine image
+    strategy:
+      matrix:
+        major: [24, 26]
+    uses: Netcracker/qubership-core-infra/.github/workflows/docker-build.yaml@05f471f3d4da2107a6ed3286f839ec517c2c18b8
+    with:
+      build-args: |
+        BASE_IMAGE=ghcr.io/netcracker/qubership-core-base:alpine-${{ inputs.version }}
+        BASE_IMAGE_TAG=ghcr.io/netcracker/qubership-nodejs-base:${{ matrix.major }}-alpine-${{ inputs.version }}
+      tags: "${{ matrix.major }}-alpine-${{ inputs.version }},${{ matrix.major }}-alpine-latest"
+      config-filename: "node-${{ matrix.major }}-docker-release-config.json"
+      dry-run: ${{ inputs.dry-run }}
+
   github-release:
     needs: [create-tag]
     if: ${{ !inputs.dry-run }}

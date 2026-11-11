@@ -145,6 +145,14 @@ jobs:
             ghcr.io/netcracker/qubership-nginx-base:test
           file: images/nginx-alpine/Dockerfile
 
+      - name: Build and load test Python Debian image
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
+        with:
+          build-args: |
+            BASE_IMAGE_TAG=ghcr.io/netcracker/qubership-python-base:debian-test
+          tags: ghcr.io/netcracker/qubership-python-base:debian-test
+          file: images/python-debian/Dockerfile
+
       - name: Run tests on containers
         run: |
           ./tests/test-suite.sh ghcr.io/netcracker/qubership-core-base:test
@@ -157,6 +165,52 @@ jobs:
           ./tests/test-suite.sh ghcr.io/netcracker/qubership-java-base-prof:25-ubi-test
           ./tests/test-suite.sh ghcr.io/netcracker/qubership-java-base-prof:21-ubi-test
           ./tests/test-suite.sh ghcr.io/netcracker/qubership-nginx-base:test
+
+      - name: Test Python Debian image
+        env:
+          PYTHON_IMAGE: ghcr.io/netcracker/qubership-python-base:debian-test
+        run: |
+          for test in args-passing bash-entrypoint-arguments certificates nss signal-propagation version-log; do
+            ./tests/test-suite.sh "$PYTHON_IMAGE" "$test"
+          done
+          docker run --rm "$PYTHON_IMAGE" python -c '
+          import bz2, compression.zstd, ctypes, dbm.gnu, lzma, os, platform, readline, sqlite3, ssl, sysconfig
+          assert os.getuid() == 10001
+          assert os.access(sysconfig.get_path("purelib"), os.W_OK), "appuser cannot write to site-packages"
+          expected_version = os.environ["PYTHON_VERSION"]
+          actual_version = platform.python_version()
+          assert actual_version == expected_version, f"Expected Python {expected_version}, got {actual_version}"
+          assert ssl.create_default_context().get_ca_certs()
+          '
+          docker run --rm "$PYTHON_IMAGE" python -m pip --version
+
+      - name: Build and test Node.js Alpine images
+        env:
+          NODE_IMAGE: ghcr.io/netcracker/qubership-nodejs-base
+        run: |
+          for major in 24 26; do
+            image="$NODE_IMAGE:$major-alpine-test"
+            docker build --file "images/node-$major-alpine/Dockerfile" \
+              --build-arg BASE_IMAGE=ghcr.io/netcracker/qubership-core-base:test \
+              --build-arg "BASE_IMAGE_TAG=$image" \
+              --tag "$image" .
+            for test in args-passing nss signal-propagation version-log; do
+              ./tests/test-suite.sh "$image" "$test"
+            done
+            docker run --rm --read-only \
+              --mount "type=bind,src=$PWD/tests/certificates/certs,dst=/tmp/cert,readonly" \
+              "$image" node -e '
+            const assert = require("node:assert/strict");
+            const { X509Certificate } = require("node:crypto");
+            const { readFileSync } = require("node:fs");
+            const { getCACertificates } = require("node:tls");
+            const expected = new X509Certificate(readFileSync("/tmp/cert/testcert.pem")).fingerprint256;
+            assert.equal(process.versions.node.split(".")[0], process.argv[1]);
+            assert.equal(process.getuid(), 10001);
+            assert(getCACertificates("default").some(pem => new X509Certificate(pem).fingerprint256 === expected));
+            ' "$major"
+            docker run --rm "$image" npm --version
+          done
 
       - name: Set up JDK 21
         uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6
@@ -251,3 +305,16 @@ jobs:
           docker push ghcr.io/netcracker/qubership-nginx-base:$TAG_BUILD_NUMBER
           docker push ghcr.io/netcracker/qubership-nginx-base:alpine-$TAG_SNAPSHOT
           docker push ghcr.io/netcracker/qubership-nginx-base:alpine-$TAG_BUILD_NUMBER
+          # python-base
+          docker tag ghcr.io/netcracker/qubership-python-base:debian-test ghcr.io/netcracker/qubership-python-base:debian-$TAG_SNAPSHOT
+          docker tag ghcr.io/netcracker/qubership-python-base:debian-test ghcr.io/netcracker/qubership-python-base:debian-$TAG_BUILD_NUMBER
+          docker push ghcr.io/netcracker/qubership-python-base:debian-$TAG_SNAPSHOT
+          docker push ghcr.io/netcracker/qubership-python-base:debian-$TAG_BUILD_NUMBER
+          # nodejs-base
+          for major in 24 26; do
+            image="ghcr.io/netcracker/qubership-nodejs-base:$major-alpine"
+            docker tag "$image-test" "$image-$TAG_SNAPSHOT"
+            docker tag "$image-test" "$image-$TAG_BUILD_NUMBER"
+            docker push "$image-$TAG_SNAPSHOT"
+            docker push "$image-$TAG_BUILD_NUMBER"
+          done
