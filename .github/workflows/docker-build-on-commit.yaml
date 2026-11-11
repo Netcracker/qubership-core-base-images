@@ -194,7 +194,7 @@ jobs:
               --build-arg BASE_IMAGE=ghcr.io/netcracker/qubership-core-base:test \
               --build-arg "BASE_IMAGE_TAG=$image" \
               --tag "$image" .
-            for test in args-passing nss signal-propagation version-log; do
+            for test in args-passing bash-entrypoint-arguments certificates nss signal-propagation version-log; do
               ./tests/test-suite.sh "$image" "$test"
             done
             docker run --rm --read-only \
