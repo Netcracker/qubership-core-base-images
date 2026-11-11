@@ -1,0 +1,6 @@
+#!/bin/sh
+# Replaces update-ca-certificates and prints plain lines like Debian's update-ca-certificates -v does,
+# which the entrypoint has to print in the log format
+echo "Updating certificates in /etc/ssl/certs..."
+echo "0 added, 0 removed; done."
+echo "plain stderr line" >&2

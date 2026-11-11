@@ -428,6 +428,7 @@ The entrypoint script performs the following operations:
    - Automatically detects and loads Kubernetes service account certificates from `/var/run/secrets/kubernetes.io/serviceaccount/ca.crt`
    - For Java images: imports certificates into the Java keystore using `keytool`
    - For base images: copies certificates and runs `update-ca-certificates`
+   - The output of `update-ca-certificates` and `keytool` is printed in the log format with the `DEBUG` level, so it is shown only when `IMAGE_LOG_LEVEL` (or `LOG_LEVEL`) is `DEBUG`
 4. **Loads profiler bootstrap** (Java profiler images only): Sources `/app/diag/diag-bootstrap.sh` to make profiler functions available
 5. **Executes initialization scripts**: Runs all `.sh` scripts from `/app/init.d/` in alphabetical order (only in non-interactive mode)
 6. **Runs the main application**: Executes the provided command with proper signal handling and crash dump collection
