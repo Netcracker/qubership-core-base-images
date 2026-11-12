@@ -39,7 +39,7 @@ There are three Java images based on Red Hat UBI:
 
 ### 6. Python Debian Image
 
-A Python runtime based on the digest-pinned official Python slim-trixie image, which uses Debian 13 slim. Releases use `qubership-python-base:debian-<version>` and `qubership-python-base:debian-latest` on GHCR.
+A Python runtime based on the digest-pinned official Python slim-trixie image, which uses Debian 13 slim. GHCR release tags include the Python major and minor version, for example `qubership-python-base:3.15-debian-<version>` and `qubership-python-base:3.15-debian-latest`. Snapshot tags use a hyphen between the Python major and minor versions, as in `3-15-debian-main-snapshot`.
 
 ### 7. Node.js Alpine Images
 
@@ -116,7 +116,7 @@ FROM ghcr.io/netcracker/qubership-java-base-prof:25-ubi-latest
 The image runs as `appuser` (UID 10001, GID 0) in `/app`. Python and pip use the virtual environment at `/opt/venv`. The environment is writable by `appuser` and group 0, so application builds can install dependencies with the default user or an arbitrary UID in group 0.
 
 ```dockerfile
-FROM ghcr.io/netcracker/qubership-python-base:debian-latest
+FROM ghcr.io/netcracker/qubership-python-base:3.15-debian-latest
 COPY requirements.txt .
 RUN python -m pip install --no-cache-dir -r requirements.txt
 COPY app.py .

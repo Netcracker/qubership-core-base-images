@@ -311,10 +311,14 @@ jobs:
           docker push ghcr.io/netcracker/qubership-nginx-base:alpine-$TAG_SNAPSHOT
           docker push ghcr.io/netcracker/qubership-nginx-base:alpine-$TAG_BUILD_NUMBER
           # python-base
-          docker tag ghcr.io/netcracker/qubership-python-base:debian-test ghcr.io/netcracker/qubership-python-base:debian-$TAG_SNAPSHOT
-          docker tag ghcr.io/netcracker/qubership-python-base:debian-test ghcr.io/netcracker/qubership-python-base:debian-$TAG_BUILD_NUMBER
-          docker push ghcr.io/netcracker/qubership-python-base:debian-$TAG_SNAPSHOT
-          docker push ghcr.io/netcracker/qubership-python-base:debian-$TAG_BUILD_NUMBER
+          python_image=ghcr.io/netcracker/qubership-python-base
+          python_series=$(bash .github/scripts/python-image-series.sh)
+          # Cleanup protects dotted release tags.
+          python_snapshot="$python_image:${python_series/./-}-debian"
+          docker tag "$python_image:debian-test" "$python_snapshot-$TAG_SNAPSHOT"
+          docker tag "$python_image:debian-test" "$python_snapshot-$TAG_BUILD_NUMBER"
+          docker push "$python_snapshot-$TAG_SNAPSHOT"
+          docker push "$python_snapshot-$TAG_BUILD_NUMBER"
           # nodejs-base
           for major in 24 26; do
             image="ghcr.io/netcracker/qubership-nodejs-base:$major-alpine"
