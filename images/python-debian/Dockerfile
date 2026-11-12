@@ -30,5 +30,7 @@ COPY --chmod=755 images/entrypoint.sh /usr/bin/entrypoint.sh
 VOLUME ["/tmp", "/etc/env", "/app/nss", "/etc/ssl/certs", "/etc/secret", "/usr/local/share/ca-certificates"]
 USER ${UID}:${GID}
 WORKDIR /app
-RUN python3 -m venv "$VIRTUAL_ENV"
+RUN umask 002 && \
+    python3 -m venv "$VIRTUAL_ENV" && \
+    chmod -R g=u "$VIRTUAL_ENV"
 ENTRYPOINT ["/usr/bin/entrypoint.sh"]

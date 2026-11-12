@@ -71,7 +71,16 @@ load_certificates() {
     # but we can do workaround by extracting certificates from trust store and copying them to java keystore (openshift case)
     log DEBUG "Running update-ca-certificates"
 
-    update-ca-certificates -v || log ERROR "Error updating CA certificates store"
+    local update_output update_level=DEBUG line
+    if ! update_output=$(update-ca-certificates -v 2>&1); then
+      log ERROR "Error updating CA certificates store"
+      update_level=ERROR
+    fi
+    if [[ -n $update_output ]]; then
+      while IFS= read -r line; do
+        log "$update_level" "$line"
+      done <<< "$update_output"
+    fi
 
     # Refresh Java cacerts from the trust store after system CA update (replaces Alpine's java-cacerts hook).
     cacerts_path=${JAVA_CERTIFICATE_FILE_LOCATION:-/etc/ssl/certs/java/cacerts}

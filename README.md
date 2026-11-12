@@ -113,7 +113,7 @@ FROM ghcr.io/netcracker/qubership-java-base-prof:25-ubi-latest
 
 ### Python Debian Image
 
-The image runs as `appuser` (UID 10001, GID 0) in `/app`. Python and pip use the virtual environment at `/opt/venv`, which `appuser` owns and can install dependencies into during the application build.
+The image runs as `appuser` (UID 10001, GID 0) in `/app`. Python and pip use the virtual environment at `/opt/venv`. The environment is writable by `appuser` and group 0, so application builds can install dependencies with the default user or an arbitrary UID in group 0.
 
 ```dockerfile
 FROM ghcr.io/netcracker/qubership-python-base:debian-latest

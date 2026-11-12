@@ -170,7 +170,7 @@ jobs:
         env:
           PYTHON_IMAGE: ghcr.io/netcracker/qubership-python-base:debian-test
         run: |
-          for test in args-passing bash-entrypoint-arguments certificates nss signal-propagation version-log; do
+          for test in args-passing bash-entrypoint-arguments certificates log-format nss signal-propagation version-log; do
             ./tests/test-suite.sh "$PYTHON_IMAGE" "$test"
           done
           docker run --rm "$PYTHON_IMAGE" python -c '
@@ -181,6 +181,11 @@ jobs:
           actual_version = platform.python_version()
           assert actual_version == expected_version, f"Expected Python {expected_version}, got {actual_version}"
           assert ssl.create_default_context().get_ca_certs()
+          '
+          docker run --rm --user 123456:0 "$PYTHON_IMAGE" python -c '
+          import os, sysconfig
+          for path in ("purelib", "scripts"):
+              assert os.access(sysconfig.get_path(path), os.W_OK), f"Arbitrary UID cannot write to {path}"
           '
           docker run --rm "$PYTHON_IMAGE" python -m pip --version
 
@@ -194,7 +199,7 @@ jobs:
               --build-arg BASE_IMAGE=ghcr.io/netcracker/qubership-core-base:test \
               --build-arg "BASE_IMAGE_TAG=$image" \
               --tag "$image" .
-            for test in args-passing bash-entrypoint-arguments certificates nss signal-propagation version-log; do
+            for test in args-passing bash-entrypoint-arguments certificates libstdcpp log-format nss signal-propagation version-log; do
               ./tests/test-suite.sh "$image" "$test"
             done
             docker run --rm --read-only \
