@@ -62,13 +62,17 @@ load_certificates() {
     certs_found=$(find $cert_search_dirs -type f \( -name '*.crt' -o -name '*.cer' -o -name '*.pem' \))
     for cert in $certs_found; do
       log DEBUG "Preprocess certificates file: ${cert}"
-      <"${cert}" awk "
+      cert_name=${cert##*/}
+      cert_extension=${cert_name##*.}
+      # Debian's update-ca-certificates reads only .crt files.
+      [[ $cert_extension == crt ]] || cert_extension+=.crt
+      <"${cert}" awk -v path="${CERTIFICATE_FILE_LOCATION}/${cert_name%.*}" -v extension="$cert_extension" '
         /-----BEGIN CERTIFICATE-----/ {
             found = 1
-            filename = sprintf(\"${CERTIFICATE_FILE_LOCATION}/$(basename ${cert%.*})_%03d.${cert##*.}\", n++);
+            filename = sprintf("%s_%03d.%s", path, n++, extension);
         }
         filename { print > filename }
-        END { if (!found) exit 1 }" || log ERROR "Error process certificates file ${cert}: invalid certificates file data format. " >&2
+        END { if (!found) exit 1 }' || log ERROR "Error process certificates file ${cert}: invalid certificates file data format. " >&2
     done
 
     # update certificates plugin for java will fail in case of non-standard file permissions and running user id

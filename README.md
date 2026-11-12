@@ -1,12 +1,12 @@
 # Qubership Base Images
 
-This repository contains secure and feature-rich base images for containerized applications, designed with security and flexibility in mind. Images come in two flavours: Alpine Linux and Red Hat UBI (Universal Base Image).
+This repository contains secure and feature-rich base images for containerized applications, designed with security and flexibility in mind. Images come in Alpine Linux, Red Hat UBI (Universal Base Image), and Debian flavours.
 
 ## Tag Naming
 
 **Note**: `qubership-core-base` and `qubership-nginx-base` were previously published without an OS marker in the tag (e.g. `latest`, `1.2.3`). They have been renamed to carry an explicit `alpine-` prefix (`alpine-latest`, `alpine-1.2.3`), mirroring the `ubi-` prefix already used for the Red Hat UBI flavour and the `alpine-`/`ubi-` prefixes already used by the Java images. The old unprefixed tags are still published for backward compatibility.
 
-**Proposal**: we'd like to make tagging fully OS-dependent going forward — every image tag explicitly carrying `alpine-` or `ubi-` — and retire the unprefixed `latest`/`<version>` tags for `qubership-core-base` and `qubership-nginx-base` in a future release. Consumers still relying on the unprefixed tags should migrate to the `alpine-` equivalents.
+**Proposal**: we'd like to make tagging fully OS-dependent going forward — every image tag explicitly carrying `alpine-`, `ubi-`, or `debian-` — and retire the unprefixed `latest`/`<version>` tags for `qubership-core-base` and `qubership-nginx-base` in a future release. Consumers still relying on the unprefixed tags should migrate to the `alpine-` equivalents.
 
 ## Available Images
 
@@ -36,6 +36,14 @@ There are three Java images based on Red Hat UBI:
 * Java 21 with JDK and profiler: `qubership-java-base:21-ubi-xxx`
 * Java 25 with JRE: `qubership-java-base:25-ubi-xxx`
 * Java 25 with JRE and profiler: `qubership-java-base-prof:25-ubi-xxx`
+
+### 6. Python Debian Image
+
+A Python runtime based on the digest-pinned official Python slim-trixie image, which uses Debian 13 slim. GHCR release tags include the Python major and minor version, for example `qubership-python-base:3.15-debian-<version>` and `qubership-python-base:3.15-debian-latest`. Snapshot tags use a hyphen between the Python major and minor versions, as in `3-15-debian-main-snapshot`.
+
+### 7. Node.js Alpine Images
+
+[Node.js 24](images/node-24-alpine/Dockerfile) and [Node.js 26](images/node-26-alpine/Dockerfile) each have an Alpine image with npm built on the Qubership Alpine core image from the same release. Builds install `nodejs~24` or `nodejs-current~26` with npm from the core image's Alpine repositories. Releases use `qubership-nodejs-base:24-alpine-<version>` and `qubership-nodejs-base:26-alpine-<version>` on GHCR.
 
 ## Usage
 
@@ -103,9 +111,51 @@ FROM ghcr.io/netcracker/qubership-java-base:25-ubi-latest
 FROM ghcr.io/netcracker/qubership-java-base-prof:25-ubi-latest
 ```
 
+### Python Debian Image
+
+The image runs as `appuser` (UID 10001, GID 0) in `/app`. Python and pip use the virtual environment at `/opt/venv`. The environment is writable by `appuser` and group 0, so application builds can install dependencies with the default user or an arbitrary UID in group 0.
+
+```dockerfile
+FROM ghcr.io/netcracker/qubership-python-base:3.15-debian-latest
+COPY requirements.txt .
+RUN python -m pip install --no-cache-dir -r requirements.txt
+COPY app.py .
+CMD ["python", "app.py"]
+```
+
+To build the base image locally, run `docker build -f images/python-debian/Dockerfile -t qubership-python-base:debian-local .` from the repository root.
+
+### Node.js Alpine Images
+
+Use `24-alpine-latest` for Node.js 24 or `26-alpine-latest` for Node.js 26.
+
+```dockerfile
+FROM ghcr.io/netcracker/qubership-nodejs-base:24-alpine-latest
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev
+COPY app.js .
+CMD ["node", "app.js"]
+```
+
+The image runs as `appuser` (UID 10001, GID 0) in `/app`. Mount corporate CA certificates under `/tmp/cert` at runtime. The entrypoint adds them to the system trust store before Node.js starts, and `NODE_USE_SYSTEM_CA=1` enables that store for Node.js TLS clients.
+
+Alpine provides English ICU locale data by default. For server-side formatting in other locales, install `icu-data-full` as root in the application image.
+
+To build both the core image and a Node.js variant from the local checkout, run the following from the repository root.
+
+```sh
+docker build -f images/core-alpine/Dockerfile -t qubership-core-base:alpine-local .
+docker build -f images/node-24-alpine/Dockerfile \
+  --build-arg BASE_IMAGE=qubership-core-base:alpine-local \
+  -t qubership-nodejs-base:24-alpine-local .
+docker build -f images/node-26-alpine/Dockerfile \
+  --build-arg BASE_IMAGE=qubership-core-base:alpine-local \
+  -t qubership-nodejs-base:26-alpine-local .
+```
+
 ## Common Features
 
-- Based on Alpine Linux 3.24.2 or Red Hat UBI 10 (minimal), depending on the flavour
+- Based on Alpine Linux 3.24, Red Hat UBI 10 (minimal), or Debian 13 (slim), depending on the flavour
 - Pre-configured with essential security settings
 - Built-in certificate management (including Kubernetes service account certificates)
 - User management with nss_wrapper support
