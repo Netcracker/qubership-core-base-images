@@ -41,6 +41,14 @@ log() {
 export -f log
 export CURRENT_LOG_LEVEL
 
+# Logs every non-empty line read from stdin with the given level, so that command output keeps the log format
+log_output() {
+  local line
+  while IFS= read -r line || [ -n "$line" ]; do
+    [ -n "$line" ] && log "$1" "$line"
+  done
+}
+
 load_certificates() {
     # shellcheck disable=SC2016
     cert_search_dirs="/tmp/cert"
@@ -71,16 +79,8 @@ load_certificates() {
     # but we can do workaround by extracting certificates from trust store and copying them to java keystore (openshift case)
     log DEBUG "Running update-ca-certificates"
 
-    local update_output update_level=DEBUG line
-    if ! update_output=$(update-ca-certificates -v 2>&1); then
-      log ERROR "Error updating CA certificates store"
-      update_level=ERROR
-    fi
-    if [[ -n $update_output ]]; then
-      while IFS= read -r line; do
-        log "$update_level" "$line"
-      done <<< "$update_output"
-    fi
+    update-ca-certificates -v 2>&1 | log_output DEBUG
+    [ "${PIPESTATUS[0]}" -eq 0 ] || log ERROR "Error updating CA certificates store"
 
     # Refresh Java cacerts from the trust store after system CA update (replaces Alpine's java-cacerts hook).
     cacerts_path=${JAVA_CERTIFICATE_FILE_LOCATION:-/etc/ssl/certs/java/cacerts}
@@ -97,7 +97,7 @@ load_certificates() {
         if [ "$pass" != "changeit" ]; then
           chmod u+rw "${cacerts_path}"
           log INFO "Change default keystore password: "
-          keytool -v -storepasswd -keystore "${cacerts_path}" -storepass changeit -new "$pass"
+          keytool -v -storepasswd -keystore "${cacerts_path}" -storepass changeit -new "$pass" 2>&1 | log_output DEBUG
           chmod u-w "${cacerts_path}"
         fi
       fi
@@ -134,7 +134,7 @@ run_init_scripts() {
     scripts=$(find /app/init.d/ -maxdepth 1 -type f -name '*.sh' | sort)
     if [ -n "$scripts" ]; then
         log INFO "Found init scripts in /app/init.d:"
-        for f in $scripts; do basename "$f"; done
+        for f in $scripts; do log INFO "$(basename "$f")"; done
 
         for script in $scripts; do
             log INFO "Running init script $script"

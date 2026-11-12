@@ -35,7 +35,7 @@ jobs:
     steps:
       - name: Create tag
         if: ${{ !inputs.dry-run }}
-        uses: netcracker/qubership-workflow-hub/actions/tag-action@e6afd0a6bcc4f24d73e3e4d5fb9a31ada009e3f1 # v2.8.2
+        uses: netcracker/qubership-workflow-hub/actions/tag-action@cf536587a99a23b3614aa4db4bdbf13cf36059b6 # v2.8.3
         with:
           ref: main
           tag-name: v${{ github.event.inputs.version }}
@@ -190,7 +190,7 @@ jobs:
   github-release:
     needs: [create-tag]
     if: ${{ !inputs.dry-run }}
-    uses: netcracker/qubership-workflow-hub/.github/workflows/release-drafter.yml@e6afd0a6bcc4f24d73e3e4d5fb9a31ada009e3f1 # v2.8.2
+    uses: netcracker/qubership-workflow-hub/.github/workflows/release-drafter.yml@cf536587a99a23b3614aa4db4bdbf13cf36059b6 # v2.8.3
     with:
       version: ${{ github.event.inputs.version }}
       publish: false

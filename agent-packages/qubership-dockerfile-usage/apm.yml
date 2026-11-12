@@ -1,0 +1,4 @@
+name: qubership-dockerfile-usage
+version: 1.0.0
+description: Dockerfile conventions for Qubership platform microservices.
+author: Qubership

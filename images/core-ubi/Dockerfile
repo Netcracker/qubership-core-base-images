@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/ubi10/ubi-minimal:10.2-1793863917@sha256:c3fe95ec9f53a3888c47314eb4d08bde09ebde646a428137b445091afe1daf89
+FROM registry.access.redhat.com/ubi10/ubi-minimal:10.3-1793834883@sha256:cc3d766e796fbb50d6fcd599f4bad4c231aeae41822c6e86e7da664a996221ca
 LABEL maintainer="qubership"
 
 ARG BASE_IMAGE_TAG=core:ubi-unknown
