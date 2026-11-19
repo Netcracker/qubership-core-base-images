@@ -11,6 +11,6 @@ USER root
 RUN apk add --no-cache 'nodejs~24' npm && \
     printf '%s\n' "$BASE_IMAGE_TAG" > /etc/base-image-release
 
-ENV NODE_USE_SYSTEM_CA=1
+ENV NODE_OPTIONS=--use-openssl-ca
 
 USER ${UID}:${GID}

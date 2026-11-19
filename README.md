@@ -137,7 +137,7 @@ COPY app.js .
 CMD ["node", "app.js"]
 ```
 
-The image runs as `appuser` (UID 10001, GID 0) in `/app`. Mount corporate CA certificates under `/tmp/cert` at runtime. The entrypoint adds them to the system trust store before Node.js starts, and `NODE_USE_SYSTEM_CA=1` enables that store for Node.js TLS clients.
+The image runs as `appuser` (UID 10001, GID 0) in `/app`. Node.js uses the Alpine system CA store through `--use-openssl-ca`. Mount additional CA certificates under `/tmp/cert` at runtime. The entrypoint adds them to the system store along with the Kubernetes service account CA when available.
 
 Alpine provides English ICU locale data by default. For server-side formatting in other locales, install `icu-data-full` as root in the application image.
 

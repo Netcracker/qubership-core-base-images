@@ -212,7 +212,7 @@ jobs:
             const expected = new X509Certificate(readFileSync("/tmp/cert/testcert.pem")).fingerprint256;
             assert.equal(process.versions.node.split(".")[0], process.argv[1]);
             assert.equal(process.getuid(), 10001);
-            assert(getCACertificates("default").some(pem => new X509Certificate(pem).fingerprint256 === expected));
+            assert(getCACertificates("system").some(pem => new X509Certificate(pem).fingerprint256 === expected));
             ' "$major"
             docker run --rm "$image" npm --version
           done
