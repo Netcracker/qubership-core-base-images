@@ -1,0 +1,10 @@
+{
+  "components": [
+    {
+      "name": "qubership-python-base",
+      "file": "./images/python-debian/Dockerfile",
+      "context": "."
+    }
+  ],
+  "platforms": "linux/amd64,linux/arm64"
+}
