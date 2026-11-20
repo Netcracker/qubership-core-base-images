@@ -2,7 +2,7 @@
   "components": [
     {
       "name": "qubership-python-base",
-      "file": "./images/python-debian/Dockerfile",
+      "file": "./images/python-3.15-ubi/Dockerfile",
       "context": "."
     }
   ],

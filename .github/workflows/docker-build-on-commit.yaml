@@ -145,14 +145,6 @@ jobs:
             ghcr.io/netcracker/qubership-nginx-base:test
           file: images/nginx-alpine/Dockerfile
 
-      - name: Build and load test Python Debian image
-        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
-        with:
-          build-args: |
-            BASE_IMAGE_TAG=ghcr.io/netcracker/qubership-python-base:debian-test
-          tags: ghcr.io/netcracker/qubership-python-base:debian-test
-          file: images/python-debian/Dockerfile
-
       - name: Run tests on containers
         run: |
           ./tests/test-suite.sh ghcr.io/netcracker/qubership-core-base:test
@@ -166,28 +158,34 @@ jobs:
           ./tests/test-suite.sh ghcr.io/netcracker/qubership-java-base-prof:21-ubi-test
           ./tests/test-suite.sh ghcr.io/netcracker/qubership-nginx-base:test
 
-      - name: Test Python Debian image
+      - name: Build and test Python UBI images
         env:
-          PYTHON_IMAGE: ghcr.io/netcracker/qubership-python-base:debian-test
+          PYTHON_IMAGE: ghcr.io/netcracker/qubership-python-base
         run: |
-          for test in args-passing bash-entrypoint-arguments certificates log-format nss signal-propagation version-log; do
-            ./tests/test-suite.sh "$PYTHON_IMAGE" "$test"
+          for series in 3.14 3.15; do
+            image="$PYTHON_IMAGE:$series-ubi-test"
+            docker build --file "images/python-$series-ubi/Dockerfile" \
+              --build-arg BASE_IMAGE=ghcr.io/netcracker/qubership-core-base:ubi-test \
+              --build-arg "BASE_IMAGE_TAG=$image" \
+              --tag "$image" .
+            for test in args-passing bash-entrypoint-arguments certificates log-format nss signal-propagation version-log; do
+              ./tests/test-suite.sh "$image" "$test"
+            done
+            docker run --rm "$image" python -c '
+            import bz2, compression.zstd, ctypes, decimal, lzma, os, platform, sqlite3, ssl, sys, sysconfig
+            assert os.getuid() == 10001
+            assert os.access(sysconfig.get_path("purelib"), os.W_OK), "appuser cannot write to site-packages"
+            series = ".".join(platform.python_version_tuple()[:2])
+            assert series == sys.argv[1], f"Expected Python {sys.argv[1]}, got {series}"
+            assert ssl.create_default_context().get_ca_certs()
+            ' "$series"
+            docker run --rm --user 123456:0 "$image" python -c '
+            import os, sysconfig
+            for path in ("purelib", "scripts"):
+                assert os.access(sysconfig.get_path(path), os.W_OK), f"Arbitrary UID cannot write to {path}"
+            '
+            docker run --rm "$image" python -m pip --version
           done
-          docker run --rm "$PYTHON_IMAGE" python -c '
-          import bz2, compression.zstd, ctypes, dbm.gnu, lzma, os, platform, readline, sqlite3, ssl, sysconfig
-          assert os.getuid() == 10001
-          assert os.access(sysconfig.get_path("purelib"), os.W_OK), "appuser cannot write to site-packages"
-          expected_version = os.environ["PYTHON_VERSION"]
-          actual_version = platform.python_version()
-          assert actual_version == expected_version, f"Expected Python {expected_version}, got {actual_version}"
-          assert ssl.create_default_context().get_ca_certs()
-          '
-          docker run --rm --user 123456:0 "$PYTHON_IMAGE" python -c '
-          import os, sysconfig
-          for path in ("purelib", "scripts"):
-              assert os.access(sysconfig.get_path(path), os.W_OK), f"Arbitrary UID cannot write to {path}"
-          '
-          docker run --rm "$PYTHON_IMAGE" python -m pip --version
 
       - name: Build and test Node.js Alpine images
         env:
@@ -312,13 +310,14 @@ jobs:
           docker push ghcr.io/netcracker/qubership-nginx-base:alpine-$TAG_BUILD_NUMBER
           # python-base
           python_image=ghcr.io/netcracker/qubership-python-base
-          python_series=$(bash .github/scripts/python-image-series.sh)
-          # Cleanup protects dotted release tags.
-          python_snapshot="$python_image:${python_series/./-}-debian"
-          docker tag "$python_image:debian-test" "$python_snapshot-$TAG_SNAPSHOT"
-          docker tag "$python_image:debian-test" "$python_snapshot-$TAG_BUILD_NUMBER"
-          docker push "$python_snapshot-$TAG_SNAPSHOT"
-          docker push "$python_snapshot-$TAG_BUILD_NUMBER"
+          for series in 3.14 3.15; do
+            # Cleanup protects dotted release tags.
+            python_snapshot="$python_image:${series/./-}-ubi"
+            docker tag "$python_image:$series-ubi-test" "$python_snapshot-$TAG_SNAPSHOT"
+            docker tag "$python_image:$series-ubi-test" "$python_snapshot-$TAG_BUILD_NUMBER"
+            docker push "$python_snapshot-$TAG_SNAPSHOT"
+            docker push "$python_snapshot-$TAG_BUILD_NUMBER"
+          done
           # nodejs-base
           for major in 24 26; do
             image="ghcr.io/netcracker/qubership-nodejs-base:$major-alpine"
