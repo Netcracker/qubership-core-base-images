@@ -168,23 +168,9 @@ jobs:
               --build-arg BASE_IMAGE=ghcr.io/netcracker/qubership-core-base:ubi-test \
               --build-arg "BASE_IMAGE_TAG=$image" \
               --tag "$image" .
-            for test in args-passing bash-entrypoint-arguments certificates log-format nss signal-propagation version-log; do
+            for test in args-passing bash-entrypoint-arguments certificates log-format nss python-run signal-propagation tls version-log; do
               ./tests/test-suite.sh "$image" "$test"
             done
-            docker run --rm "$image" python -c '
-            import bz2, compression.zstd, ctypes, decimal, lzma, os, platform, sqlite3, ssl, sys, sysconfig
-            assert os.getuid() == 10001
-            assert os.access(sysconfig.get_path("purelib"), os.W_OK), "appuser cannot write to site-packages"
-            series = ".".join(platform.python_version_tuple()[:2])
-            assert series == sys.argv[1], f"Expected Python {sys.argv[1]}, got {series}"
-            assert ssl.create_default_context().get_ca_certs()
-            ' "$series"
-            docker run --rm --user 123456:0 "$image" python -c '
-            import os, sysconfig
-            for path in ("purelib", "scripts"):
-                assert os.access(sysconfig.get_path(path), os.W_OK), f"Arbitrary UID cannot write to {path}"
-            '
-            docker run --rm "$image" python -m pip --version
           done
 
       - name: Build and test Node.js Alpine images
@@ -197,22 +183,9 @@ jobs:
               --build-arg BASE_IMAGE=ghcr.io/netcracker/qubership-core-base:test \
               --build-arg "BASE_IMAGE_TAG=$image" \
               --tag "$image" .
-            for test in args-passing bash-entrypoint-arguments certificates libstdcpp log-format nss signal-propagation version-log; do
+            for test in args-passing bash-entrypoint-arguments certificates libstdcpp log-format node-run nss signal-propagation tls version-log; do
               ./tests/test-suite.sh "$image" "$test"
             done
-            docker run --rm --read-only \
-              --mount "type=bind,src=$PWD/tests/certificates/certs,dst=/tmp/cert,readonly" \
-              "$image" node -e '
-            const assert = require("node:assert/strict");
-            const { X509Certificate } = require("node:crypto");
-            const { readFileSync } = require("node:fs");
-            const { getCACertificates } = require("node:tls");
-            const expected = new X509Certificate(readFileSync("/tmp/cert/testcert.pem")).fingerprint256;
-            assert.equal(process.versions.node.split(".")[0], process.argv[1]);
-            assert.equal(process.getuid(), 10001);
-            assert(getCACertificates("default").some(pem => new X509Certificate(pem).fingerprint256 === expected));
-            ' "$major"
-            docker run --rm "$image" npm --version
           done
 
       - name: Set up JDK 21

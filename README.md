@@ -509,6 +509,16 @@ For Java images, certificates are imported into the Java keystore. The keystore 
 
 **OpenShift / random UID support**: When running under a random UID (e.g., on OpenShift), `update-ca-certificates` may fail due to non-standard file permissions. In this case, the entrypoint automatically falls back to using `trust extract` to rebuild the Java keystore from the system trust anchors.
 
+### Testing Python and Node.js Images
+
+Use the `python-run` or `node-run` suite to check the runtime and package manager. The `tls` suite makes an HTTPS request with the image's own runtime. It checks rejection before CA import, then checks certificates mounted under `/tmp/cert` and in the Kubernetes service account directory, including with a read-only filesystem and arbitrary UID.
+
+```sh
+./tests/test-suite.sh qubership-python-base:3.14-ubi-local python-run
+./tests/test-suite.sh qubership-nodejs-base:24-alpine-local node-run
+./tests/test-suite.sh qubership-python-base:3.14-ubi-local tls
+```
+
 ### Adding Initialization Scripts
 
 Place your initialization scripts (`.sh` files) in `/app/init.d/`. They will be executed in alphabetical order before the main application starts.
