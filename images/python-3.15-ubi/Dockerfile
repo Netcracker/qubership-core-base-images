@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=ghcr.io/netcracker/qubership-core-base:ubi-latest
+ARG BASE_IMAGE
 ARG PYTHON_VERSION=3.15.2
 
 FROM ${BASE_IMAGE} AS python-build
