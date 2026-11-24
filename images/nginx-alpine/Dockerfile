@@ -15,7 +15,7 @@ RUN apk add --no-cache \
 WORKDIR /usr/src
 
 # renovate: datasource=github-tags depName=nginx/nginx
-ARG NGINX_VERSION=release-1.31.9
+ARG NGINX_VERSION=release-1.31.10
 # renovate: datasource=github-tags depName=vision5/ngx_devel_kit
 ARG NGX_DEVEL_KIT_VERSION=v0.3.4
 # lua-nginx-module and lua-resty-core must be updated together: lua-resty-core pins an exact
