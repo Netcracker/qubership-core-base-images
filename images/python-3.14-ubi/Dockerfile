@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=ghcr.io/netcracker/qubership-core-base:ubi-latest
+ARG BASE_IMAGE=ghcr.io/netcracker/qubership-core-base:ubi-latest@sha256:b38264570a8ee4716f39297c1298819b6b204ec1b18741f5ed10e20d3b47b782
 FROM ${BASE_IMAGE}
 
 ARG BASE_IMAGE_TAG=python:3.14-ubi-unknown
