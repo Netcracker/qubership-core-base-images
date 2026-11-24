@@ -315,7 +315,7 @@ Test results URL: https://atp3-results-cpcap.atp3prod.managed.netcracker.cloud/r
 ### Nginx Alpine Image Details
 
 - **Base Image**: `ghcr.io/netcracker/qubership-core-base:alpine-latest` (Alpine 3.24.2)
-- **NGINX Version**: 1.28.3
+- **NGINX Version**: 1.31.9
 - **Default Language**: `en_US.UTF-8`
 
 #### Features and modules
@@ -325,10 +325,43 @@ Test results URL: https://atp3-results-cpcap.atp3prod.managed.netcracker.cloud/r
 - Brotli compression (ngx_brotli, dynamic module)
 - OpenTelemetry instrumentation (nginx-otel native module by nginxinc), linked against the Alpine `grpc` package
 - auth_request, sub filter, stub_status, headers-more
+- Prometheus metrics via [nginx-lua-prometheus](https://github.com/knyar/nginx-lua-prometheus)
 
 The image inherits all base Alpine features (certificate management, nss_wrapper, init.d scripts, signal handling, etc.).
 
 Probe snippets are shipped at `/etc/nginx/base-image-conf/probes-locations.conf` (`/probes/live`, `/probes/ready`, `/health`). Include that file from the server block in your `nginx.conf`.
+
+#### Monitoring (Prometheus)
+
+The [nginx-lua-prometheus](https://github.com/knyar/nginx-lua-prometheus) library is installed to `/usr/local/lib/lua/nginx-lua-prometheus` — the same location as in the legacy `docker-nginx-base` image, so existing configurations keep working. The directory is part of the default `LUA_PATH`, so `require("prometheus")` works without extra settings. If you override `lua_package_path`, either end it with `;;` (to keep the default path) or add `/usr/local/lib/lua/nginx-lua-prometheus/?.lua` to it explicitly.
+
+```nginx
+http {
+    lua_shared_dict prometheus_metrics 10M;
+
+    init_worker_by_lua_block {
+        prometheus = require("prometheus").init("prometheus_metrics")
+        metric_requests = prometheus:counter("nginx_http_requests_total", "Number of HTTP requests", {"host", "status"})
+        metric_connections = prometheus:gauge("nginx_http_connections", "Number of HTTP connections", {"state"})
+    }
+
+    log_by_lua_block {
+        metric_requests:inc(1, {ngx.var.server_name, ngx.var.status})
+    }
+
+    server {
+        listen 8080;
+        location = /prometheus {
+            content_by_lua_block {
+                metric_connections:set(ngx.var.connections_active, {"active"})
+                prometheus:collect()
+            }
+        }
+    }
+}
+```
+
+Note: `init_worker_by_lua*` runs in every worker process, so `worker_processes auto;` may noticeably increase memory and CPU usage. Prefer an explicit (small) number of workers.
 
 ## Base UBI Image Details
 

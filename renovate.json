@@ -26,6 +26,11 @@
     "groupName" : "openresty lua modules",
     "matchPackageNames" : [ "openresty/lua-nginx-module", "openresty/lua-resty-core" ]
   }, {
+    "description" : "NGINX release tags use a release- prefix",
+    "matchDatasources" : [ "github-tags" ],
+    "matchPackageNames" : [ "nginx/nginx" ],
+    "versioning" : "regex:^release-(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$"
+  }, {
     "description" : "Java base images are pinned per major (images/java-<major>): minor/patch/digest only",
     "matchManagers" : [ "dockerfile" ],
     "matchDatasources" : [ "docker" ],

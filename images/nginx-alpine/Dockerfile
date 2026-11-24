@@ -15,7 +15,7 @@ RUN apk add --no-cache \
 WORKDIR /usr/src
 
 # renovate: datasource=github-tags depName=nginx/nginx
-ARG NGINX_VERSION=release-1.28.3
+ARG NGINX_VERSION=release-1.31.10
 # renovate: datasource=github-tags depName=vision5/ngx_devel_kit
 ARG NGX_DEVEL_KIT_VERSION=v0.3.4
 # lua-nginx-module and lua-resty-core must be updated together: lua-resty-core pins an exact
@@ -25,13 +25,15 @@ ARG LUA_NGINX_MODULE_VERSION=v0.10.31
 # renovate: datasource=git-refs depName=https://github.com/google/ngx_brotli.git currentValue=master
 ARG NGX_BROTLI_COMMIT=53e0fb55f250f48fe80c0ddbf6c0f7103cdbaae1
 # renovate: datasource=github-tags depName=openresty/headers-more-nginx-module
-ARG HEADERS_MORE_VERSION=v0.41
+ARG HEADERS_MORE_VERSION=v0.42
 # renovate: datasource=github-tags depName=openresty/lua-resty-lrucache
 ARG LUA_RESTY_LRUCACHE_VERSION=v0.15
 # renovate: datasource=github-tags depName=openresty/lua-resty-core
 ARG LUA_RESTY_CORE_VERSION=v0.1.34rc3
 # renovate: datasource=git-refs depName=https://github.com/nginxinc/nginx-otel.git currentValue=main
 ARG NGINX_OTEL_COMMIT=e3b6c98b1556e4c82cec39acc7be91a62449fa84
+# renovate: datasource=github-tags depName=knyar/nginx-lua-prometheus
+ARG NGINX_LUA_PROMETHEUS_VERSION=0.20260912
 
 RUN git clone --depth 1 --branch ${NGINX_VERSION} https://github.com/nginx/nginx.git && \
     git clone --depth 1 --branch ${NGX_DEVEL_KIT_VERSION} https://github.com/vision5/ngx_devel_kit.git && \
@@ -97,6 +99,15 @@ RUN mkdir -p lua && \
     cp -fR /tmp/lua-core/* lua/ && \
     find lua/ -maxdepth 1 -mindepth 1 ! -name 'lib' -exec rm -rf -- {} +
 
+# nginx-lua-prometheus: installed to the same location as in the legacy docker-nginx-base image
+# (/usr/local/lib/lua/nginx-lua-prometheus) to keep existing lua_package_path settings working
+RUN git clone --depth 1 --branch ${NGINX_LUA_PROMETHEUS_VERSION} https://github.com/knyar/nginx-lua-prometheus.git /tmp/lua-prometheus/ && \
+    mkdir -p lua-prometheus && \
+    cp /tmp/lua-prometheus/prometheus.lua \
+       /tmp/lua-prometheus/prometheus_keys.lua \
+       /tmp/lua-prometheus/prometheus_resty_counter.lua \
+       lua-prometheus/
+
 # ---- Runtime stage ----
 FROM ${BASE_IMAGE}
 LABEL maintainer="qubership"
@@ -106,7 +117,7 @@ ARG UID=appuser
 ARG GID=root
 
 ENV LUA_LIB_ROOT=/usr/local/lib/lua
-ENV LUA_PATH=$LUA_LIB_ROOT/?.lua
+ENV LUA_PATH="$LUA_LIB_ROOT/?.lua;$LUA_LIB_ROOT/nginx-lua-prometheus/?.lua;;"
 
 # switch to root for build phase
 USER root
@@ -118,6 +129,7 @@ COPY --from=builder /usr/lib/nginx/modules/ /usr/lib/nginx/modules/
 COPY --from=builder /usr/local/bin/ /usr/local/bin/
 COPY --from=builder /usr/local/share/luajit* /usr/local/share/
 COPY --from=builder /usr/src/lua/lib/ /usr/local/lib/lua/
+COPY --from=builder /usr/src/lua-prometheus/ /usr/local/lib/lua/nginx-lua-prometheus/
 COPY --from=builder /usr/local/lib/libopentelemetry_proto*.so /usr/local/lib/
 COPY --from=builder \
     /usr/lib/libabsl_*.so* \
