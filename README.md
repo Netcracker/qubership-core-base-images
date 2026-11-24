@@ -1,6 +1,6 @@
 # Qubership Base Images
 
-This repository contains secure and feature-rich base images for containerized applications, designed with security and flexibility in mind. Images come in two flavours: Alpine Linux and Red Hat UBI (Universal Base Image).
+This repository contains secure and feature-rich base images for containerized applications, designed with security and flexibility in mind. Images come in Alpine Linux and Red Hat UBI (Universal Base Image) flavours.
 
 ## Tag Naming
 
@@ -36,6 +36,14 @@ There are three Java images based on Red Hat UBI:
 * Java 21 with JDK and profiler: `qubership-java-base:21-ubi-xxx`
 * Java 25 with JRE: `qubership-java-base:25-ubi-xxx`
 * Java 25 with JRE and profiler: `qubership-java-base-prof:25-ubi-xxx`
+
+### 6. Python UBI Images
+
+Python 3.14 and 3.15 images inherit the Qubership UBI core image from the same release. Python 3.14 comes from Red Hat RPMs. Python 3.15 is built from checksum-verified CPython source against UBI libraries. Release tags use `<python-series>-ubi-<version>` and `<python-series>-ubi-latest`. Snapshot tags use a hyphen between the Python major and minor versions, as in `3-14-ubi-main-snapshot`.
+
+### 7. Node.js Alpine Images
+
+[Node.js 24](images/node-24-alpine/Dockerfile) and [Node.js 26](images/node-26-alpine/Dockerfile) each have an Alpine image with npm built on the Qubership Alpine core image from the same release. Builds install `nodejs~24` or `nodejs-current~26` with npm from the core image's Alpine repositories. Releases use `qubership-nodejs-base:24-alpine-<version>` and `qubership-nodejs-base:26-alpine-<version>` on GHCR.
 
 ## Usage
 
@@ -103,9 +111,65 @@ FROM ghcr.io/netcracker/qubership-java-base:25-ubi-latest
 FROM ghcr.io/netcracker/qubership-java-base-prof:25-ubi-latest
 ```
 
+### Python UBI Images
+
+The image runs as `appuser` (UID 10001, GID 0) in `/app`. Python and pip use the virtual environment at `/opt/venv`. The environment is writable by `appuser` and group 0, so application builds can install dependencies with the default user or an arbitrary UID in group 0.
+
+Mount corporate CA certificates under `/tmp/cert`. The inherited entrypoint imports them before the application starts. `SSL_CERT_FILE`, `REQUESTS_CA_BUNDLE`, `AWS_CA_BUNDLE`, and `PIP_CERT` point the HTTP, S3, and pip clients to the resulting system CA bundle.
+
+```dockerfile
+FROM ghcr.io/netcracker/qubership-python-base:3.14-ubi-latest
+COPY requirements.txt .
+RUN python -m pip install --no-cache-dir \
+      --extra-index-url https://download.pytorch.org/whl/cpu -r requirements.txt
+COPY app.py .
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
+```
+
+Build from the repository root.
+
+```sh
+docker build -f images/core-ubi/Dockerfile -t qubership-core-base:ubi-local .
+for series in 3.14 3.15; do
+  docker build -f "images/python-$series-ubi/Dockerfile" \
+    --build-arg BASE_IMAGE=qubership-core-base:ubi-local \
+    -t "qubership-python-base:$series-ubi-local" .
+done
+```
+
+For Python 3.15 source updates, change `PYTHON_VERSION` and the matching `PYTHON_SHA256` together in its Dockerfile.
+
+### Node.js Alpine Images
+
+Use `24-alpine-latest` for Node.js 24 or `26-alpine-latest` for Node.js 26.
+
+```dockerfile
+FROM ghcr.io/netcracker/qubership-nodejs-base:24-alpine-latest
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev
+COPY app.js .
+CMD ["node", "app.js"]
+```
+
+The image runs as `appuser` (UID 10001, GID 0) in `/app`. Mount corporate CA certificates under `/tmp/cert` at runtime. The entrypoint adds them to the system trust store before Node.js starts, and `NODE_USE_SYSTEM_CA=1` enables that store for Node.js TLS clients.
+
+Alpine provides English ICU locale data by default. For server-side formatting in other locales, install `icu-data-full` as root in the application image.
+
+To build both the core image and a Node.js variant from the local checkout, run the following from the repository root.
+
+```sh
+docker build -f images/core-alpine/Dockerfile -t qubership-core-base:alpine-local .
+docker build -f images/node-24-alpine/Dockerfile \
+  --build-arg BASE_IMAGE=qubership-core-base:alpine-local \
+  -t qubership-nodejs-base:24-alpine-local .
+docker build -f images/node-26-alpine/Dockerfile \
+  --build-arg BASE_IMAGE=qubership-core-base:alpine-local \
+  -t qubership-nodejs-base:26-alpine-local .
+```
+
 ## Common Features
 
-- Based on Alpine Linux 3.24.2 or Red Hat UBI 10 (minimal), depending on the flavour
+- Based on Alpine Linux 3.24 or Red Hat UBI 10 (minimal), depending on the flavour
 - Pre-configured with essential security settings
 - Built-in certificate management (including Kubernetes service account certificates)
 - User management with nss_wrapper support
@@ -477,6 +541,16 @@ Certificates can be added in two ways:
 For Java images, certificates are imported into the Java keystore. The keystore password can be customized via the `CERTIFICATE_FILE_PASSWORD` environment variable (default: `changeit`).
 
 **OpenShift / random UID support**: When running under a random UID (e.g., on OpenShift), `update-ca-certificates` may fail due to non-standard file permissions. In this case, the entrypoint automatically falls back to using `trust extract` to rebuild the Java keystore from the system trust anchors.
+
+### Testing Python and Node.js Images
+
+Use the `python-run` or `node-run` suite to check the runtime and package manager. The `tls` suite makes an HTTPS request with the image's own runtime. It checks rejection before CA import, then checks certificates mounted under `/tmp/cert` and in the Kubernetes service account directory, including with a read-only filesystem and arbitrary UID.
+
+```sh
+./tests/test-suite.sh qubership-python-base:3.14-ubi-local python-run
+./tests/test-suite.sh qubership-nodejs-base:24-alpine-local node-run
+./tests/test-suite.sh qubership-python-base:3.14-ubi-local tls
+```
 
 ### Adding Initialization Scripts
 
