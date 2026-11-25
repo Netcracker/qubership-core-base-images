@@ -1,7 +1,7 @@
 ARG BASE_IMAGE
 ARG PYTHON_VERSION=3.15.2
 
-FROM ghcr.io/astral-sh/uv:0.13.10 AS uv
+FROM ghcr.io/astral-sh/uv:0.13.10@sha256:a3ea1357342c1a4bf9a0c53a3deb1b55379aefa037338d8113d5771efa01774f AS uv
 
 FROM ${BASE_IMAGE} AS python-build
 
