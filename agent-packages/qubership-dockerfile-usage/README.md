@@ -17,7 +17,7 @@ agent applies it when it writes or edits a `Dockerfile`.
 
 ## Contents
 
-- `.apm/instructions/qubership-dockerfile-usage.instructions.md`: the trigger merged into `AGENTS.md` / `CLAUDE.md` by
+- `.apm/instructions/qubership-dockerfile-usage.instructions.md`: the trigger merged into `AGENTS.md` by
   `apm compile`.
 - `.apm/skills/qubership-dockerfile-usage/SKILL.md`: the rules and templates the agent loads when the trigger fires.
 
@@ -40,4 +40,4 @@ dependencies:
 ```
 
 Replace `<ref>` with a release tag or a commit SHA of this repository. Then run `apm install` and `apm compile` to
-merge the trigger into your local `AGENTS.md` / `CLAUDE.md` and deploy the skill where your agent reads it.
+merge the trigger into your local `AGENTS.md` / `../../AGENTS.md` and deploy the skill where your agent reads it.
