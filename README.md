@@ -78,6 +78,7 @@ FROM ghcr.io/netcracker/qubership-java-base-atp:25-alpine-latest
 ```
 
 **Note**: There are obsolete image labels named `qubership/java-base:latest`. Please, do not use them!
+**Note**: Each [GitHub release](https://github.com/Netcracker/qubership-core-base-images/releases) lists the images it published, with their tags, in a "Docker Images" section.
 **Note**: Images are available on GitHub Container Registry (`ghcr.io/netcracker/qubership/`) and support multi-platform builds (linux/amd64, linux/arm64). Use platform-specific tags if needed.
 
 ### Nginx Alpine Image

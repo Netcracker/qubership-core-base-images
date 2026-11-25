@@ -194,7 +194,61 @@ jobs:
   github-release:
     needs: [create-tag]
     if: ${{ !inputs.dry-run }}
-    uses: netcracker/qubership-workflow-hub/.github/workflows/release-drafter.yml@cdfcd0a8abd7ba80d7a04a4e9debfb4e24995f1a # v3.0.1
-    with:
-      version: ${{ github.event.inputs.version }}
-      publish: false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Render Docker images list
+        id: images
+        env:
+          VERSION: ${{ inputs.version }}
+          SKIP_NGINX: ${{ inputs.skip-nginx }}
+        run: |
+          images=(
+            "qubership-core-base:alpine-${VERSION}"
+            "qubership-core-base:ubi-${VERSION}"
+            "qubership-java-base:25-alpine-${VERSION}"
+            "qubership-java-base:25-ubi-${VERSION}"
+            "qubership-java-base-prof:21-alpine-${VERSION}"
+            "qubership-java-base-prof:21-ubi-${VERSION}"
+            "qubership-java-base-prof:25-alpine-${VERSION}"
+            "qubership-java-base-prof:25-ubi-${VERSION}"
+            "qubership-java-base-atp:25-alpine-${VERSION}"
+            "qubership-python-base:3.14-ubi-${VERSION}"
+            "qubership-python-base:3.15-ubi-${VERSION}"
+            "qubership-nodejs-base:24-alpine-${VERSION}"
+            "qubership-nodejs-base:26-alpine-${VERSION}"
+          )
+          if [ "$SKIP_NGINX" != "true" ]; then
+            images+=("qubership-nginx-base:alpine-${VERSION}")
+          fi
+          {
+            echo "footer<<EOF"
+            echo
+            echo "### 🐳 Docker Images"
+            echo
+            echo "All images are multi-platform (linux/amd64, linux/arm64)."
+            echo
+            for image in "${images[@]}"; do
+              echo "- [\`ghcr.io/netcracker/${image}\`](https://github.com/orgs/netcracker/packages/container/package/${image%%:*})"
+            done
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+          ref: main
+
+      - name: Run Release Drafter
+        uses: netcracker/release-drafter@130c08399304912ffe90e9604e4328f2fdcd7619 # v1.0.1
+        with:
+          config-name: release-drafter-config.yml
+          publish: false
+          name: ${{ inputs.version }}
+          tag: v${{ inputs.version }}
+          version: v${{ inputs.version }}
+          latest: true
+          footer: ${{ steps.images.outputs.footer }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
