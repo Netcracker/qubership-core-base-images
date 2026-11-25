@@ -39,7 +39,7 @@ There are three Java images based on Red Hat UBI:
 
 ### 6. Python UBI Images
 
-Python 3.14 and 3.15 images inherit the Qubership UBI core image from the same release. Python 3.14 comes from Red Hat RPMs. Python 3.15 is built from checksum-verified CPython source against UBI libraries. Release tags use `<python-series>-ubi-<version>` and `<python-series>-ubi-latest`. Snapshot tags use a hyphen between the Python major and minor versions, as in `3-14-ubi-main-snapshot`.
+Python 3.14 and 3.15 images inherit the Qubership UBI core image from the same release. Python 3.14 comes from Red Hat RPMs. Python 3.15 is a checksum-verified [python-build-standalone](https://github.com/astral-sh/python-build-standalone) CPython installed with [uv](https://docs.astral.sh/uv/) in a build stage; uv itself is not shipped in the image. Release tags use `<python-series>-ubi-<version>` and `<python-series>-ubi-latest`. Snapshot tags use a hyphen between the Python major and minor versions, as in `3-14-ubi-main-snapshot`.
 
 ### 7. Node.js Alpine Images
 
@@ -137,7 +137,7 @@ for series in 3.14 3.15; do
 done
 ```
 
-For Python 3.15 source updates, change `PYTHON_VERSION` and the matching `PYTHON_SHA256` together in its Dockerfile.
+For Python 3.15 updates, change `PYTHON_VERSION` in its Dockerfile. If the pinned uv image does not know that version yet, bump the `ghcr.io/astral-sh/uv` tag too.
 
 ### Node.js Alpine Images
 
