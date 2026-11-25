@@ -16,7 +16,7 @@ on:
 
 jobs:
   assign-labels:
-    uses: Netcracker/qubership-workflow-hub/.github/workflows/auto-labeler.yaml@cdfcd0a8abd7ba80d7a04a4e9debfb4e24995f1a # main
+    uses: Netcracker/qubership-workflow-hub/.github/workflows/auto-labeler.yaml@a9a2f070bf240152eb7924ef12b593a2bd93e608 # main
     name: Assign labels in pull request
     if: github.event.pull_request.merged == false
     with:
